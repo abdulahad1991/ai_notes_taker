@@ -1,0 +1,114 @@
+import 'package:ai_notes_taker/models/response/login_response.dart';
+import 'package:flutter/material.dart';
+import 'package:stacked/stacked.dart';
+import 'package:stacked_services/stacked_services.dart';
+
+import '../../../app/app.locator.dart';
+import '../../../app/app.router.dart';
+import '../../../services/api_service.dart';
+import '../../../services/app_auth_service.dart';
+
+class AuthViewModel extends ReactiveViewModel {
+  // Controllers
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final nameController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  final api = locator<ApiService>();
+  final authService = locator<AppAuthService>();
+
+  // State
+  bool isLogin = true;
+  bool isPasswordVisible = false;
+  bool isConfirmPasswordVisible = false;
+  bool isLoading = false;
+
+  final formKey = GlobalKey<FormState>();
+
+  void toggleAuthMode() {
+    isLogin = !isLogin;
+    notifyListeners();
+  }
+
+  void togglePasswordVisibility() {
+    isPasswordVisible = !isPasswordVisible;
+    notifyListeners();
+  }
+
+  void toggleConfirmPasswordVisibility() {
+    isConfirmPasswordVisible = !isConfirmPasswordVisible;
+    notifyListeners();
+  }
+
+  Future<void> submitForm(BuildContext context) async {
+    /*// if (!formKey.currentState!.validate()) return;
+    isLoading = true;
+    notifyListeners();
+
+    await Future.delayed(const Duration(seconds: 2));
+    isLoading = false;
+    notifyListeners();*/
+
+    if(isLogin){
+      try {
+        var response = await runBusyFuture(
+          api.login(
+              email: emailController.text.toString(),
+              password: passwordController.text.toString()),
+          throwException: true,
+        );
+        if (response != null) {
+          final data = response.data as LoginResponse;
+          authService.setLoginData(data);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(isLogin
+                  ? 'Login successful!'
+                  : 'Account created successfully!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          NavigationService().navigateTo(Routes.voiceView);
+        }
+      } on FormatException catch (e) {
+        print(e);
+      }
+    }else {
+      try {
+        var response = await runBusyFuture(
+          api.login(
+              email: emailController.text.toString(),
+              password: passwordController.text.toString()),
+          throwException: true,
+        );
+        if (response != null) {
+          final data = response.data as LoginResponse;
+          authService.setLoginData(data);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(isLogin
+                  ? 'Login successful!'
+                  : 'Account created successfully!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          NavigationService().navigateTo(Routes.voiceView);
+        }
+      } on FormatException catch (e) {
+        print(e);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    nameController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+}

@@ -11,7 +11,7 @@ import '../services/api_service.dart';
 import '../services/app_auth_service.dart';
 import '../services/app_preferences_service.dart';
 import '../services/app_shared_pref_service.dart';
-import '../ui/views/auth_screen.dart';
+import '../ui/views/auth/auth_screen.dart';
 // @stacked-import
 
 @StackedApp(
