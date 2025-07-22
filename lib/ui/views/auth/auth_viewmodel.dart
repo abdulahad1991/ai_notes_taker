@@ -25,6 +25,12 @@ class AuthViewModel extends ReactiveViewModel {
 
   final formKey = GlobalKey<FormState>();
 
+  void init() {
+    if(authService.loginData!=null){
+      NavigationService().navigateTo(Routes.voiceNewView);
+    }
+  }
+
   void toggleAuthMode() {
     isLogin = !isLogin;
     notifyListeners();
@@ -49,6 +55,8 @@ class AuthViewModel extends ReactiveViewModel {
     isLoading = false;
     notifyListeners();*/
 
+    emailController.text = "a01@gmail.com";
+    passwordController.text = "123456";
     if (isLogin) {
       try {
         var response = await runBusyFuture(
@@ -69,7 +77,7 @@ class AuthViewModel extends ReactiveViewModel {
               behavior: SnackBarBehavior.floating,
             ),
           );
-          NavigationService().navigateTo(Routes.voiceView);
+          NavigationService().navigateTo(Routes.voiceNewView);
         }
       } on FormatException catch (e) {
         print(e);
