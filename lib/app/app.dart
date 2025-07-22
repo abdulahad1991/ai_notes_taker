@@ -18,7 +18,6 @@ import '../ui/views/auth/auth_screen.dart';
   routes: [
     MaterialRoute(page: HomeView),
     MaterialRoute(page: StartupView),
-    MaterialRoute(page: AINotesApp),
     MaterialRoute(page: VoiceView),
     MaterialRoute(page: RemindersListScreen),
     // @stacked-route

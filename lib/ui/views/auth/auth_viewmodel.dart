@@ -43,14 +43,15 @@ class AuthViewModel extends ReactiveViewModel {
 
   Future<void> submitForm(BuildContext context) async {
     /*// if (!formKey.currentState!.validate()) return;
-    isLoading = true;
+
     notifyListeners();
 
     await Future.delayed(const Duration(seconds: 2));
     isLoading = false;
     notifyListeners();*/
 
-    if(isLogin){
+    isLoading = isBusy;
+    if (isLogin) {
       try {
         var response = await runBusyFuture(
           api.login(
@@ -58,6 +59,7 @@ class AuthViewModel extends ReactiveViewModel {
               password: passwordController.text.toString()),
           throwException: true,
         );
+        isLoading = isBusy;
         if (response != null) {
           final data = response.data as LoginResponse;
           authService.setLoginData(data);
@@ -75,27 +77,20 @@ class AuthViewModel extends ReactiveViewModel {
       } on FormatException catch (e) {
         print(e);
       }
-    }else {
+    } else {
       try {
         var response = await runBusyFuture(
-          api.login(
+          api.signup(
+              first_name: nameController.text.toString().split(" ").first,
+              last_name: nameController.text.toString().split(" ").last,
               email: emailController.text.toString(),
               password: passwordController.text.toString()),
           throwException: true,
         );
+        isLoading = isBusy;
         if (response != null) {
-          final data = response.data as LoginResponse;
-          authService.setLoginData(data);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(isLogin
-                  ? 'Login successful!'
-                  : 'Account created successfully!'),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          NavigationService().navigateTo(Routes.voiceView);
+          isLogin = true;
+          notifyListeners();
         }
       } on FormatException catch (e) {
         print(e);
