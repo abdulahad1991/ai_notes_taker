@@ -20,6 +20,7 @@ import '../ui/views/auth/auth_screen.dart';
     MaterialRoute(page: StartupView),
     MaterialRoute(page: VoiceView),
     MaterialRoute(page: RemindersListScreen),
+    MaterialRoute(page: AuthScreen),
     // @stacked-route
   ],
   dependencies: [
