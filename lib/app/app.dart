@@ -7,6 +7,10 @@ import 'package:ai_notes_taker/ui/views/voice/voice_view.dart';
 import 'package:stacked/stacked_annotations.dart';
 import 'package:stacked_services/stacked_services.dart';
 
+import '../services/api_service.dart';
+import '../services/app_auth_service.dart';
+import '../services/app_preferences_service.dart';
+import '../services/app_shared_pref_service.dart';
 import '../ui/views/auth_screen.dart';
 // @stacked-import
 
