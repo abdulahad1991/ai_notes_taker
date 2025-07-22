@@ -208,9 +208,12 @@ class _VoiceRecordingScreenState extends State<VoiceView>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.blue.shade50,
+              /*Colors.blue.shade50,
               Colors.purple.shade50,
-              Colors.pink.shade50,
+              Colors.pink.shade50,*/
+              Color(0xFFFFFF),
+              Color(0xFFFFFF),
+              Color(0xFFFFFF)
             ],
           ),
         ),
@@ -218,7 +221,7 @@ class _VoiceRecordingScreenState extends State<VoiceView>
           child: Column(
             children: [
               // Header
-              Padding(
+              /*Padding(
                 padding: EdgeInsets.all(24),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,7 +231,7 @@ class _VoiceRecordingScreenState extends State<VoiceView>
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
+                        color: Colors.black,
                       ),
                     ),
                     IconButton(
@@ -237,13 +240,13 @@ class _VoiceRecordingScreenState extends State<VoiceView>
                       },
                       icon: Icon(
                         Icons.list_alt,
-                        color: Colors.grey.shade700,
+                        color: Colors.black,
                         size: 28,
                       ),
                     ),
                   ],
                 ),
-              ),
+              ),*/
 
               // Voice Recording Area
               Expanded(
@@ -260,7 +263,7 @@ class _VoiceRecordingScreenState extends State<VoiceView>
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade700,
+                          color: Colors.black,
                         ),
                       ),
                       SizedBox(height: 40),
@@ -281,10 +284,10 @@ class _VoiceRecordingScreenState extends State<VoiceView>
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: _isRecording
-                                        ? [Colors.red.shade400, Colors.red.shade600]
+                                        ? [Colors.red.shade400, Colors.red.shade800]
                                         : _isProcessing
-                                        ? [Colors.orange.shade400, Colors.orange.shade600]
-                                        : [Colors.blue.shade400, Colors.blue.shade600],
+                                        ? [Colors.orange.shade400, Colors.orange.shade800]
+                                        : [Colors.blue.shade300, Colors.blue.shade900],
                                   ),
                                   borderRadius: BorderRadius.circular(60),
                                   boxShadow: [
@@ -342,7 +345,7 @@ class _VoiceRecordingScreenState extends State<VoiceView>
                             : 'Press and hold to record',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.grey.shade600,
+                          color: Colors.black,
                         ),
                       ),
                     ],
