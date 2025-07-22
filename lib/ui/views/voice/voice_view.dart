@@ -88,15 +88,14 @@ class _VoiceRecordingScreenState extends State<VoiceView>
                 end: Alignment.bottomCenter,
                 colors: [
                   AppColors.white,
-                  AppColors.secondary,
-                  AppColors.secondary,
+                  AppColors.white,
+                  AppColors.white,
                 ],
               ),
             ),
             child: SafeArea(
               child: Column(
                 children: [
-
                   Expanded(
                     child: Center(
                       child: Column(
@@ -111,7 +110,7 @@ class _VoiceRecordingScreenState extends State<VoiceView>
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.white,
+                              color: AppColors.black,
                             ),
                           ),
                           SizedBox(height: 40),
@@ -152,7 +151,7 @@ class _VoiceRecordingScreenState extends State<VoiceView>
                                                   ]
                                                 : [
                                                     Colors.blue.shade400,
-                                                    Colors.blue.shade600
+                                                    Colors.blue.shade900
                                                   ],
                                       ),
                                       borderRadius: BorderRadius.circular(60),
