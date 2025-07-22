@@ -23,6 +23,10 @@ import '../ui/views/auth_screen.dart';
     LazySingleton(classType: BottomSheetService),
     LazySingleton(classType: DialogService),
     LazySingleton(classType: NavigationService),
+    LazySingleton(classType: ApiService),
+    LazySingleton(classType: AppAuthService),
+    LazySingleton(classType: AppPreferencesService),
+    LazySingleton(classType: AppSharedPrefService),
     // @stacked-service
   ],
   bottomsheets: [
