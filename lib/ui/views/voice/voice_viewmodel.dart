@@ -8,8 +8,10 @@ import 'package:stacked/stacked.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import '../../../app/app.locator.dart';
+import '../../../models/response/transcribe_response.dart';
 import '../../../services/api_service.dart';
 import '../../../services/app_auth_service.dart';
+import '../../../shared/functions.dart';
 
 class VoiceViewmodel extends ReactiveViewModel {
   BuildContext context;
@@ -22,19 +24,17 @@ class VoiceViewmodel extends ReactiveViewModel {
   bool isRecording = false;
   bool isProcessing = false;
 
-  void init() {
-
-  }
+  void init() {}
 
   @override
   void dispose() {
-
     super.dispose();
   }
 
   String? _recordedPath;
 
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
+
   Future<void> startRecording() async {
     isRecording = true;
     isProcessing = false;
@@ -69,15 +69,19 @@ class VoiceViewmodel extends ReactiveViewModel {
   Future<void> sendVoiceAndProcessResponse({required File file}) async {
     try {
       var response = await runBusyFuture(
-        api.voiceIntent(file: file),
+        api.transcribe(
+            file: file,
+            is_reminder: 1,
+            user_current_datetime:
+                DateTime.now().toUtc().toIso8601String() + 'Z',
+            offset: getTimezoneOffsetFormatted()),
         throwException: true,
       );
       if (response != null) {
-        final data = response.data as VoiceResponse;
+
       }
     } on FormatException catch (e) {
       print(e);
     }
   }
-
 }

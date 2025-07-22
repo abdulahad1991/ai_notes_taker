@@ -57,4 +57,39 @@ class ApiService {
       rethrow;
     }
   }
+
+  Future<dynamic> transcribe({
+    required File file,
+    required int is_reminder,
+    required String user_current_datetime,
+    required String offset,
+  }) async {
+    try {
+      String? fileExt = file?.path.split('.').last.toLowerCase();
+      String mimeType =
+      fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
+      MultipartFile? multipartFile;
+      if (file != null) {
+        multipartFile = await MultipartFile.fromFile(
+          "${file?.path.toString()}",
+          contentType: MediaType.parse(mimeType),
+          filename: file?.path.split('/').last,
+        );
+      }
+
+      Map<String, dynamic> dataMap = {
+        "file": multipartFile,
+        "is_reminder": is_reminder,
+        "user_current_datetime": user_current_datetime,
+        "offset": offset,
+      };
+
+      FormData formData = FormData.fromMap(dataMap);
+
+      var response = await _apiClient?.postReq("transcribe", data: formData);
+      return LoginResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
