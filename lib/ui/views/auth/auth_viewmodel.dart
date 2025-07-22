@@ -22,7 +22,6 @@ class AuthViewModel extends ReactiveViewModel {
   bool isLogin = true;
   bool isPasswordVisible = false;
   bool isConfirmPasswordVisible = false;
-  bool isLoading = false;
 
   final formKey = GlobalKey<FormState>();
 
@@ -50,7 +49,6 @@ class AuthViewModel extends ReactiveViewModel {
     isLoading = false;
     notifyListeners();*/
 
-    isLoading = isBusy;
     if (isLogin) {
       try {
         var response = await runBusyFuture(
@@ -59,9 +57,8 @@ class AuthViewModel extends ReactiveViewModel {
               password: passwordController.text.toString()),
           throwException: true,
         );
-        isLoading = isBusy;
         if (response != null) {
-          final data = response.data as LoginResponse;
+          final data = response as LoginResponse;
           authService.setLoginData(data);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -87,7 +84,6 @@ class AuthViewModel extends ReactiveViewModel {
               password: passwordController.text.toString()),
           throwException: true,
         );
-        isLoading = isBusy;
         if (response != null) {
           isLogin = true;
           notifyListeners();
