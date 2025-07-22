@@ -12,6 +12,7 @@ import '../services/app_auth_service.dart';
 import '../services/app_preferences_service.dart';
 import '../services/app_shared_pref_service.dart';
 import '../ui/views/auth/auth_screen.dart';
+import '../ui/views/voice/voice_new_view.dart';
 // @stacked-import
 
 @StackedApp(
@@ -21,6 +22,7 @@ import '../ui/views/auth/auth_screen.dart';
     MaterialRoute(page: VoiceView),
     MaterialRoute(page: RemindersListScreen),
     MaterialRoute(page: AuthScreen),
+    MaterialRoute(page: VoiceNewView),
     // @stacked-route
   ],
   dependencies: [

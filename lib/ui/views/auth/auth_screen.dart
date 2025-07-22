@@ -10,7 +10,7 @@ class AuthScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<AuthViewModel>.reactive(
-      viewModelBuilder: () => AuthViewModel(),
+      viewModelBuilder: () => AuthViewModel()..init(),
       builder: (context, model, child) => Scaffold(
         body: Container(
           decoration: const BoxDecoration(
