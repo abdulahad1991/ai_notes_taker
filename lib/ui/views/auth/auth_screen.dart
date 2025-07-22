@@ -234,7 +234,7 @@ class AuthScreen extends StatelessWidget {
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: model.isLoading
+        onPressed: model.isBusy
             ? null
             : () {
                 model.submitForm(context);
@@ -247,7 +247,7 @@ class AuthScreen extends StatelessWidget {
           ),
           elevation: 4,
         ),
-        child: model.isLoading
+        child: model.isBusy
             ? const SizedBox(
                 width: 20,
                 height: 20,
