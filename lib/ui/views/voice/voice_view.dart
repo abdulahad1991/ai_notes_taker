@@ -1,191 +1,268 @@
+import 'dart:io';
+
+import 'package:ai_notes_taker/ui/views/voice/reminders_list.dart';
+import 'package:ai_notes_taker/ui/views/voice/voice_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'voice_viewmodel.dart';
+
+import '../../../shared/app_colors.dart';
 
 class VoiceView extends StatefulWidget {
   const VoiceView({Key? key}) : super(key: key);
 
   @override
-  State<VoiceView> createState() => _VoiceViewState();
+  _VoiceRecordingScreenState createState() => _VoiceRecordingScreenState();
 }
 
-class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
-  late VoiceViewModel _viewModel;
+class _VoiceRecordingScreenState extends State<VoiceView>
+    with TickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late AnimationController _waveController;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _waveAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _waveController = AnimationController(
+      duration: Duration(milliseconds: 2000),
+      vsync: this,
+    );
+
+    _pulseAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeInOut,
+    ));
+
+    _waveAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _waveController,
+      curve: Curves.easeInOut,
+    ));
+  }
 
   @override
   void dispose() {
-    _viewModel.dispose();
+    _pulseController.dispose();
+    _waveController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<VoiceViewModel>.reactive(
-      viewModelBuilder: () {
-        final vm = VoiceViewModel();
-        vm.setContext(context);
-        vm.init(this);
-        _viewModel = vm;
-        return vm;
-      },
-      builder: (context, model, child) => Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF), Color(0xFFFFFFFF)],
+    return ViewModelBuilder<VoiceViewmodel>.reactive(
+      viewModelBuilder: () => VoiceViewmodel(context)..init(),
+      builder: (context, model, child) {
+        // Reflect ViewModel states in your UI
+        bool isRecording = model.isRecording;
+        bool isProcessing = model.isProcessing;
+
+        // Animation controls in View
+        void startRecording() {
+          model.startRecording();
+          _pulseController.repeat(reverse: true);
+          _waveController.repeat();
+        }
+
+        void stopRecording(File file) async {
+          model.isProcessing = true;
+          _pulseController.stop();
+          _waveController.stop();
+          await model.stopRecordingAndProcess(file: file);
+        }
+
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.white,
+                  AppColors.secondary,
+                  AppColors.secondary,
+                ],
+              ),
             ),
-          ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          model.isRecording
-                              ? 'Listening...'
-                              : model.isProcessing
-                              ? 'Processing...'
-                              : 'Tap to record a reminder',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        GestureDetector(
-                          onTap: model.isProcessing
-                              ? null
-                              : (model.isRecording
-                              ? model.stopRecording
-                              : model.startRecording),
-                          child: AnimatedBuilder(
-                            animation: model.pulseAnimation,
-                            builder: (context, child) {
-                              return Transform.scale(
-                                scale: model.isRecording
-                                    ? model.pulseAnimation.value
-                                    : 1.0,
-                                child: Container(
-                                  width: 120,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: model.isRecording
-                                          ? [Colors.red.shade400, Colors.red.shade800]
-                                          : model.isProcessing
-                                          ? [Colors.orange.shade400, Colors.orange.shade800]
-                                          : [Colors.blue.shade300, Colors.blue.shade900],
-                                    ),
-                                    borderRadius: BorderRadius.circular(60),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: (model.isRecording
-                                            ? Colors.red
-                                            : Colors.blue)
-                                            .withOpacity(0.3),
-                                        blurRadius: 20,
-                                        spreadRadius: 5,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Icon(
-                                    model.isRecording
-                                        ? Icons.stop
-                                        : model.isProcessing
-                                        ? Icons.hourglass_empty
-                                        : Icons.mic,
-                                    size: 48,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        if (model.isRecording) ...[
-                          const SizedBox(height: 30),
-                          AnimatedBuilder(
-                            animation: model.waveAnimation,
-                            builder: (context, child) {
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(5, (index) {
-                                  return Container(
-                                    width: 4,
-                                    height: 20 +
-                                        (30 *
-                                            model.waveAnimation.value *
-                                            (index % 2 == 0 ? 1 : 0.5)),
-                                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade400,
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                  );
-                                }),
-                              );
-                            },
-                          ),
-                        ],
-                        const SizedBox(height: 40),
-                        Text(
-                          model.isRecording
-                              ? 'Recording in progress...'
-                              : model.isProcessing
-                              ? 'Converting speech to text...'
-                              : 'Press and hold to record',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.lightbulb_outline,
-                          color: Colors.amber.shade600,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'Try saying: "Remind me to buy groceries at 6 PM"',
+            child: SafeArea(
+              child: Column(
+                children: [
+
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            isRecording
+                                ? 'Listening...'
+                                : isProcessing
+                                    ? 'Processing...'
+                                    : 'Tap to talk',
                             style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white,
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 40),
+
+                          // Recording Button with Animation
+                          GestureDetector(
+                            onTap: isProcessing
+                                ? null
+                                : (isRecording
+                                    ? () async {
+                                        File file =
+                                            await model.stopAndGetAudioBytes();
+                                        stopRecording(file);
+                                      }
+                                    : startRecording),
+                            child: AnimatedBuilder(
+                              animation: _pulseAnimation,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale:
+                                      isRecording ? _pulseAnimation.value : 1.0,
+                                  child: Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: isRecording
+                                            ? [
+                                                Colors.red.shade400,
+                                                Colors.red.shade600
+                                              ]
+                                            : isProcessing
+                                                ? [
+                                                    Colors.orange.shade400,
+                                                    Colors.orange.shade600
+                                                  ]
+                                                : [
+                                                    Colors.blue.shade400,
+                                                    Colors.blue.shade600
+                                                  ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(60),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: (isRecording
+                                                  ? Colors.red
+                                                  : Colors.blue)
+                                              .withOpacity(0.3),
+                                          blurRadius: 20,
+                                          spreadRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      isRecording
+                                          ? Icons.stop
+                                          : isProcessing
+                                              ? Icons.hourglass_empty
+                                              : Icons.mic,
+                                      size: 48,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+
+                          if (isRecording) ...[
+                            SizedBox(height: 30),
+                            AnimatedBuilder(
+                              animation: _waveAnimation,
+                              builder: (context, child) {
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(5, (index) {
+                                    return Container(
+                                      width: 4,
+                                      height: 20 +
+                                          (30 *
+                                              _waveAnimation.value *
+                                              (index % 2 == 0 ? 1 : 0.5)),
+                                      margin:
+                                          EdgeInsets.symmetric(horizontal: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade400,
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                    );
+                                  }),
+                                );
+                              },
+                            ),
+                          ],
+
+                          SizedBox(height: 40),
+                          Text(
+                            isRecording
+                                ? 'Recording in progress...'
+                                : isProcessing
+                                    ? 'Converting speech to text...'
+                                    : 'Press and hold to talk',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+
+                  // Bottom Tips
+                  Container(
+                    padding: EdgeInsets.all(24),
+                    child: Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline,
+                            color: Colors.amber.shade600,
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Try saying: "Remind me to buy groceries at 6 PM"',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
