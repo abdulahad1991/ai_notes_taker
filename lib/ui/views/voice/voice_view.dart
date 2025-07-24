@@ -1,382 +1,9 @@
 import 'dart:io';
+import 'package:ai_notes_taker/ui/views/voice/voice_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-
-// Main Screen with Google Keep-like layout
-/*
-class MainScreen extends StatefulWidget {
-  @override
-  _MainScreenState createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
-  late AnimationController _fabController;
-  late Animation<double> _fabAnimation;
-  bool _isFabOpen = false;
-
-  List<Note> notes = [];
-  List<Reminder> reminders = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _fabController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _fabAnimation = CurvedAnimation(
-      parent: _fabController,
-      curve: Curves.elasticOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _fabController.dispose();
-    super.dispose();
-  }
-
-  void _toggleFab() {
-    setState(() {
-      _isFabOpen = !_isFabOpen;
-    });
-    if (_isFabOpen) {
-      _fabController.forward();
-    } else {
-      _fabController.reverse();
-    }
-  }
-
-  void _addNote() {
-    _toggleFab();
-    // Navigate to note creation screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => NoteCreationScreen()),
-    ).then((note) {
-      if (note != null) {
-        setState(() {
-          notes.add(note);
-        });
-      }
-    });
-  }
-
-  void _addReminder() {
-    _toggleFab();
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => VoiceView()),
-    ).then((reminder) {
-      if (reminder != null) {
-        setState(() {
-          reminders.add(reminder);
-        });
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    bool isEmpty = notes.isEmpty && reminders.isEmpty;
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: isEmpty
-          ? _buildEmptyState()
-          : _buildNotesGrid(),
-      floatingActionButton: _buildSpeedDial(),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.lightbulb_outline,
-            size: 120,
-            color: Colors.grey.shade300,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Notes you add appear here',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotesGrid() {
-    List<dynamic> allItems = [...notes, ...reminders];
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: MasonryGridView.count(
-        crossAxisCount: 2,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        itemCount: allItems.length,
-        itemBuilder: (context, index) {
-          final item = allItems[index];
-          if (item is Note) {
-            return _buildNoteCard(item);
-          } else if (item is Reminder) {
-            return _buildReminderCard(item);
-          }
-          return const SizedBox.shrink();
-        },
-      ),
-    );
-  }
-
-  Widget _buildNoteCard(Note note) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () {
-          // Edit note
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (note.title.isNotEmpty) ...[
-                Text(
-                  note.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-              ],
-              Text(
-                note.content,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade700,
-                ),
-                maxLines: 10,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReminderCard(Reminder reminder) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () {
-          // Edit reminder
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.notifications_outlined,
-                    size: 16,
-                    color: Colors.orange.shade600,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Reminder',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                reminder.title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (reminder.description.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  reminder.description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.access_time,
-                    size: 14,
-                    color: Colors.grey.shade600,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${reminder.date} at ${reminder.time}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSpeedDial() {
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        // Background overlay
-        if (_isFabOpen)
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: _toggleFab,
-              child: Container(
-                color: Colors.black26,
-              ),
-            ),
-          ),
-        // Speed dial options
-        if (_isFabOpen) ...[
-          Positioned(
-            bottom: 140,
-            right: 0,
-            child: ScaleTransition(
-              scale: _fabAnimation,
-              child: FloatingActionButton(
-                heroTag: 'reminder',
-                mini: true,
-                backgroundColor: Colors.white,
-                onPressed: _addReminder,
-                child: Icon(
-                  Icons.mic,
-                  color: Colors.red.shade600,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 105,
-            right: 56,
-            child: ScaleTransition(
-              scale: _fabAnimation,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.black87,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Text(
-                  'Reminder',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 80,
-            right: 0,
-            child: ScaleTransition(
-              scale: _fabAnimation,
-              child: FloatingActionButton(
-                heroTag: 'note',
-                mini: true,
-                backgroundColor: Colors.white,
-                onPressed: _addNote,
-                child: Icon(
-                  Icons.edit,
-                  color: Colors.blue.shade600,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 45,
-            right: 56,
-            child: ScaleTransition(
-              scale: _fabAnimation,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.black87,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Text(
-                  'Note',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-        // Main FAB
-        FloatingActionButton(
-          onPressed: _toggleFab,
-          backgroundColor: Colors.white,
-          child: AnimatedRotation(
-            turns: _isFabOpen ? 0.125 : 0,
-            duration: const Duration(milliseconds: 300),
-            child: Icon(
-              _isFabOpen ? Icons.close : Icons.add,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-*/
+import 'package:stacked/stacked.dart';
 
 // Voice Recording Screen (Updated)
 class VoiceView extends StatefulWidget {
@@ -493,146 +120,173 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
     if (showRemindersList) {
       return _buildRemindersListScreen();
     }
+    return ViewModelBuilder<VoiceViewmodel>.reactive(
+        viewModelBuilder: () => VoiceViewmodel(context)..init(),
+        builder: (context, model, child) {
+          bool isRecording = model.isRecording;
+          bool isProcessing = model.isProcessing;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              isRecording
-                  ? 'Listening...'
-                  : isProcessing
-                  ? 'Processing...'
-                  : 'Tap to record',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w400,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 60),
+          // Animation controls in View
+          void startRecording() {
+            model.startRecording();
+            _pulseController.repeat(reverse: true);
+            _waveController.repeat();
+          }
 
-            // Recording Button
-            GestureDetector(
-              onTap: isProcessing
-                  ? null
-                  : (isRecording ? stopRecording : startRecording),
-              child: AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: isRecording ? _pulseAnimation.value : 1.0,
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: isRecording
-                            ? Colors.red.shade500
-                            : isProcessing
-                            ? Colors.orange.shade500
-                            : Colors.blue.shade500,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: (isRecording
-                                ? Colors.red
-                                : isProcessing
-                                ? Colors.orange
-                                : Colors.blue)
-                                .withOpacity(0.3),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        isRecording
-                            ? Icons.stop
-                            : isProcessing
-                            ? Icons.hourglass_empty
-                            : Icons.mic,
-                        size: 48,
-                        color: Colors.white,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+          void stopRecording(File file) async {
+            model.isProcessing = true;
+            _pulseController.stop();
+            _waveController.stop();
+            await model.stopRecordingAndProcess(file: file);
+          }
 
-            if (isRecording) ...[
-              const SizedBox(height: 40),
-              AnimatedBuilder(
-                animation: _waveAnimation,
-                builder: (context, child) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (index) {
-                      return Container(
-                        width: 4,
-                        height: 20 +
-                            (30 *
-                                _waveAnimation.value *
-                                (index % 2 == 0 ? 1 : 0.5)),
-                        margin: const EdgeInsets.symmetric(horizontal: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade400,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      );
-                    }),
-                  );
-                },
-              ),
-            ],
-
-            const SizedBox(height: 40),
-            Text(
-              isRecording
-                  ? 'Recording in progress...'
-                  : isProcessing
-                  ? 'Converting speech to text...'
-                  : 'Tap to start recording',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-              ),
-            ),
-
-            const SizedBox(height: 60),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 32),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    color: Colors.amber.shade600,
-                    size: 20,
+                  Text(
+                    isRecording
+                        ? 'Listening...'
+                        : isProcessing
+                            ? 'Processing...'
+                            : 'Tap to record',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black87,
+                    ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Try saying: "Remind me to buy groceries at 6 PM"',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade700,
-                      ),
+                  const SizedBox(height: 60),
+
+                  // Recording Button
+                  GestureDetector(
+                    onTap: isProcessing
+                        ? null
+                        : (isRecording
+                            ? () async {
+                                File file = await model.stopAndGetAudioBytes();
+                                stopRecording(file);
+                              }
+                            : startRecording),
+                    child: AnimatedBuilder(
+                      animation: _pulseAnimation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: isRecording ? _pulseAnimation.value : 1.0,
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: isRecording
+                                  ? Colors.red.shade500
+                                  : isProcessing
+                                      ? Colors.orange.shade500
+                                      : Colors.blue.shade500,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (isRecording
+                                          ? Colors.red
+                                          : isProcessing
+                                              ? Colors.orange
+                                              : Colors.blue)
+                                      .withOpacity(0.3),
+                                  blurRadius: 20,
+                                  spreadRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              isRecording
+                                  ? Icons.stop
+                                  : isProcessing
+                                      ? Icons.hourglass_empty
+                                      : Icons.mic,
+                              size: 48,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  if (isRecording) ...[
+                    const SizedBox(height: 40),
+                    AnimatedBuilder(
+                      animation: _waveAnimation,
+                      builder: (context, child) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(5, (index) {
+                            return Container(
+                              width: 4,
+                              height: 20 +
+                                  (30 *
+                                      _waveAnimation.value *
+                                      (index % 2 == 0 ? 1 : 0.5)),
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade400,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            );
+                          }),
+                        );
+                      },
+                    ),
+                  ],
+
+                  const SizedBox(height: 40),
+                  Text(
+                    isRecording
+                        ? 'Recording in progress...'
+                        : isProcessing
+                            ? 'Converting speech to text...'
+                            : 'Tap to start recording',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+
+                  const SizedBox(height: 60),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 32),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lightbulb_outline,
+                          color: Colors.amber.shade600,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Try saying: "Remind me to buy groceries at 6 PM"',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
+          );
+        });
+
+    // return;
   }
 
   Widget _buildRemindersListScreen() {
@@ -708,10 +362,10 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                     ),
                     child: reminder.isCompleted
                         ? const Icon(
-                      Icons.check,
-                      size: 16,
-                      color: Colors.white,
-                    )
+                            Icons.check,
+                            size: 16,
+                            color: Colors.white,
+                          )
                         : null,
                   ),
                 ),
@@ -771,9 +425,11 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                   ),
                   const SizedBox(width: 12),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: _getPriorityColor(reminder.priority).withOpacity(0.1),
+                      color:
+                          _getPriorityColor(reminder.priority).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -830,7 +486,8 @@ class _NoteCreationScreenState extends State<NoteCreationScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              if (_titleController.text.isNotEmpty || _contentController.text.isNotEmpty) {
+              if (_titleController.text.isNotEmpty ||
+                  _contentController.text.isNotEmpty) {
                 final note = Note(
                   id: DateTime.now().millisecondsSinceEpoch,
                   title: _titleController.text,
