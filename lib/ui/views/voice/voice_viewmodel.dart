@@ -290,7 +290,7 @@ class VoiceViewmodel extends ReactiveViewModel {
   Future<void> stopRecordingAndProcess({File? file}) async {
     try {
       isRecording = false;
-      isProcessing = true;
+      isProcessing = false;
       rebuildUi();
       HapticFeedback.lightImpact();
 
@@ -302,7 +302,7 @@ class VoiceViewmodel extends ReactiveViewModel {
       }
 
       // Test playback (optional)
-      await playRecordedFile();
+      // await playRecordedFile();
 
       await sendVoiceAndProcessResponse(file: audioFile);
     } catch (e) {
@@ -318,7 +318,7 @@ class VoiceViewmodel extends ReactiveViewModel {
         api.transcribe(file: file,
             is_reminder: 1,
             user_current_datetime:
-            DateTime.now().toUtc().toIso8601String() + 'Z',
+            DateTime.now().toUtc().toIso8601String(),
             offset: getTimezoneOffsetFormatted()),
         throwException: true,
       );
