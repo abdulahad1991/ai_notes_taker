@@ -302,7 +302,7 @@ class VoiceViewmodel extends ReactiveViewModel {
       }
 
       // Test playback (optional)
-      // await playRecordedFile();
+      await playRecordedFile();
 
       await sendVoiceAndProcessResponse(file: audioFile);
     } catch (e) {
