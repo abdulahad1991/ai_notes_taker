@@ -4,6 +4,7 @@ import 'package:ai_notes_taker/models/response/login_response.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import '../models/response/transcribe_response.dart';
+import '../models/response/transcription_response.dart';
 import 'api_client.dart';
 import 'auth_interceptor.dart';
 
@@ -68,7 +69,7 @@ class ApiService {
     try {
       String? fileExt = file?.path.split('.').last.toLowerCase();
       String mimeType =
-      fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
+          fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
       MultipartFile? multipartFile;
       if (file != null) {
         multipartFile = await MultipartFile.fromFile(
@@ -89,6 +90,16 @@ class ApiService {
 
       var response = await _apiClient?.postReq("transcribe", data: formData);
       return TranscribeResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> getAll() async {
+    try {
+      var response =
+          await _apiClient?.postReq("transcriptions?skip=0&limit=10");
+      return TranscriptionResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

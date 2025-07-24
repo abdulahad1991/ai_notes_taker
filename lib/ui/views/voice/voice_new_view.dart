@@ -1,7 +1,9 @@
+import 'package:ai_notes_taker/ui/views/voice/voice_new_viewmodel.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:stacked/stacked.dart';
 
 class VoiceNewView extends StatefulWidget {
   @override
@@ -12,10 +14,6 @@ class _MainScreenState extends State<VoiceNewView>
     with TickerProviderStateMixin {
   late AnimationController _fabController;
   late Animation<double> _fabAnimation;
-  bool _isFabOpen = false;
-
-  List<Note> notes = [];
-  List<Reminder> reminders = [];
 
   @override
   void initState() {
@@ -36,93 +34,21 @@ class _MainScreenState extends State<VoiceNewView>
     super.dispose();
   }
 
-  void _toggleFab() {
-    setState(() {
-      _isFabOpen = !_isFabOpen;
-    });
-    if (_isFabOpen) {
-      _fabController.forward();
-    } else {
-      _fabController.reverse();
-    }
-  }
 
-  void _addNote() {
-    _toggleFab();
-    // Navigate to note creation screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => NoteCreationScreen()),
-    ).then((note) {
-      if (note != null) {
-        setState(() {
-          notes.add(note);
-        });
-      }
-    });
-  }
-
-  void _addReminder() {
-    _toggleFab();
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => VoiceView()),
-    ).then((reminder) {
-      if (reminder != null) {
-        setState(() {
-          reminders.add(reminder);
-        });
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    bool isEmpty = notes.isEmpty && reminders.isEmpty;
+    return ViewModelBuilder<VoiceNewViewmodel>.reactive(
+        viewModelBuilder: () => VoiceNewViewmodel(context)..init(),
+        builder: (context, model, child) {
+          bool isEmpty = model.notes.isEmpty && model.reminders.isEmpty;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: /*Stack(
-        children: [
-          isEmpty ? _buildEmptyState() : _buildNotesGrid(),
-          Positioned(
-            bottom: 24,
-            right: 24,
-            child: _buildSpeedDial(),
-          ),
-        ],
-      ), */
-          isEmpty ? _buildEmptyState() : _buildNotesGrid(),
-      floatingActionButton: _buildSpeedDial(),
-      /*floatingActionButton: Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        if (_isFabOpen)
-          ...[
-            // Backdrop
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: _toggleFab,
-                child: Container(color: Colors.black26),
-              ),
-            ),
-            // Options
-            Positioned(
-              bottom: 80,
-              right: 0,
-              child: FloatingActionButton(
-                onPressed: _addNote,
-                child: Icon(Icons.edit),
-              ),
-            ),
-          ],
-        FloatingActionButton(
-          onPressed: _toggleFab,
-          child: Icon(_isFabOpen ? Icons.close : Icons.add),
-        ),
-      ],
-    ),*/
-    );
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: isEmpty ? _buildEmptyState() : _buildNotesGrid(model),
+            floatingActionButton: _buildSpeedDial(model),
+          );
+        });
   }
 
   Widget _buildEmptyState() {
@@ -149,8 +75,8 @@ class _MainScreenState extends State<VoiceNewView>
     );
   }
 
-  Widget _buildNotesGrid() {
-    List<dynamic> allItems = [...notes, ...reminders];
+  Widget _buildNotesGrid(VoiceNewViewmodel model) {
+    List<dynamic> allItems = [];
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -299,13 +225,13 @@ class _MainScreenState extends State<VoiceNewView>
     );
   }
 
-  Widget _buildSpeedDial() {
+  Widget _buildSpeedDial(VoiceNewViewmodel model) {
     return Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.bottomRight,
       children: [
         // Overlay
-        if (_isFabOpen)
+        if (model.isFabOpen)
           Positioned(
             right: 0,
             bottom: 140,
@@ -315,12 +241,12 @@ class _MainScreenState extends State<VoiceNewView>
                 heroTag: 'reminder',
                 mini: true,
                 backgroundColor: Colors.white,
-                onPressed: _addReminder,
+                onPressed: model.addReminder,
                 child: Icon(Icons.mic, color: Colors.red.shade600),
               ),
             ),
           ),
-        if (_isFabOpen)
+        if (model.isFabOpen)
           Positioned(
             right: 50,
             bottom: 150,
@@ -344,7 +270,7 @@ class _MainScreenState extends State<VoiceNewView>
               ),
             ),
           ),
-        if (_isFabOpen)
+        if (model.isFabOpen)
           Positioned(
             right: 0,
             bottom: 80,
@@ -354,12 +280,12 @@ class _MainScreenState extends State<VoiceNewView>
                 heroTag: 'note',
                 mini: true,
                 backgroundColor: Colors.white,
-                onPressed: _addNote,
+                onPressed: model.addNote,
                 child: Icon(Icons.edit, color: Colors.blue.shade600),
               ),
             ),
           ),
-        if (_isFabOpen)
+        if (model.isFabOpen)
           Positioned(
             right: 50,
             bottom: 90,
@@ -388,13 +314,13 @@ class _MainScreenState extends State<VoiceNewView>
           right: 0,
           bottom: 0,
           child: FloatingActionButton(
-            onPressed: _toggleFab,
+            onPressed: model.toggleFab,
             backgroundColor: Colors.white,
             child: AnimatedRotation(
-              turns: _isFabOpen ? 0.125 : 0,
+              turns: model.isFabOpen ? 0.125 : 0,
               duration: const Duration(milliseconds: 300),
               child: Icon(
-                _isFabOpen ? Icons.close : Icons.add,
+                model.isFabOpen ? Icons.close : Icons.add,
                 color: Colors.black87,
               ),
             ),
