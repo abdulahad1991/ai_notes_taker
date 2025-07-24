@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import 'alert_dialog.dart';
+
 const double _tinySize = 5.0;
 const double _smallSize = 10.0;
 const double _mediumSize = 25.0;
@@ -87,4 +89,27 @@ double getResponsiveFontSize(
   );
 
   return responsiveSize;
+}
+
+
+Future<void> showErrorDialog(
+    String? message,
+    BuildContext? context, {
+      VoidCallback? onOkTap,
+      VoidCallback? onVerifyTap,
+    }) async {
+  await showDialog(
+    context: context!,
+    builder: (_) => AlertDialogApp(
+      message: "$message",
+      onOkTap: () {
+        Navigator.of(context).pop(); // Always close dialog
+        if (onOkTap != null) onOkTap(); // Then run your logic
+      },
+      onVerifyTap: () {
+        Navigator.of(context).pop(); // Always close dialog
+        if (onVerifyTap != null) onVerifyTap(); // Then run your logic
+      },
+    ),
+  );
 }
