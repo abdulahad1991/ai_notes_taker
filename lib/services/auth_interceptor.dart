@@ -9,7 +9,7 @@ class AuthInterceptor extends Interceptor {
     var userToken = locator<AppAuthService>().loginData;
     if (userToken != null) {
       print("JWT TOKEN--->>>>>${userToken.user?.token}");
-      options.headers['x-access-token'] = "${userToken.user?.token}";
+      options.headers['Authorization'] = "Bearer ${userToken.user?.token}";
     }
 
     return handler.next(options);

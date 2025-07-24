@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ai_notes_taker/models/response/login_response.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
+import '../models/response/transcribe_response.dart';
 import 'api_client.dart';
 import 'auth_interceptor.dart';
 
@@ -87,7 +88,7 @@ class ApiService {
       FormData formData = FormData.fromMap(dataMap);
 
       var response = await _apiClient?.postReq("transcribe", data: formData);
-      return LoginResponse.fromJson(response.data);
+      return TranscribeResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

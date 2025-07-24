@@ -6,3 +6,4 @@ String getTimezoneOffsetFormatted() {
   final minutes = (duration.inMinutes.abs() % 60).toString().padLeft(2, '0');
   return '$sign$hours:$minutes';
 }
+

@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
 
+import '../../../shared/playback_confirmation_dialog.dart';
+
 // Voice Recording Screen (Updated)
 class VoiceView extends StatefulWidget {
   const VoiceView({Key? key}) : super(key: key);
@@ -135,6 +137,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
 
           void stopRecording(File file) async {
             model.isProcessing = true;
+            model.isRecording = false;
             _pulseController.stop();
             _waveController.stop();
             await model.stopRecordingAndProcess(file: file);
@@ -165,11 +168,26 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                     onTap: isProcessing
                         ? null
                         : (isRecording
-                            ? () async {
-                                File file = await model.stopAndGetAudioBytes();
-                                stopRecording(file);
-                              }
-                            : startRecording),
+                        ? () async {
+                      File file = await model.stopAndGetAudioBytes();
+
+                      // Show playback-and-confirm dialog
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => PlaybackConfirmationDialog(
+                          audioFile: file,
+                          onConfirm: () async {
+                            Navigator.of(context).pop();
+                            stopRecording(file); // continue as before
+                          },
+                          onCancel: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      );
+                    }
+                        : startRecording),
                     child: AnimatedBuilder(
                       animation: _pulseAnimation,
                       builder: (context, child) {
