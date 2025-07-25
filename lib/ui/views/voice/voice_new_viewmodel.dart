@@ -67,10 +67,12 @@ class VoiceNewViewmodel extends ReactiveViewModel {
 
   void toggleFab() {
     isFabOpen = !isFabOpen;
+    notifyListeners();
+    /*isFabOpen = !isFabOpen;
     if (isFabOpen) {
       fabController.forward();
     } else {
       fabController.reverse();
-    }
+    }*/
   }
 }

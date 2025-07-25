@@ -34,14 +34,17 @@ class _MainScreenState extends State<VoiceNewView>
     super.dispose();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<VoiceNewViewmodel>.reactive(
         viewModelBuilder: () => VoiceNewViewmodel(context)..init(),
         builder: (context, model, child) {
           bool isEmpty = model.notes.isEmpty && model.reminders.isEmpty;
+          if (model.isFabOpen) {
+            _fabController.forward();
+          } else {
+            _fabController.reverse();
+          }
 
           return Scaffold(
             backgroundColor: Colors.white,
@@ -76,7 +79,7 @@ class _MainScreenState extends State<VoiceNewView>
   }
 
   Widget _buildNotesGrid(VoiceNewViewmodel model) {
-    List<dynamic> allItems = [];
+    List<dynamic> allItems = [...model.notes, ...model.reminders];
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
