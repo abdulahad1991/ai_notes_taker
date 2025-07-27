@@ -507,10 +507,10 @@ class _NoteCreationScreenState extends State<NoteCreationScreen> {
               if (_titleController.text.isNotEmpty ||
                   _contentController.text.isNotEmpty) {
                 final note = Note(
-                  id: DateTime.now().millisecondsSinceEpoch,
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
                   title: _titleController.text,
                   content: _contentController.text,
-                  createdAt: DateTime.now(),
+                  createdAt: DateTime.now().toString(),
                 );
                 Navigator.pop(context, note);
               } else {
@@ -579,10 +579,10 @@ class _NoteCreationScreenState extends State<NoteCreationScreen> {
 enum Priority { high, medium, low }
 
 class Note {
-  final int id;
+  final String id;
   final String title;
   final String content;
-  final DateTime createdAt;
+  final String createdAt;
 
   Note({
     required this.id,
