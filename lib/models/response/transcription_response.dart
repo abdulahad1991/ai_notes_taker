@@ -143,6 +143,7 @@ class Reminder {
   Id? user;
   CreatedAt? runTime;
   String? message;
+  String? title;
   CreatedAt? userCurrentDatetime;
   bool? isDelivered;
   CreatedAt? createdAt;
@@ -153,6 +154,7 @@ class Reminder {
         this.user,
         this.runTime,
         this.message,
+        this.title,
         this.userCurrentDatetime,
         this.isDelivered,
         this.createdAt,
@@ -164,7 +166,8 @@ class Reminder {
     runTime = json['run_time'] != null
         ? new CreatedAt.fromJson(json['run_time'])
         : null;
-    message = json['message'];
+    message = json['text'];
+    title = json['title'];
     userCurrentDatetime = json['user_current_datetime'] != null
         ? new CreatedAt.fromJson(json['user_current_datetime'])
         : null;

@@ -55,8 +55,8 @@ class AuthViewModel extends ReactiveViewModel {
     isLoading = false;
     notifyListeners();*/
 
-    emailController.text = "a01@gmail.com";
-    passwordController.text = "123456";
+    emailController.text = "saad@gmail.com";
+    passwordController.text = "saad123";
     if (isLogin) {
       try {
         var response = await runBusyFuture(

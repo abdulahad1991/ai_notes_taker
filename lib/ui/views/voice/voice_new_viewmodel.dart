@@ -33,6 +33,39 @@ class VoiceNewViewmodel extends ReactiveViewModel {
       );
       if (response != null) {
         final data = response as TranscriptionResponse;
+        for (var item in data.data!) {
+
+          notes.add(Note(id: item.iId!.oid.toString(),
+              title: item.reminder?.title??"N/A",
+              content: item.reminder?.message??"N/A",
+              createdAt: ""));
+          print("object");
+        }
+        for (var item in data.data!) {
+
+          notes.add(Note(id: item.iId!.oid.toString(),
+              title: item.reminder?.title??"N/A",
+              content: item.reminder?.message??"N/A",
+              createdAt: ""));
+          print("object");
+        }
+        for (var item in data.data!) {
+
+          notes.add(Note(id: item.iId!.oid.toString(),
+              title: item.reminder?.title??"N/A",
+              content: item.reminder?.message??"N/A",
+              createdAt: ""));
+          print("object");
+        }
+        for (var item in data.data!) {
+
+          notes.add(Note(id: item.iId!.oid.toString(),
+              title: item.reminder?.title??"N/A",
+              content: item.reminder?.message??"N/A",
+              createdAt: ""));
+          print("object");
+        }
+        notifyListeners();
       }
     } on FormatException catch (e) {
       print(e);

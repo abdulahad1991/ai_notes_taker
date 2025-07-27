@@ -98,7 +98,7 @@ class ApiService {
   Future<dynamic> getAll() async {
     try {
       var response =
-          await _apiClient?.postReq("transcriptions?skip=0&limit=10");
+          await _apiClient?.getReq("transcriptions?skip=0&limit=10");
       return TranscriptionResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
