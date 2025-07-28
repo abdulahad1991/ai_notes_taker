@@ -22,6 +22,7 @@ class AuthViewModel extends ReactiveViewModel {
   bool isLogin = true;
   bool isPasswordVisible = false;
   bool isConfirmPasswordVisible = false;
+  String token = "";
 
   final formKey = GlobalKey<FormState>();
 
@@ -62,7 +63,8 @@ class AuthViewModel extends ReactiveViewModel {
         var response = await runBusyFuture(
           api.login(
               email: emailController.text.toString(),
-              password: passwordController.text.toString()),
+              password: passwordController.text.toString(),
+              fcm_token: token),
           throwException: true,
         );
         if (response != null) {

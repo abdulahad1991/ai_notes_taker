@@ -28,11 +28,13 @@ class ApiService {
   Future<dynamic> login({
     required String email,
     required String password,
+    required String fcm_token,
   }) async {
     try {
       var response = await _apiClient?.postReq("user/login", data: {
         "email": email,
         "password": password,
+        "fcm_token": fcm_token,
       });
       return LoginResponse.fromJson(response.data);
     } catch (e) {
