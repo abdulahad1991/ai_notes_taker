@@ -36,7 +36,7 @@ Future<void> main() async {
   await _initializeLocalNotifications();
 
   _setupFirebaseMessaging();
-  
+
   setupDialogUi();
   setupBottomSheetUi();
   runApp(const MainApp());
