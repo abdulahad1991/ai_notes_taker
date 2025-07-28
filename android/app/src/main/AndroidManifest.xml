@@ -5,7 +5,7 @@
 
 
     <application
-        android:label="ai_notes_taker"
+        android:label="Voice Pad"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
