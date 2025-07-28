@@ -1,4 +1,5 @@
 import 'package:ai_notes_taker/models/response/login_response.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -27,9 +28,17 @@ class AuthViewModel extends ReactiveViewModel {
   final formKey = GlobalKey<FormState>();
 
   void init() {
+    initFirebase();
     if(authService.loginData!=null){
       NavigationService().navigateTo(Routes.voiceNewView);
     }
+  }
+
+  void initFirebase() {
+    FirebaseMessaging.instance.getToken().then((value) {
+      token = value!;
+      print("FCM - ${token}");
+    });
   }
 
   void toggleAuthMode() {
