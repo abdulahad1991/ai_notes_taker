@@ -21,8 +21,9 @@ import '../../common/ui_helpers.dart';
 
 class VoiceViewmodel extends ReactiveViewModel {
   BuildContext context;
+  bool isReminder;
 
-  VoiceViewmodel(this.context);
+  VoiceViewmodel(this.context, this.isReminder);
 
   late FlutterTts flutterTts;
   final api = locator<ApiService>();
@@ -315,10 +316,10 @@ class VoiceViewmodel extends ReactiveViewModel {
   Future<void> sendVoiceAndProcessResponse({required File file}) async {
     try {
       var response = await runBusyFuture(
-        api.transcribe(file: file,
-            is_reminder: 1,
-            user_current_datetime:
-            DateTime.now().toUtc().toIso8601String(),
+        api.transcribe(
+            file: file,
+            is_reminder: isReminder == true ? 1 : 0,
+            user_current_datetime: DateTime.now().toUtc().toIso8601String(),
             offset: getTimezoneOffsetFormatted()),
         throwException: true,
       );

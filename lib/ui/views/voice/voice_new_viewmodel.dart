@@ -11,7 +11,6 @@ import '../../../services/app_auth_service.dart';
 class VoiceNewViewmodel extends ReactiveViewModel {
   BuildContext context;
 
-
   bool isFabOpen = false;
   List<Note> notes = [];
   List<Reminder> reminders = [];
@@ -21,10 +20,10 @@ class VoiceNewViewmodel extends ReactiveViewModel {
   final api = locator<ApiService>();
   final authService = locator<AppAuthService>();
 
-  void init(){
-
+  void init() {
     fetchAll();
   }
+
   Future<void> fetchAll() async {
     try {
       var response = await runBusyFuture(
@@ -34,34 +33,34 @@ class VoiceNewViewmodel extends ReactiveViewModel {
       if (response != null) {
         final data = response as TranscriptionResponse;
         for (var item in data.data!) {
-
-          notes.add(Note(id: item.iId!.oid.toString(),
-              title: item.reminder?.title??"N/A",
-              content: item.reminder?.message??"N/A",
+          notes.add(Note(
+              id: item.iId!.oid.toString(),
+              title: item.reminder?.title ?? "N/A",
+              content: item.reminder?.message ?? "N/A",
               createdAt: ""));
           print("object");
         }
         for (var item in data.data!) {
-
-          notes.add(Note(id: item.iId!.oid.toString(),
-              title: item.reminder?.title??"N/A",
-              content: item.reminder?.message??"N/A",
+          notes.add(Note(
+              id: item.iId!.oid.toString(),
+              title: item.reminder?.title ?? "N/A",
+              content: item.reminder?.message ?? "N/A",
               createdAt: ""));
           print("object");
         }
         for (var item in data.data!) {
-
-          notes.add(Note(id: item.iId!.oid.toString(),
-              title: item.reminder?.title??"N/A",
-              content: item.reminder?.message??"N/A",
+          notes.add(Note(
+              id: item.iId!.oid.toString(),
+              title: item.reminder?.title ?? "N/A",
+              content: item.reminder?.message ?? "N/A",
               createdAt: ""));
           print("object");
         }
         for (var item in data.data!) {
-
-          notes.add(Note(id: item.iId!.oid.toString(),
-              title: item.reminder?.title??"N/A",
-              content: item.reminder?.message??"N/A",
+          notes.add(Note(
+              id: item.iId!.oid.toString(),
+              title: item.reminder?.title ?? "N/A",
+              content: item.reminder?.message ?? "N/A",
               createdAt: ""));
           print("object");
         }
@@ -72,13 +71,11 @@ class VoiceNewViewmodel extends ReactiveViewModel {
     }
   }
 
-
   void addNote() {
     toggleFab();
-    // Navigate to note creation screen
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => NoteCreationScreen()),
+      MaterialPageRoute(builder: (context) => VoiceView(isReminder: false)),
     ).then((note) {
       if (note != null) {
         notes.add(note);
@@ -90,7 +87,7 @@ class VoiceNewViewmodel extends ReactiveViewModel {
     toggleFab();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => VoiceView()),
+      MaterialPageRoute(builder: (context) => VoiceView(isReminder: true)),
     ).then((reminder) {
       if (reminder != null) {
         reminders.add(reminder);

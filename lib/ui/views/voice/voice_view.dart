@@ -9,7 +9,9 @@ import '../../../shared/playback_confirmation_dialog.dart';
 
 // Voice Recording Screen (Updated)
 class VoiceView extends StatefulWidget {
-  const VoiceView({Key? key}) : super(key: key);
+  bool isReminder = false;
+
+  VoiceView({Key? key, required bool isReminder}) : super(key: key);
 
   @override
   _VoiceViewState createState() => _VoiceViewState();
@@ -123,7 +125,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
       return _buildRemindersListScreen();
     }
     return ViewModelBuilder<VoiceViewmodel>.reactive(
-        viewModelBuilder: () => VoiceViewmodel(context)..init(),
+        viewModelBuilder: () => VoiceViewmodel(context, widget.isReminder)..init(),
         builder: (context, model, child) {
           bool isRecording = model.isRecording;
           bool isProcessing = model.isProcessing;
@@ -168,26 +170,27 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                     onTap: isProcessing
                         ? null
                         : (isRecording
-                        ? () async {
-                      File file = await model.stopAndGetAudioBytes();
+                            ? () async {
+                                File file = await model.stopAndGetAudioBytes();
 
-                      // Show playback-and-confirm dialog
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => PlaybackConfirmationDialog(
-                          audioFile: file,
-                          onConfirm: () async {
-                            Navigator.of(context).pop();
-                            stopRecording(file); // continue as before
-                          },
-                          onCancel: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      );
-                    }
-                        : startRecording),
+                                // Show playback-and-confirm dialog
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) =>
+                                      PlaybackConfirmationDialog(
+                                    audioFile: file,
+                                    onConfirm: () async {
+                                      Navigator.of(context).pop();
+                                      stopRecording(file); // continue as before
+                                    },
+                                    onCancel: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                );
+                              }
+                            : startRecording),
                     child: AnimatedBuilder(
                       animation: _pulseAnimation,
                       builder: (context, child) {

@@ -81,8 +81,10 @@ class StackedRouter extends _i1.RouterBase {
       );
     },
     _i4.VoiceView: (data) {
+      final args = data.getArgs<VoiceViewArguments>(nullOk: false);
       return _i8.MaterialPageRoute<dynamic>(
-        builder: (context) => const _i4.VoiceView(),
+        builder: (context) =>
+            _i4.VoiceView(key: args.key, isReminder: args.isReminder),
         settings: data,
       );
     },
@@ -111,6 +113,33 @@ class StackedRouter extends _i1.RouterBase {
 
   @override
   Map<Type, _i1.StackedRouteFactory> get pagesMap => _pagesMap;
+}
+
+class VoiceViewArguments {
+  const VoiceViewArguments({
+    this.key,
+    required this.isReminder,
+  });
+
+  final _i8.Key? key;
+
+  final bool isReminder;
+
+  @override
+  String toString() {
+    return '{"key": "$key", "isReminder": "$isReminder"}';
+  }
+
+  @override
+  bool operator ==(covariant VoiceViewArguments other) {
+    if (identical(this, other)) return true;
+    return other.key == key && other.isReminder == isReminder;
+  }
+
+  @override
+  int get hashCode {
+    return key.hashCode ^ isReminder.hashCode;
+  }
 }
 
 extension NavigatorStateExtension on _i9.NavigationService {
@@ -142,14 +171,17 @@ extension NavigatorStateExtension on _i9.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> navigateToVoiceView([
+  Future<dynamic> navigateToVoiceView({
+    _i8.Key? key,
+    required bool isReminder,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
-  ]) async {
+  }) async {
     return navigateTo<dynamic>(Routes.voiceView,
+        arguments: VoiceViewArguments(key: key, isReminder: isReminder),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -226,14 +258,17 @@ extension NavigatorStateExtension on _i9.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> replaceWithVoiceView([
+  Future<dynamic> replaceWithVoiceView({
+    _i8.Key? key,
+    required bool isReminder,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
-  ]) async {
+  }) async {
     return replaceWith<dynamic>(Routes.voiceView,
+        arguments: VoiceViewArguments(key: key, isReminder: isReminder),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
