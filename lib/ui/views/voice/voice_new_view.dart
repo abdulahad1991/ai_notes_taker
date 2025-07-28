@@ -16,6 +16,10 @@ class _MainScreenState extends State<VoiceNewView>
   late AnimationController _fabController;
   late Animation<double> _fabAnimation;
 
+  // Tab controller
+  late TabController _tabController;
+  int _selectedTabIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -27,11 +31,19 @@ class _MainScreenState extends State<VoiceNewView>
       parent: _fabController,
       curve: Curves.elasticOut,
     );
+
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        _selectedTabIndex = _tabController.index;
+      });
+    });
   }
 
   @override
   void dispose() {
     _fabController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -40,7 +52,10 @@ class _MainScreenState extends State<VoiceNewView>
     return ViewModelBuilder<VoiceNewViewmodel>.reactive(
         viewModelBuilder: () => VoiceNewViewmodel(context)..init(),
         builder: (context, model, child) {
-          bool isEmpty = model.notes.isEmpty /* && model.reminders.isEmpty*/;
+          // Filter items based on selected tab
+          List<dynamic> filteredItems = _getFilteredItems(model);
+          bool isEmpty = filteredItems.isEmpty;
+
           if (model.isFabOpen) {
             _fabController.forward();
           } else {
@@ -48,26 +63,82 @@ class _MainScreenState extends State<VoiceNewView>
           }
 
           return Scaffold(
-            backgroundColor: Colors.grey[50],
-            body: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF764ba2),
-                    Color(0xFFF1F3F4),
-                  ],
+            backgroundColor: const Color(0xFFF8F9FA), // Light gray background
+            appBar: AppBar(
+              backgroundColor: const Color(0xFFF8F9FA),
+              elevation: 0,
+              title: Text(
+                'Voice Pad',
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.w600,
+                  fontSize: 24,
                 ),
               ),
-              child: isEmpty ? _buildEmptyState() : _buildNotesGrid(model),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(60),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: TabBar(
+                      controller: _tabController,
+                      indicator: BoxDecoration(
+                        color: const Color(0xFF667eea),
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.grey[600],
+                      labelStyle: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                      unselectedLabelStyle: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                      tabs: const [
+                        Tab(text: 'Notes'),
+                        Tab(text: 'Reminder'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            body: Container(
+              color: const Color(0xFFF8F9FA),
+              child: isEmpty ? _buildEmptyState() : _buildNotesGrid(filteredItems),
             ),
             floatingActionButton: _buildSpeedDial(model),
           );
         });
   }
 
+  List<dynamic> _getFilteredItems(VoiceNewViewmodel model) {
+    if (_selectedTabIndex == 0) {
+      // Notes tab - show only notes
+      return model.notes.where((item) => item is Note).toList();
+    } else {
+      // Reminder Notes tab - show only reminders
+      return model.notes.where((item) => item is Reminder).toList();
+    }
+  }
+
   Widget _buildEmptyState() {
+    String emptyMessage = _selectedTabIndex == 0
+        ? 'No notes yet'
+        : 'No reminder notes yet';
+    String emptySubMessage = _selectedTabIndex == 0
+        ? 'Tap the + button to create your first note'
+        : 'Tap the + button to create your first reminder';
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -76,35 +147,30 @@ class _MainScreenState extends State<VoiceNewView>
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFF667eea).withOpacity(0.1),
-                  const Color(0xFF764ba2).withOpacity(0.1),
-                ],
-              ),
+              color: const Color(0xFF667eea).withOpacity(0.1),
               borderRadius: BorderRadius.circular(60),
             ),
             child: Icon(
-              Icons.lightbulb_outline,
+              _selectedTabIndex == 0 ? Icons.lightbulb_outline : Icons.notifications_outlined,
               size: 60,
-              color: AppColors.white,
+              color: const Color(0xFF667eea),
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            'Notes you add appear here',
+            emptyMessage,
             style: TextStyle(
               fontSize: 18,
-              color: Colors.white,
+              color: Colors.grey[700],
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Tap the + button to get started',
+            emptySubMessage,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white,
+              color: Colors.grey[500],
               fontWeight: FontWeight.w400,
             ),
           ),
@@ -113,18 +179,16 @@ class _MainScreenState extends State<VoiceNewView>
     );
   }
 
-  Widget _buildNotesGrid(VoiceNewViewmodel model) {
-    List<dynamic> allItems = [...model.notes];
-
+  Widget _buildNotesGrid(List<dynamic> items) {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: MasonryGridView.count(
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        itemCount: allItems.length,
+        itemCount: items.length,
         itemBuilder: (context, index) {
-          final item = allItems[index];
+          final item = items[index];
           if (item is Note) {
             return _buildNoteCard(item);
           } else if (item is Reminder) {
@@ -138,7 +202,7 @@ class _MainScreenState extends State<VoiceNewView>
 
   Widget _buildNoteCard(Note note) {
     return Card(
-      elevation: 8,
+      elevation: 4,
       shadowColor: Colors.black12,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -146,14 +210,7 @@ class _MainScreenState extends State<VoiceNewView>
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              Color(0xFFFAFBFF),
-            ],
-          ),
+          color: Colors.white,
           border: Border.all(
             color: const Color(0xFF667eea).withOpacity(0.1),
             width: 1,
@@ -176,9 +233,7 @@ class _MainScreenState extends State<VoiceNewView>
                         width: 4,
                         height: 20,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                          ),
+                          color: const Color(0xFF667eea),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -219,7 +274,7 @@ class _MainScreenState extends State<VoiceNewView>
 
   Widget _buildReminderCard(Reminder reminder) {
     return Card(
-      elevation: 8,
+      elevation: 4,
       shadowColor: Colors.black12,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -227,14 +282,7 @@ class _MainScreenState extends State<VoiceNewView>
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.red.shade50,
-              Colors.redAccent.shade700,
-            ],
-          ),
+          color: Colors.orange.shade50,
           border: Border.all(
             color: Colors.orange.shade200,
             width: 1,
@@ -256,12 +304,7 @@ class _MainScreenState extends State<VoiceNewView>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.orange.shade400,
-                            Colors.orange.shade500
-                          ],
-                        ),
+                        color: Colors.orange.shade400,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -313,7 +356,7 @@ class _MainScreenState extends State<VoiceNewView>
                 const SizedBox(height: 12),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.orange.shade100,
                     borderRadius: BorderRadius.circular(8),
@@ -360,9 +403,7 @@ class _MainScreenState extends State<VoiceNewView>
               scale: _fabAnimation,
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF6B6B), Color(0xFFEE5A52)],
-                  ),
+                  color: Colors.red.shade400,
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
@@ -391,11 +432,9 @@ class _MainScreenState extends State<VoiceNewView>
               scale: _fabAnimation,
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2D3748), Color(0xFF4A5568)],
-                  ),
+                  color: Colors.grey[700],
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -424,9 +463,7 @@ class _MainScreenState extends State<VoiceNewView>
               scale: _fabAnimation,
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                  ),
+                  color: const Color(0xFF667eea),
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
@@ -455,11 +492,9 @@ class _MainScreenState extends State<VoiceNewView>
               scale: _fabAnimation,
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2D3748), Color(0xFF4A5568)],
-                  ),
+                  color: Colors.grey[700],
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -486,14 +521,7 @@ class _MainScreenState extends State<VoiceNewView>
           bottom: 0,
           child: Container(
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF667eea),
-                  Color(0xFF764ba2),
-                ],
-              ),
+              color: const Color(0xFF667eea),
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
