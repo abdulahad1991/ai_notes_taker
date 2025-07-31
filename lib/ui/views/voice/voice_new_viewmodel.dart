@@ -51,30 +51,7 @@ class VoiceNewViewmodel extends ReactiveViewModel {
               createdAt: ""));
           print("object");
         }
-        for (var item in data.data!) {
-          notes.add(Note(
-              id: item.iId!.oid.toString(),
-              title: item.reminder?.title ?? "N/A",
-              content: item.reminder?.message ?? "N/A",
-              createdAt: ""));
-          print("object");
-        }
-        for (var item in data.data!) {
-          notes.add(Note(
-              id: item.iId!.oid.toString(),
-              title: item.reminder?.title ?? "N/A",
-              content: item.reminder?.message ?? "N/A",
-              createdAt: ""));
-          print("object");
-        }
-        for (var item in data.data!) {
-          notes.add(Note(
-              id: item.iId!.oid.toString(),
-              title: item.reminder?.title ?? "N/A",
-              content: item.reminder?.message ?? "N/A",
-              createdAt: ""));
-          print("object");
-        }
+
         notifyListeners();
       }
     } on FormatException catch (e) {
