@@ -1,5 +1,6 @@
 import 'package:ai_notes_taker/models/response/transcription_response.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart' hide Reminder;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -22,6 +23,16 @@ class VoiceNewViewmodel extends ReactiveViewModel {
 
   void init() {
     fetchAll();
+    FirebaseMessaging.instance.getToken().then((value) {
+      callUpdateUserProfile(value!);
+    });
+  }
+
+  Future<void> callUpdateUserProfile(String token) async {
+    await runBusyFuture(
+      api.updateUser(fcm_token: token),
+      throwException: true,
+    );
   }
 
   Future<void> fetchAll() async {

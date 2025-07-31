@@ -106,4 +106,17 @@ class ApiService {
       rethrow;
     }
   }
+
+  Future<dynamic> updateUser({
+    required String fcm_token,
+  }) async {
+    try {
+      var response = await _apiClient?.putReq("user", data: {
+        "fcm_token": fcm_token,
+      });
+      return LoginResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
