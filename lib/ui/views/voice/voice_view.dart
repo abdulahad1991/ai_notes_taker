@@ -9,9 +9,9 @@ import '../../../shared/playback_confirmation_dialog.dart';
 
 // Voice Recording Screen (Updated)
 class VoiceView extends StatefulWidget {
-  bool isReminder = false;
+  final bool isReminder;
 
-  VoiceView({Key? key, required bool isReminder}) : super(key: key);
+  VoiceView({Key? key, required this.isReminder}) : super(key: key);
 
   @override
   _VoiceViewState createState() => _VoiceViewState();
