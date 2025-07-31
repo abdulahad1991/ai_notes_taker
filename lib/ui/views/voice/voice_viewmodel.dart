@@ -326,7 +326,9 @@ class VoiceViewmodel extends ReactiveViewModel {
       if (response != null) {
         isProcessing = false;
         final data = response as TranscribeResponse;
-        playText(data.transcription!);
+
+        Navigator.of(context).pop(true);
+        // playText(data.transcription!);
       }
     } on FormatException catch (e) {
       print(e);
@@ -371,7 +373,7 @@ class VoiceViewmodel extends ReactiveViewModel {
           TextButton(
             onPressed: () {
               flutterTts.stop();
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Close dialog// Navigate back with refresh signal
             },
             child: Text(lang == "ur" ? "بند کریں" : "Close"),
           ),

@@ -43,6 +43,7 @@ class VoiceNewViewmodel extends ReactiveViewModel {
       );
       if (response != null) {
         final data = response as TranscriptionResponse;
+        notes.clear();
         for (var item in data.data!) {
           notes.add(Note(
               id: item.iId!.oid.toString(),
@@ -51,30 +52,7 @@ class VoiceNewViewmodel extends ReactiveViewModel {
               createdAt: ""));
           print("object");
         }
-        for (var item in data.data!) {
-          notes.add(Note(
-              id: item.iId!.oid.toString(),
-              title: item.reminder?.title ?? "N/A",
-              content: item.reminder?.message ?? "N/A",
-              createdAt: ""));
-          print("object");
-        }
-        for (var item in data.data!) {
-          notes.add(Note(
-              id: item.iId!.oid.toString(),
-              title: item.reminder?.title ?? "N/A",
-              content: item.reminder?.message ?? "N/A",
-              createdAt: ""));
-          print("object");
-        }
-        for (var item in data.data!) {
-          notes.add(Note(
-              id: item.iId!.oid.toString(),
-              title: item.reminder?.title ?? "N/A",
-              content: item.reminder?.message ?? "N/A",
-              createdAt: ""));
-          print("object");
-        }
+
         notifyListeners();
       }
     } on FormatException catch (e) {
@@ -87,9 +65,12 @@ class VoiceNewViewmodel extends ReactiveViewModel {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => VoiceView(isReminder: false)),
-    ).then((note) {
-      if (note != null) {
-        notes.add(note);
+    ).then((result) {
+      if (result == true) {
+        // Refresh data when returning from voice recording
+        fetchAll();
+      } else if (result != null) {
+        notes.add(result);
       }
     });
   }
@@ -99,9 +80,12 @@ class VoiceNewViewmodel extends ReactiveViewModel {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => VoiceView(isReminder: true)),
-    ).then((reminder) {
-      if (reminder != null) {
-        reminders.add(reminder);
+    ).then((result) {
+      if (result == true) {
+        // Refresh data when returning from voice recording
+        fetchAll();
+      } else if (result != null) {
+        reminders.add(result);
       }
     });
   }

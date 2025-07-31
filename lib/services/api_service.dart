@@ -83,7 +83,7 @@ class ApiService {
 
       Map<String, dynamic> dataMap = {
         "file": multipartFile,
-        "is_reminder": is_reminder,
+        "is_reminder": 1,
         "user_current_datetime": user_current_datetime,
         "offset": offset,
       };
