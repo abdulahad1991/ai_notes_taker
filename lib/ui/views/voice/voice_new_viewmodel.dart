@@ -1,5 +1,5 @@
 import 'package:ai_notes_taker/models/response/transcription_response.dart';
-import 'package:ai_notes_taker/ui/views/voice/voice_view.dart' hide Reminder;
+import 'package:ai_notes_taker/ui/views/voice/voice_view.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -44,19 +44,54 @@ class VoiceNewViewmodel extends ReactiveViewModel {
       if (response != null) {
         final data = response as TranscriptionResponse;
         notes.clear();
+        reminders.clear();
+        
         for (var item in data.data!) {
-          notes.add(Note(
+          if (item.isReminder == true) {
+            reminders.add(Reminder(
               id: item.iId!.oid.toString(),
               title: item.reminder?.title ?? "N/A",
-              content: item.reminder?.message ?? "N/A",
-              createdAt: ""));
-          print("object");
+              description: item.reminder?.message ?? "N/A",
+              time: "",
+              date: "",
+              isCompleted: item.reminder?.isDelivered ?? false,
+              priority: Priority.medium,
+            ));
+          } else {
+            notes.add(Note(
+              id: item.iId!.oid.toString(),
+              title: item.transcription ?? "N/A",
+              content: item.transcription ?? "N/A",
+              createdAt: item.createdAt?.date??"",
+              isReminder: false
+            ));
+          }
         }
 
         notifyListeners();
       }
     } on FormatException catch (e) {
       print(e);
+    }
+  }
+
+  String _formatTime(DateTime? dateTime) {
+    if (dateTime == null) return "N/A";
+    return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+  }
+
+  String _formatDate(DateTime? dateTime) {
+    if (dateTime == null) return "N/A";
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final itemDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    
+    if (itemDate == today) {
+      return "Today";
+    } else if (itemDate == today.add(Duration(days: 1))) {
+      return "Tomorrow";
+    } else {
+      return "${dateTime.day}/${dateTime.month}/${dateTime.year}";
     }
   }
 
@@ -100,4 +135,41 @@ class VoiceNewViewmodel extends ReactiveViewModel {
       fabController.reverse();
     }*/
   }
+}
+
+
+class Note {
+  final String id;
+  final String title;
+  final String content;
+  final String createdAt;
+  final bool isReminder;
+
+  Note({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.createdAt,
+    required this.isReminder,
+  });
+}
+
+class Reminder {
+  final String id;
+  final String title;
+  final String description;
+  final String time;
+  final String date;
+  bool isCompleted;
+  final Priority priority;
+
+  Reminder({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.time,
+    required this.date,
+    required this.isCompleted,
+    required this.priority,
+  });
 }

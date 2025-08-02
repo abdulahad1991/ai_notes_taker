@@ -95,7 +95,7 @@ class AuthScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'AI Notes',
+          'Voice Pad',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,

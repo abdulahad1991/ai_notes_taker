@@ -124,10 +124,10 @@ class _MainScreenState extends State<VoiceNewView>
   List<dynamic> _getFilteredItems(VoiceNewViewmodel model) {
     if (_selectedTabIndex == 0) {
       // Notes tab - show only notes
-      return model.notes.where((item) => item is Note).toList();
+      return model.notes;
     } else {
       // Reminder Notes tab - show only reminders
-      return model.notes.where((item) => item is Reminder).toList();
+      return model.reminders;
     }
   }
 
@@ -272,7 +272,79 @@ class _MainScreenState extends State<VoiceNewView>
     );
   }
 
-  Widget _buildReminderCard(Reminder reminder) {
+  Widget _buildReminderCard(Reminder note) {
+    return Card(
+      elevation: 4,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          border: Border.all(
+            color: const Color(0xFF667eea).withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // Edit note
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (note.title.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF667eea),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          note.title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                Text(
+                  note.description,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    height: 1.4,
+                  ),
+                  maxLines: 10,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReminderCard2(Reminder reminder) {
     return Card(
       elevation: 4,
       shadowColor: Colors.black12,
