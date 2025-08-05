@@ -128,7 +128,7 @@ class CreatedAt {
   CreatedAt({this.date});
 
   CreatedAt.fromJson(Map<String, dynamic> json) {
-    date = json['$date'];
+    date = json['\$date'];
   }
 
   Map<String, dynamic> toJson() {
@@ -144,6 +144,7 @@ class Reminder {
   CreatedAt? runTime;
   String? message;
   String? title;
+  CreatedAt? date;
   CreatedAt? userCurrentDatetime;
   bool? isDelivered;
   CreatedAt? createdAt;
@@ -155,6 +156,7 @@ class Reminder {
         this.runTime,
         this.message,
         this.title,
+        this.date,
         this.userCurrentDatetime,
         this.isDelivered,
         this.createdAt,
@@ -167,6 +169,9 @@ class Reminder {
         ? new CreatedAt.fromJson(json['run_time'])
         : null;
     message = json['text'];
+    date = json['datetime'] != null
+        ? new CreatedAt.fromJson(json['datetime'])
+        : null;
     title = json['title'];
     userCurrentDatetime = json['user_current_datetime'] != null
         ? new CreatedAt.fromJson(json['user_current_datetime'])
