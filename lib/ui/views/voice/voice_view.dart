@@ -92,9 +92,9 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-
     return ViewModelBuilder<VoiceViewmodel>.reactive(
-        viewModelBuilder: () => VoiceViewmodel(context, widget.isReminder)..init(),
+        viewModelBuilder: () =>
+            VoiceViewmodel(context, widget.isReminder)..init(),
         builder: (context, model, child) {
           bool isRecording = model.isRecording;
           bool isProcessing = model.isProcessing;
@@ -173,7 +173,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                   ? Colors.red.shade500
                                   : isProcessing
                                       ? Colors.orange.shade500
-                                      : Colors.blue.shade500,
+                                      : Color(0xFF667eea),
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
@@ -181,7 +181,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                           ? Colors.red
                                           : isProcessing
                                               ? Colors.orange
-                                              : Colors.blue)
+                                              : Color(0xFF667eea))
                                       .withOpacity(0.3),
                                   blurRadius: 20,
                                   spreadRadius: 5,
@@ -279,8 +279,6 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
     // return;
   }
 
-
-
   Color _getPriorityColor(Priority priority) {
     switch (priority) {
       case Priority.high:
@@ -320,12 +318,11 @@ class _NoteCreationScreenState extends State<NoteCreationScreen> {
               if (_titleController.text.isNotEmpty ||
                   _contentController.text.isNotEmpty) {
                 final note = Note(
-                  id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  title: _titleController.text,
-                  content: _contentController.text,
-                  createdAt: DateTime.now().toString(),
-                  isReminder: false
-                );
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    title: _titleController.text,
+                    content: _contentController.text,
+                    createdAt: DateTime.now().toString(),
+                    isReminder: false);
                 Navigator.pop(context, note);
               } else {
                 Navigator.pop(context);
@@ -391,4 +388,3 @@ class _NoteCreationScreenState extends State<NoteCreationScreen> {
 
 // Models
 enum Priority { high, medium, low }
-
