@@ -1,70 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
-import '../../../app/app.router.dart';
-import 'auth_viewmodel.dart'; // import your viewmodel
+import 'auth_viewmodel.dart'; // your existing viewmodel
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // For responsive UI
+    final isWide = MediaQuery.of(context).size.width > 600;
+
     return ViewModelBuilder<AuthViewModel>.reactive(
       viewModelBuilder: () => AuthViewModel()..init(),
       builder: (context, model, child) => Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF667eea),
-                Color(0xFF764ba2),
-                Color(0xFF8B5FBF),
-              ],
-            ),
-          ),
-          child: SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: FadeTransition(
-                  opacity: AlwaysStoppedAnimation(1.0),
-                  child: SlideTransition(
-                    position: AlwaysStoppedAnimation(Offset.zero),
-                    child: Card(
-                      elevation: 20,
-                      shadowColor: Colors.black26,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Container(
-                        width: double.infinity,
-                        constraints: const BoxConstraints(maxWidth: 400),
-                        padding: const EdgeInsets.all(32.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: Colors.white,
-                        ),
-                        child: Form(
-                          key: model.formKey,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildHeader(),
-                              const SizedBox(height: 32),
-                              _buildFormFields(model),
-                              const SizedBox(height: 24),
-                              _buildSubmitButton(model, context),
-                              const SizedBox(height: 16),
-                              _buildDivider(),
-                              const SizedBox(height: 24),
-                              _buildToggleButton(model),
-                            ],
-                          ),
-                        ),
-                      ),
+        backgroundColor: const Color(0xFFF8F9FA), // soft light gray
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: isWide ? 0 : 24,
+                vertical: 32,
+              ),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 400),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 36,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 18,
+                      offset: const Offset(0, 4),
                     ),
+                  ],
+                ),
+                child: Form(
+                  key: model.formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 32),
+                      _buildFormFields(model),
+                      const SizedBox(height: 28),
+                      _buildSubmitButton(model, context),
+                      const SizedBox(height: 16),
+                      _buildDivider(),
+                      const SizedBox(height: 24),
+                      _buildToggleButton(model),
+                    ],
                   ),
                 ),
               ),
@@ -79,27 +67,36 @@ class AuthScreen extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 56,
+          height: 56,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-            ),
-            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFF667eea),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: const Icon(
             Icons.auto_awesome,
             color: Colors.white,
-            size: 40,
+            size: 32,
           ),
         ),
         const SizedBox(height: 16),
         Text(
           'Voice Pad',
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 26,
             fontWeight: FontWeight.bold,
+            letterSpacing: 0.2,
             color: Colors.grey[800],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Sign in to continue',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[500],
+            fontWeight: FontWeight.w400,
+            letterSpacing: 0.1,
           ),
         ),
       ],
@@ -115,9 +112,7 @@ class AuthScreen extends StatelessWidget {
             label: 'Full Name',
             icon: Icons.person_outline,
             validator: (value) {
-              if (value?.isEmpty ?? true) {
-                return 'Please enter your name';
-              }
+              if (value?.isEmpty ?? true) return 'Please enter your name';
               return null;
             },
           ),
@@ -129,9 +124,7 @@ class AuthScreen extends StatelessWidget {
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           validator: (value) {
-            if (value?.isEmpty ?? true) {
-              return 'Please enter your email';
-            }
+            if (value?.isEmpty ?? true) return 'Please enter your email';
             if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)) {
               return 'Please enter a valid email';
             }
@@ -147,12 +140,8 @@ class AuthScreen extends StatelessWidget {
           isPasswordVisible: model.isPasswordVisible,
           onTogglePassword: model.togglePasswordVisibility,
           validator: (value) {
-            if (value?.isEmpty ?? true) {
-              return 'Please enter your password';
-            }
-            if (value!.length < 6) {
-              return 'Password must be at least 6 characters';
-            }
+            if (value?.isEmpty ?? true) return 'Please enter your password';
+            if (value!.length < 6) return 'Password must be at least 6 characters';
             return null;
           },
         ),
@@ -166,12 +155,8 @@ class AuthScreen extends StatelessWidget {
             isPasswordVisible: model.isConfirmPasswordVisible,
             onTogglePassword: model.toggleConfirmPasswordVisibility,
             validator: (value) {
-              if (value?.isEmpty ?? true) {
-                return 'Please confirm your password';
-              }
-              if (value != model.passwordController.text) {
-                return 'Passwords do not match';
-              }
+              if (value?.isEmpty ?? true) return 'Please confirm your password';
+              if (value != model.passwordController.text) return 'Passwords do not match';
               return null;
             },
           ),
@@ -195,36 +180,39 @@ class AuthScreen extends StatelessWidget {
       keyboardType: keyboardType,
       obscureText: isPassword && !isPasswordVisible,
       validator: validator,
+      style: const TextStyle(fontSize: 15),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w500),
         prefixIcon: Icon(icon, color: const Color(0xFF667eea)),
         suffixIcon: isPassword
             ? IconButton(
-                icon: Icon(
-                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey[600],
-                ),
-                onPressed: onTogglePassword,
-              )
+          icon: Icon(
+            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+            color: Colors.grey[500],
+          ),
+          onPressed: onTogglePassword,
+        )
             : null,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Color(0xFF667eea), width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.red),
         ),
         filled: true,
         fillColor: Colors.grey[50],
+        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 18),
       ),
     );
   }
@@ -232,37 +220,30 @@ class AuthScreen extends StatelessWidget {
   Widget _buildSubmitButton(AuthViewModel model, BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 48,
       child: ElevatedButton(
-        onPressed: model.isBusy
-            ? null
-            : () {
-                model.submitForm(context);
-              },
+        onPressed: model.isBusy ? null : () => model.submitForm(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF667eea),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
           ),
-          elevation: 4,
+          elevation: 2,
         ),
         child: model.isBusy
             ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        )
             : Text(
-                model.isLogin ? 'Sign In' : 'Create Account',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+          model.isLogin ? 'Sign In' : 'Create Account',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -270,15 +251,15 @@ class AuthScreen extends StatelessWidget {
   Widget _buildDivider() {
     return Row(
       children: [
-        Expanded(child: Divider(color: Colors.grey[300])),
+        Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'or',
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: Colors.grey[500], fontSize: 13),
           ),
         ),
-        Expanded(child: Divider(color: Colors.grey[300])),
+        Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
       ],
     );
   }
@@ -291,7 +272,7 @@ class AuthScreen extends StatelessWidget {
           model.isLogin
               ? "Don't have an account? "
               : "Already have an account? ",
-          style: TextStyle(color: Colors.grey[600]),
+          style: TextStyle(color: Colors.grey[600], fontSize: 14),
         ),
         TextButton(
           onPressed: model.toggleAuthMode,
@@ -300,6 +281,7 @@ class AuthScreen extends StatelessWidget {
             style: const TextStyle(
               color: Color(0xFF667eea),
               fontWeight: FontWeight.bold,
+              fontSize: 15,
             ),
           ),
         ),
