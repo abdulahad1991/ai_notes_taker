@@ -53,7 +53,7 @@ class VoiceNewViewmodel extends ReactiveViewModel {
               title: item.reminder?.title ?? "N/A",
               description: item.reminder?.message ?? "N/A",
               time: "",
-              date: "",
+              date: item.reminder!.date!.date.toString(),
               isCompleted: item.reminder?.isDelivered ?? false,
               priority: Priority.medium,
             ));
