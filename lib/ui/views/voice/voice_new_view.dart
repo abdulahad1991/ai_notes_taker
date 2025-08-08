@@ -7,6 +7,8 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
 
 class VoiceNewView extends StatefulWidget {
+  const VoiceNewView({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -526,7 +528,7 @@ class _MainScreenState extends State<VoiceNewView>
                       ),
                     ),
                     // Scheduled time
-                    Container(
+                    /*Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: isSmallScreen ? 6 : 8,
                         vertical: isSmallScreen ? 2 : 3,
@@ -554,7 +556,7 @@ class _MainScreenState extends State<VoiceNewView>
                           ),
                         ],
                       ),
-                    ),
+                    ),*/
                   ],
                 ),
 
@@ -657,7 +659,7 @@ class _MainScreenState extends State<VoiceNewView>
             ),
           ),
           content: Text(
-            'Are you sure you want to delete this ${item is Note ? 'note' : 'reminder'}? This action cannot be undone.',
+            'Are you sure you want to delete this ${item is Note ? 'note' : 'reminder'}?',
             style: TextStyle(
               color: Colors.grey[600],
             ),
@@ -683,7 +685,7 @@ class _MainScreenState extends State<VoiceNewView>
                 }
               },
               child: const Text(
-                'Delete',
+                'Yes',
                 style: TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.w600,
@@ -771,7 +773,7 @@ class _MainScreenState extends State<VoiceNewView>
                   ],
                 ),
                 child: Text(
-                  'Voice Note',
+                  'Reminder',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: isCompact ? 10 : 12,

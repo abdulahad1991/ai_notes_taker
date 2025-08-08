@@ -321,6 +321,7 @@ class VoiceViewmodel extends ReactiveViewModel {
             is_reminder: isReminder == true ? 1 : 0,
             user_current_datetime: DateTime.now().toUtc().toIso8601String(),
             offset: getTimezoneOffsetFormatted()),
+        busyObject: "transcribe",
         throwException: true,
       );
       if (response != null) {
