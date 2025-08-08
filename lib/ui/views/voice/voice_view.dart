@@ -141,8 +141,6 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                         : (isRecording
                             ? () async {
                                 File file = await model.stopAndGetAudioBytes();
-
-                                // Show playback-and-confirm dialog
                                 showDialog(
                                   context: context,
                                   barrierDismissible: false,
@@ -151,7 +149,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                     audioFile: file,
                                     onConfirm: () async {
                                       Navigator.of(context).pop();
-                                      stopRecording(file); // continue as before
+                                      stopRecording(file);
                                     },
                                     onCancel: () {
                                       Navigator.of(context).pop();
