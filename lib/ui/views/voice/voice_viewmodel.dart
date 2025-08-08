@@ -328,11 +328,20 @@ class VoiceViewmodel extends ReactiveViewModel {
         isProcessing = false;
         final data = response as TranscribeResponse;
 
+        // Dismiss processing dialog first
+        Navigator.of(context).pop();
+        // Then navigate back with result
         Navigator.of(context).pop(true);
         // playText(data.transcription!);
       }
     } on FormatException catch (e) {
       print(e);
+      // Dismiss processing dialog on error
+      Navigator.of(context).pop();
+    } catch (e) {
+      print(e);
+      // Dismiss processing dialog on any other error
+      Navigator.of(context).pop();
     }
   }
 
