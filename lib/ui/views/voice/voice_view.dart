@@ -7,6 +7,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
 
 import '../../../shared/playback_confirmation_dialog.dart';
+import '../../../shared/processing_dialog.dart';
 
 // Voice Recording Screen (Updated)
 class VoiceView extends StatefulWidget {
@@ -149,6 +150,12 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                     audioFile: file,
                                     onConfirm: () async {
                                       Navigator.of(context).pop();
+                                      // Show processing dialog
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => const ProcessingDialog(),
+                                      );
                                       stopRecording(file);
                                     },
                                     onCancel: () {

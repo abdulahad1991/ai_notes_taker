@@ -55,25 +55,107 @@ class _PlaybackConfirmationDialogState extends State<PlaybackConfirmationDialog>
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Review your recording"),
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: Row(
         children: [
-          IconButton(
-            icon: Icon(isPlaying ? Icons.stop : Icons.play_arrow),
-            iconSize: 48,
-            onPressed: isPlaying ? _stop : _play,
+          Icon(
+            Icons.headphones,
+            color: Colors.blue.shade600,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            "Review your recording",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade800,
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: isPlaying ? Colors.red.shade500 : Colors.blue.shade500,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isPlaying ? Colors.red : Colors.blue).withOpacity(0.3),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      isPlaying ? Icons.stop : Icons.play_arrow,
+                      color: Colors.white,
+                    ),
+                    iconSize: 32,
+                    onPressed: isPlaying ? _stop : _play,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Listen to your recording to ensure it captured correctly before submitting.",
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade600,
+              height: 1.3,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: widget.onCancel,
-          child: Text("Cancel"),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          child: Text(
+            "Cancel",
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+          ),
         ),
         ElevatedButton(
           onPressed: widget.onConfirm,
-          child: Text("Submit"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue.shade600,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+          ),
+          child: Text(
+            "Submit",
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ],
     );
