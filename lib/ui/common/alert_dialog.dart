@@ -35,7 +35,7 @@ class AlertDialogApp extends StatelessWidget {
             verticalSpaceSmall,
             Text(
               message,
-              style: TextStyle(fontSize: 14, color: AppColors.white),
+              style: TextStyle(fontSize: 14, color: AppColors.primary),
               textAlign: TextAlign.center,
             ),
             verticalSpaceMedium,

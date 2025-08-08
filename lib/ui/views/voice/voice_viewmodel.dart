@@ -328,20 +328,20 @@ class VoiceViewmodel extends ReactiveViewModel {
         isProcessing = false;
         final data = response as TranscribeResponse;
 
-        // Dismiss processing dialog first
         Navigator.of(context).pop();
-        // Then navigate back with result
-        Navigator.of(context).pop(true);
-        // playText(data.transcription!);
+        if(data.success == false){
+          showErrorDialog("We could not process your voice, please try again", context);
+        }else {
+          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
+        }
       }
     } on FormatException catch (e) {
       print(e);
-      // Dismiss processing dialog on error
-      Navigator.of(context).pop();
+      showErrorDialog("We could not process your voice, please try again", context);
     } catch (e) {
       print(e);
-      // Dismiss processing dialog on any other error
-      Navigator.of(context).pop();
+      showErrorDialog("We could not process your voice, please try again", context);
     }
   }
 
