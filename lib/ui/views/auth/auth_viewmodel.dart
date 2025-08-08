@@ -57,16 +57,16 @@ class AuthViewModel extends ReactiveViewModel {
   }
 
   Future<void> submitForm(BuildContext context) async {
-    /*// if (!formKey.currentState!.validate()) return;
 
-    notifyListeners();
+    /*notifyListeners();
 
     await Future.delayed(const Duration(seconds: 2));
     isLoading = false;
     notifyListeners();*/
 
-    emailController.text = "a01@gmail.com";
-    passwordController.text = "123456";
+    if (!formKey.currentState!.validate()) return;
+    // emailController.text = "a01@gmail.com";
+    // passwordController.text = "123456";
     if (isLogin) {
       try {
         var response = await runBusyFuture(
