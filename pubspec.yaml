@@ -22,6 +22,7 @@ dependencies:
   firebase_messaging: ^15.2.8
   firebase_crashlytics: ^4.3.8
   flutter_local_notifications: ^19.3.0
+  timezone: ^0.10.1
   local_auth: ^2.3.0
   flutter_sound: ^9.28.0
   flutter_tts: ^4.2.3
