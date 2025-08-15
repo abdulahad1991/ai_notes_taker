@@ -1,12 +1,13 @@
 import 'package:ai_notes_taker/models/response/transcription_response.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart' hide NotificationSettings;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Priority;
 import 'package:stacked/stacked.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:alarm/alarm.dart';
 
 import '../../../app/app.locator.dart';
 import '../../../services/api_service.dart';
@@ -25,13 +26,85 @@ class VoiceNewViewmodel extends ReactiveViewModel {
   final authService = locator<AppAuthService>();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  void init() {
+  void init() async {
     tz.initializeTimeZones();
-    _initializeNotifications();
+    await _initializeNotifications();
+    await _initializeAlarm();
+    _setupAlarmListeners();
     fetchAll();
     FirebaseMessaging.instance.getToken().then((value) {
       callUpdateUserProfile(value!);
     });
+  }
+
+  Future<void> _initializeAlarm() async {
+    await Alarm.init();
+  }
+
+  void _setupAlarmListeners() {
+    Alarm.ringStream.stream.listen((alarmSettings) {
+      print('Alarm ringing for reminder: ${alarmSettings.notificationSettings?.title}');
+      _handleAlarmRinging(alarmSettings);
+    });
+  }
+
+  void _handleAlarmRinging(AlarmSettings alarmSettings) {
+    try {
+      final reminder = reminders.firstWhere(
+        (r) => int.parse(r.id.hashCode.toString().substring(0, 8)) == alarmSettings.id,
+      );
+      _showAlarmDialog(reminder);
+    } catch (e) {
+      print('Reminder not found for alarm ID: ${alarmSettings.id}');
+    }
+  }
+
+  void _showAlarmDialog(Reminder reminder) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text('Reminder: ${reminder.title}'),
+        content: Text(reminder.description),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Alarm.stop(int.parse(reminder.id.hashCode.toString().substring(0, 8)));
+              Navigator.of(context).pop();
+              _markReminderCompleted(reminder);
+            },
+            child: Text('Mark Complete'),
+          ),
+          TextButton(
+            onPressed: () {
+              Alarm.stop(int.parse(reminder.id.hashCode.toString().substring(0, 8)));
+              Navigator.of(context).pop();
+              _snoozeReminder(reminder);
+            },
+            child: Text('Snooze'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _markReminderCompleted(Reminder reminder) {
+    reminder.isCompleted = true;
+    notifyListeners();
+  }
+
+  void _snoozeReminder(Reminder reminder) {
+    final snoozeTime = DateTime.now().add(Duration(minutes: 10));
+    final snoozeReminder = Reminder(
+      id: '${reminder.id}_snooze',
+      title: reminder.title,
+      description: reminder.description,
+      time: "${snoozeTime.hour.toString().padLeft(2, '0')}:${snoozeTime.minute.toString().padLeft(2, '0')}",
+      date: snoozeTime.toIso8601String(),
+      isCompleted: false,
+      priority: reminder.priority,
+    );
+    scheduleAlarmForReminder(snoozeReminder);
   }
 
   Future<void> _initializeNotifications() async {
@@ -77,7 +150,7 @@ class VoiceNewViewmodel extends ReactiveViewModel {
               priority: Priority.medium,
             );
             reminders.add(reminder);
-            
+            scheduleAlarmForReminder(reminder);
             if (!reminder.isCompleted) {
               scheduleAlarmForReminder(reminder);
             }
@@ -132,37 +205,32 @@ class VoiceNewViewmodel extends ReactiveViewModel {
       final List<String> timeParts = reminder.time.split(':');
       final DateTime scheduledTime = DateTime(
         scheduleDate.year,
-        scheduleDate.month+1,
-        /*scheduleDate.day*/12,
-        /*int.parse(timeParts[0]*/12,
-        /*int.parse(timeParts[1])*/34,
+        scheduleDate.month,
+        scheduleDate.day,
+        int.parse(timeParts[0]),
+        int.parse(timeParts[1]),
       );
 
       if (scheduledTime.isBefore(DateTime.now())) return;
 
-      const AndroidNotificationDetails androidPlatformChannelSpecifics =
-          AndroidNotificationDetails(
-        'reminder_channel',
-        'Reminder Notifications',
-        channelDescription: 'Notifications for reminders',
-        importance: Importance.max,
-        showWhen: false,
-      );
-      const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-          DarwinNotificationDetails();
-      const NotificationDetails platformChannelSpecifics = NotificationDetails(
-        android: androidPlatformChannelSpecifics,
-        iOS: iOSPlatformChannelSpecifics,
+      final alarmSettings = AlarmSettings(
+        id: int.parse(reminder.id.hashCode.toString().substring(0, 8)),
+        dateTime: scheduledTime,
+        assetAudioPath: 'assets/alarm.mp3',
+        loopAudio: true,
+        vibrate: true,
+        volume: 0.8,
+        fadeDuration: 3.0,
+        notificationSettings: NotificationSettings(
+          title: reminder.title,
+          body: reminder.description,
+          stopButton: 'Stop',
+          icon: 'notification_icon',
+        ),
       );
 
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        int.parse(reminder.id.hashCode.toString().substring(0, 8)),
-        reminder.title,
-        reminder.description,
-        tz.TZDateTime.from(scheduledTime, tz.local),
-        platformChannelSpecifics,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      );
+      await Alarm.set(alarmSettings: alarmSettings);
+      print('Alarm scheduled for ${scheduledTime.toString()}');
     } catch (e) {
       print('Error scheduling alarm for reminder: $e');
     }
@@ -170,9 +238,8 @@ class VoiceNewViewmodel extends ReactiveViewModel {
 
   Future<void> cancelAlarmForReminder(String reminderId) async {
     try {
-      await flutterLocalNotificationsPlugin.cancel(
-        int.parse(reminderId.hashCode.toString().substring(0, 8)),
-      );
+      await Alarm.stop(int.parse(reminderId.hashCode.toString().substring(0, 8)));
+      print('Alarm canceled for reminder: $reminderId');
     } catch (e) {
       print('Error canceling alarm for reminder: $e');
     }
