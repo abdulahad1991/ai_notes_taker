@@ -7,6 +7,7 @@ import 'package:ai_notes_taker/app/app.locator.dart';
 import 'package:ai_notes_taker/app/app.router.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:alarm/alarm.dart';
 
 import 'firebase_options.dart';
 
@@ -34,6 +35,7 @@ Future<void> main() async {
 
   await setupLocator();
   await _initializeLocalNotifications();
+  await Alarm.init();
 
   _setupFirebaseMessaging();
 
