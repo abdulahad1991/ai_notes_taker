@@ -8,7 +8,7 @@ import '../../../app/app.locator.dart';
 import '../../../app/app.router.dart';
 import '../../../services/api_service.dart';
 import '../../../services/app_auth_service.dart';
-import '../../../services/location_service.dart';
+import '../../../services/timezone_region_service.dart';
 
 class AuthViewModel extends ReactiveViewModel {
   // Controllers
@@ -19,7 +19,7 @@ class AuthViewModel extends ReactiveViewModel {
 
   final api = locator<ApiService>();
   final authService = locator<AppAuthService>();
-  final locationService = LocationService.instance;
+  final timezoneRegionService = TimezoneRegionService.instance;
 
   // State
   bool isLogin = true;
@@ -32,20 +32,18 @@ class AuthViewModel extends ReactiveViewModel {
 
   void init() {
     initFirebase();
-    _getUserLocation();
+    _getUserRegion();
     if(authService.loginData!=null){
       NavigationService().navigateTo(Routes.voiceNewView);
     }
   }
 
-  Future<void> _getUserLocation() async {
+  void _getUserRegion() {
     try {
-      userRegionData = await locationService.getUserRegion();
-      if (userRegionData != null) {
-        print('User region data: $userRegionData');
-      }
+      userRegionData = timezoneRegionService.getDetailedRegionInfo();
+      print('User region data: $userRegionData');
     } catch (e) {
-      print('Error getting user location: $e');
+      print('Error getting user region: $e');
     }
   }
 
@@ -91,9 +89,6 @@ class AuthViewModel extends ReactiveViewModel {
               fcm_token: token,
               region: userRegionData?['region'],
               country: userRegionData?['country'],
-              city: userRegionData?['city'],
-              latitude: userRegionData?['latitude'],
-              longitude: userRegionData?['longitude'],
               timezone: userRegionData?['timezone']),
           throwException: true,
         );
