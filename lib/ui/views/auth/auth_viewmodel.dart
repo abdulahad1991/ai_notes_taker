@@ -87,8 +87,9 @@ class AuthViewModel extends ReactiveViewModel {
               email: emailController.text.toString(),
               password: passwordController.text.toString(),
               fcm_token: token,
-              region: userRegionData?['region'],
-              country: userRegionData?['country'],
+              // region: userRegionData?['region'],
+              // country: userRegionData?['country'],
+              offset: userRegionData?['offset'],
               timezone: userRegionData?['timezone']),
           throwException: true,
         );
@@ -116,7 +117,9 @@ class AuthViewModel extends ReactiveViewModel {
               first_name: nameController.text.toString().split(" ").first,
               last_name: nameController.text.toString().split(" ").last,
               email: emailController.text.toString(),
-              password: passwordController.text.toString()),
+              password: passwordController.text.toString(),
+              offset: userRegionData?['offset'],
+              timezone: userRegionData?['timezone']),
           throwException: true,
         );
         if (response != null) {
