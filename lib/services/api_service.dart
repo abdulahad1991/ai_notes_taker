@@ -31,6 +31,7 @@ class ApiService {
     required String fcm_token,
     String? region,
     String? country,
+    String? offset,
     String? timezone,
   }) async {
     try {
@@ -44,6 +45,7 @@ class ApiService {
       if (region != null) loginData["region"] = region;
       if (country != null) loginData["country"] = country;
       if (timezone != null) loginData["timezone"] = timezone;
+      if (offset != null) loginData["offset"] = offset;
 
       var response = await _apiClient?.postReq("user/login", data: loginData);
       return LoginResponse.fromJson(response.data);
@@ -57,6 +59,8 @@ class ApiService {
     required String last_name,
     required String email,
     required String password,
+    String? offset,
+    String? timezone,
   }) async {
     try {
       var response = await _apiClient?.postReq("user/signup", data: {
@@ -65,6 +69,8 @@ class ApiService {
         "email": email,
         "password": password,
         "dob": "1991-01-28",
+        "offset": offset,
+        "timezone": timezone,
       });
       return LoginResponse.fromJson(response.data);
     } catch (e) {
