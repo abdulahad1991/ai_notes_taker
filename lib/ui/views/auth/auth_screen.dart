@@ -80,23 +80,29 @@ class AuthScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Text(
-          'Voice Pad',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.2,
-            color: Colors.grey[800],
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'Voice Pad',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.2,
+              color: Colors.grey[800],
+            ),
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          'Sign in to continue',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[500],
-            fontWeight: FontWeight.w400,
-            letterSpacing: 0.1,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'Sign in to continue',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.1,
+            ),
           ),
         ),
       ],
@@ -180,7 +186,7 @@ class AuthScreen extends StatelessWidget {
       keyboardType: keyboardType,
       obscureText: isPassword && !isPasswordVisible,
       validator: validator,
-      style: const TextStyle(fontSize: 15),
+      style: const TextStyle(fontSize: 14),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w500),
@@ -240,9 +246,12 @@ class AuthScreen extends StatelessWidget {
             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
           ),
         )
-            : Text(
-          model.isLogin ? 'Sign In' : 'Create Account',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            : FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            model.isLogin ? 'Sign In' : 'Create Account',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
@@ -265,27 +274,33 @@ class AuthScreen extends StatelessWidget {
   }
 
   Widget _buildToggleButton(AuthViewModel model) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          model.isLogin
-              ? "Don't have an account? "
-              : "Already have an account? ",
-          style: TextStyle(color: Colors.grey[600], fontSize: 14),
-        ),
-        TextButton(
-          onPressed: model.toggleAuthMode,
-          child: Text(
-            model.isLogin ? 'Sign up' : 'Sign in',
-            style: const TextStyle(
-              color: Color(0xFF667eea),
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
+    return Flexible(
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        children: [
+          Text(
+            model.isLogin
+                ? "Don't have an account? "
+                : "Already have an account? ",
+            style: TextStyle(
+              color: Colors.grey[600], 
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          GestureDetector(
+            onTap: model.toggleAuthMode,
+            child: Text(
+              model.isLogin ? 'Sign up' : 'Sign in',
+              style: const TextStyle(
+                color: Color(0xFF667eea),
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

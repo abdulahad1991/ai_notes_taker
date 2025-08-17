@@ -107,6 +107,7 @@ class _MainScreenState extends State<VoiceNewView>
           return Scaffold(
             backgroundColor: const Color(0xFFF8F9FA),
             appBar: AppBar(
+              automaticallyImplyLeading: false,
               backgroundColor: const Color(0xFFF8F9FA),
               elevation: 0,
               title: Text(
@@ -429,7 +430,7 @@ class _MainScreenState extends State<VoiceNewView>
                         child: Text(
                           reminder.title,
                           style: TextStyle(
-                            fontSize: isSmallScreen ? 13 : (isMediumScreen ? 14 : 16),
+                            fontSize: isSmallScreen ? 11 : (isMediumScreen ? 14 : 16),
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[800],
                           ),
@@ -442,7 +443,7 @@ class _MainScreenState extends State<VoiceNewView>
                         child: Text(
                           reminder.description,
                           style: TextStyle(
-                            fontSize: isSmallScreen ? 13 : (isMediumScreen ? 14 : 16),
+                            fontSize: isSmallScreen ? 10 : (isMediumScreen ? 14 : 16),
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[800],
                           ),
