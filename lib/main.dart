@@ -8,6 +8,7 @@ import 'package:ai_notes_taker/app/app.router.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:alarm/alarm.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'firebase_options.dart';
 
@@ -75,6 +76,9 @@ class MainApp extends StatelessWidget {
       navigatorKey: StackedService.navigatorKey,
       navigatorObservers: [StackedService.routeObserver],
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: GoogleFonts.poppins().fontFamily,
+      ),
     );
   }
 }

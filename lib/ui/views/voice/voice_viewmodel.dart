@@ -332,7 +332,6 @@ class VoiceViewmodel extends ReactiveViewModel {
         if(data.success == false){
           showErrorDialog("We could not process your voice, please try again", context);
         }else {
-          Navigator.of(context).pop();
           Navigator.of(context).pop(true);
         }
       }
