@@ -29,13 +29,29 @@ class ApiService {
     required String email,
     required String password,
     required String fcm_token,
+    String? region,
+    String? country,
+    String? city,
+    double? latitude,
+    double? longitude,
+    String? timezone,
   }) async {
     try {
-      var response = await _apiClient?.postReq("user/login", data: {
+      Map<String, dynamic> loginData = {
         "email": email,
         "password": password,
         "fcm_token": fcm_token,
-      });
+      };
+
+      // Add region data if available
+      if (region != null) loginData["region"] = region;
+      if (country != null) loginData["country"] = country;
+      if (city != null) loginData["city"] = city;
+      if (latitude != null) loginData["latitude"] = latitude;
+      if (longitude != null) loginData["longitude"] = longitude;
+      if (timezone != null) loginData["timezone"] = timezone;
+
+      var response = await _apiClient?.postReq("user/login", data: loginData);
       return LoginResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
