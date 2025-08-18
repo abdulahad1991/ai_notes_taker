@@ -1,0 +1,70 @@
+{
+  "app": {
+    "title": "Voice Pad",
+    "subtitle": "Sign in to continue"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "createAccount": "Create Account",
+    "fullName": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "dontHaveAccount": "Don't have an account? ",
+    "alreadyHaveAccount": "Already have an account? ",
+    "or": "or",
+    "loginSuccessful": "Login successful!",
+    "accountCreated": "Account created successfully!",
+    "validation": {
+      "enterName": "Please enter your name",
+      "enterEmail": "Please enter your email",
+      "validEmail": "Please enter a valid email",
+      "enterPassword": "Please enter your password",
+      "passwordLength": "Password must be at least 6 characters",
+      "confirmPassword": "Please confirm your password",
+      "passwordsMatch": "Passwords do not match"
+    }
+  },
+  "voice": {
+    "title": "Voice Pad",
+    "tapToRecord": "Tap to record",
+    "listening": "Listening...",
+    "processing": "Processing...",
+    "recordingInProgress": "Recording in progress...",
+    "convertingSpeech": "Converting speech to text...",
+    "tapToStart": "Tap to start recording",
+    "tryExample": "Try saying: \"Remind me to buy groceries at 6 PM\"",
+    "notes": "Notes",
+    "reminder": "Reminder",
+    "textNote": "Text Note",
+    "noNotes": "No notes yet",
+    "noReminders": "No reminder notes yet",
+    "createFirstNote": "Tap the + button to create your first note",
+    "createFirstReminder": "Tap the + button to create your first reminder"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "error": "Error",
+    "success": "Success",
+    "loading": "Loading...",
+    "retry": "Retry"
+  },
+  "errors": {
+    "general": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "voiceProcessing": "We could not process your voice, please try again"
+  },
+  "language": {
+    "english": "English",
+    "german": "Deutsch",
+    "selectLanguage": "Select Language"
+  }
+}

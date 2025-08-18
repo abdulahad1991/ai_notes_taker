@@ -6,6 +6,7 @@ import 'package:stacked_services/stacked_services.dart';
 
 import '../../../app/app.locator.dart';
 import '../../../app/app.router.dart';
+import '../../../i18n/strings.g.dart';
 import '../../../services/api_service.dart';
 import '../../../services/app_auth_service.dart';
 import '../../../services/timezone_region_service.dart';
@@ -27,6 +28,7 @@ class AuthViewModel extends ReactiveViewModel {
   bool isConfirmPasswordVisible = false;
   String token = "";
   Map<String, dynamic>? userRegionData;
+  AppLocale currentLocale = AppLocale.en;
 
   final formKey = GlobalKey<FormState>();
 
@@ -69,6 +71,18 @@ class AuthViewModel extends ReactiveViewModel {
     notifyListeners();
   }
 
+  void toggleLanguage() {
+    currentLocale = currentLocale == AppLocale.en ? AppLocale.de : AppLocale.en;
+    LocaleSettings.setLocale(currentLocale);
+    notifyListeners();
+  }
+
+  void setLanguage(AppLocale locale) {
+    currentLocale = locale;
+    LocaleSettings.setLocale(locale);
+    notifyListeners();
+  }
+
   Future<void> submitForm(BuildContext context) async {
 
     /*notifyListeners();
@@ -99,8 +113,8 @@ class AuthViewModel extends ReactiveViewModel {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(isLogin
-                  ? 'Login successful!'
-                  : 'Account created successfully!'),
+                  ? t.auth.loginSuccessful
+                  : t.auth.accountCreated),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
             ),

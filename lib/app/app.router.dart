@@ -102,7 +102,7 @@ class StackedRouter extends _i1.RouterBase {
     },
     _i7.VoiceNewView: (data) {
       return _i8.MaterialPageRoute<dynamic>(
-        builder: (context) => _i7.VoiceNewView(),
+        builder: (context) => const _i7.VoiceNewView(),
         settings: data,
       );
     },
