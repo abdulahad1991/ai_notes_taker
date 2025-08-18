@@ -529,7 +529,7 @@ class _MainScreenState extends State<VoiceNewView>
                       ),
                     ),
                     // Scheduled time
-                    /*Container(
+                    Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: isSmallScreen ? 6 : 8,
                         vertical: isSmallScreen ? 2 : 3,
@@ -557,7 +557,7 @@ class _MainScreenState extends State<VoiceNewView>
                           ),
                         ],
                       ),
-                    ),*/
+                    ),
                   ],
                 ),
 
@@ -622,7 +622,7 @@ class _MainScreenState extends State<VoiceNewView>
       } else if (difference.inMinutes > -60) {
         return 'Late ${difference.inMinutes.abs()}m';
       } else {
-        return 'Overdue';
+        return '${_formatTime(scheduledTime)}';
       }
     } catch (e) {
       return scheduledTimeString;
