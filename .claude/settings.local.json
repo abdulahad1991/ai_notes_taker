@@ -5,7 +5,9 @@
       "Bash(flutter pub:*)",
       "WebSearch",
       "WebFetch(domain:pub.dev)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(flutter packages pub run:*)",
+      "Bash(flutter packages pub:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'auth_viewmodel.dart'; // your existing viewmodel
+import '../../../i18n/strings.g.dart';
+import 'auth_viewmodel.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -43,6 +44,8 @@ class AuthScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // _buildLanguageToggle(model),
+                      // const SizedBox(height: 16),
                       _buildHeader(),
                       const SizedBox(height: 32),
                       _buildFormFields(model),
@@ -58,6 +61,75 @@ class AuthScreen extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageToggle(AuthViewModel model) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildLanguageButton(
+                model,
+                AppLocale.en,
+                t.language.english,
+                Icons.language,
+              ),
+              _buildLanguageButton(
+                model,
+                AppLocale.de,
+                t.language.german,
+                Icons.language,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLanguageButton(
+    AuthViewModel model,
+    AppLocale locale,
+    String label,
+    IconData icon,
+  ) {
+    final isSelected = model.currentLocale == locale;
+    return GestureDetector(
+      onTap: () => model.setLanguage(locale),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF667eea) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? Colors.white : Colors.grey[600],
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white : Colors.grey[600],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -83,7 +155,7 @@ class AuthScreen extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
-            'Voice Pad',
+            t.app.title,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -96,7 +168,7 @@ class AuthScreen extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
-            'Sign in to continue',
+            t.app.subtitle,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],
@@ -115,10 +187,10 @@ class AuthScreen extends StatelessWidget {
         if (!model.isLogin) ...[
           _buildTextField(
             controller: model.nameController,
-            label: 'Full Name',
+            label: t.auth.fullName,
             icon: Icons.person_outline,
             validator: (value) {
-              if (value?.isEmpty ?? true) return 'Please enter your name';
+              if (value?.isEmpty ?? true) return t.auth.validation.enterName;
               return null;
             },
           ),
@@ -126,13 +198,13 @@ class AuthScreen extends StatelessWidget {
         ],
         _buildTextField(
           controller: model.emailController,
-          label: 'Email',
+          label: t.auth.email,
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           validator: (value) {
-            if (value?.isEmpty ?? true) return 'Please enter your email';
+            if (value?.isEmpty ?? true) return t.auth.validation.enterEmail;
             if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)) {
-              return 'Please enter a valid email';
+              return t.auth.validation.validEmail;
             }
             return null;
           },
@@ -140,14 +212,14 @@ class AuthScreen extends StatelessWidget {
         const SizedBox(height: 16),
         _buildTextField(
           controller: model.passwordController,
-          label: 'Password',
+          label: t.auth.password,
           icon: Icons.lock_outline,
           isPassword: true,
           isPasswordVisible: model.isPasswordVisible,
           onTogglePassword: model.togglePasswordVisibility,
           validator: (value) {
-            if (value?.isEmpty ?? true) return 'Please enter your password';
-            if (value!.length < 6) return 'Password must be at least 6 characters';
+            if (value?.isEmpty ?? true) return t.auth.validation.enterPassword;
+            if (value!.length < 6) return t.auth.validation.passwordLength;
             return null;
           },
         ),
@@ -155,14 +227,14 @@ class AuthScreen extends StatelessWidget {
           const SizedBox(height: 16),
           _buildTextField(
             controller: model.confirmPasswordController,
-            label: 'Confirm Password',
+            label: t.auth.confirmPassword,
             icon: Icons.lock_outline,
             isPassword: true,
             isPasswordVisible: model.isConfirmPasswordVisible,
             onTogglePassword: model.toggleConfirmPasswordVisibility,
             validator: (value) {
-              if (value?.isEmpty ?? true) return 'Please confirm your password';
-              if (value != model.passwordController.text) return 'Passwords do not match';
+              if (value?.isEmpty ?? true) return t.auth.validation.confirmPassword;
+              if (value != model.passwordController.text) return t.auth.validation.passwordsMatch;
               return null;
             },
           ),
@@ -249,7 +321,7 @@ class AuthScreen extends StatelessWidget {
             : FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
-            model.isLogin ? 'Sign In' : 'Create Account',
+            model.isLogin ? t.auth.signIn : t.auth.createAccount,
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
           ),
         ),
@@ -264,7 +336,7 @@ class AuthScreen extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'or',
+            t.auth.or,
             style: TextStyle(color: Colors.grey[500], fontSize: 13),
           ),
         ),
@@ -280,8 +352,8 @@ class AuthScreen extends StatelessWidget {
         children: [
           Text(
             model.isLogin
-                ? "Don't have an account? "
-                : "Already have an account? ",
+                ? t.auth.dontHaveAccount
+                : t.auth.alreadyHaveAccount,
             style: TextStyle(
               color: Colors.grey[600], 
               fontSize: 14,
@@ -291,7 +363,7 @@ class AuthScreen extends StatelessWidget {
           GestureDetector(
             onTap: model.toggleAuthMode,
             child: Text(
-              model.isLogin ? 'Sign up' : 'Sign in',
+              model.isLogin ? t.auth.signUp : t.auth.signIn,
               style: const TextStyle(
                 color: Color(0xFF667eea),
                 fontWeight: FontWeight.bold,
