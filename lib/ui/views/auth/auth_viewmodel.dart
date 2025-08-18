@@ -44,8 +44,37 @@ class AuthViewModel extends ReactiveViewModel {
     try {
       userRegionData = timezoneRegionService.getDetailedRegionInfo();
       print('User region data: $userRegionData');
+      
+      // Set language based on region
+      _setLanguageBasedOnRegion();
     } catch (e) {
       print('Error getting user region: $e');
+    }
+  }
+
+  void _setLanguageBasedOnRegion() {
+    if (userRegionData != null) {
+      final country = userRegionData!['country']?.toString().toLowerCase();
+      final countryCode = userRegionData!['countryCode']?.toString().toLowerCase();
+      final region = userRegionData!['region']?.toString().toLowerCase();
+      
+      print('Detected country: $country, country code: $countryCode, region: $region');
+      
+      // Set German if country/region indicates Germany
+      if (country?.contains('germany') == true || 
+          countryCode == 'de' ||
+          region?.contains('germany') == true ||
+          region?.contains('german') == true) {
+        currentLocale = AppLocale.de;
+        LocaleSettings.setLocale(AppLocale.de);
+        print('🇩🇪 Language set to German based on region detection');
+      } else {
+        currentLocale = AppLocale.en;
+        LocaleSettings.setLocale(AppLocale.en);
+        print('🇺🇸 Language set to English (default)');
+      }
+      
+      notifyListeners();
     }
   }
 
