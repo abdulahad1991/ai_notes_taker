@@ -132,7 +132,7 @@ class AuthViewModel extends ReactiveViewModel {
               fcm_token: token,
               // region: userRegionData?['region'],
               // country: userRegionData?['country'],
-              offset: userRegionData?['offset'],
+              offset: userRegionData?['offsetString'],
               timezone: userRegionData?['timezone']),
           throwException: true,
         );
@@ -161,7 +161,7 @@ class AuthViewModel extends ReactiveViewModel {
               last_name: nameController.text.toString().split(" ").last,
               email: emailController.text.toString(),
               password: passwordController.text.toString(),
-              offset: userRegionData?['offset'],
+              offset: userRegionData?['offsetString'],
               timezone: userRegionData?['timezone']),
           throwException: true,
         );
