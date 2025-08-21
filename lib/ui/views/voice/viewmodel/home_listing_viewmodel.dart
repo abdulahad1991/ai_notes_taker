@@ -1,17 +1,19 @@
 import 'package:ai_notes_taker/models/response/transcription_response.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart';
-import 'package:firebase_messaging/firebase_messaging.dart' hide NotificationSettings;
+import 'package:firebase_messaging/firebase_messaging.dart'
+    hide NotificationSettings;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Priority;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    hide Priority;
 import 'package:stacked/stacked.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:alarm/alarm.dart';
 
-import '../../../app/app.locator.dart';
-import '../../../services/api_service.dart';
-import '../../../services/app_auth_service.dart';
+import '../../../../app/app.locator.dart';
+import '../../../../services/api_service.dart';
+import '../../../../services/app_auth_service.dart';
 
 class HomeListingViewmodel extends ReactiveViewModel {
   BuildContext context;
@@ -19,12 +21,14 @@ class HomeListingViewmodel extends ReactiveViewModel {
   bool isFabOpen = false;
   List<Note> notes = [];
   List<Reminder> reminders = [];
+  int selectedTabIndex = 0;
 
   HomeListingViewmodel(this.context);
 
   final api = locator<ApiService>();
   final authService = locator<AppAuthService>();
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   void init() async {
     tz.initializeTimeZones();
@@ -43,7 +47,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
   void _setupAlarmListeners() {
     Alarm.ringStream.stream.listen((alarmSettings) {
-      print('Alarm ringing for reminder: ${alarmSettings.notificationSettings?.title}');
+      print(
+          'Alarm ringing for reminder: ${alarmSettings.notificationSettings?.title}');
       _handleAlarmRinging(alarmSettings);
     });
   }
@@ -51,7 +56,9 @@ class HomeListingViewmodel extends ReactiveViewModel {
   void _handleAlarmRinging(AlarmSettings alarmSettings) {
     try {
       final reminder = reminders.firstWhere(
-        (r) => int.parse(r.id.hashCode.toString().substring(0, 8)) == alarmSettings.id,
+        (r) =>
+            int.parse(r.id.hashCode.toString().substring(0, 8)) ==
+            alarmSettings.id,
       );
       _showAlarmDialog(reminder);
     } catch (e) {
@@ -69,7 +76,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
         actions: [
           TextButton(
             onPressed: () {
-              Alarm.stop(int.parse(reminder.id.hashCode.toString().substring(0, 8)));
+              Alarm.stop(
+                  int.parse(reminder.id.hashCode.toString().substring(0, 8)));
               Navigator.of(context).pop();
               _markReminderCompleted(reminder);
             },
@@ -77,7 +85,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
           ),
           TextButton(
             onPressed: () {
-              Alarm.stop(int.parse(reminder.id.hashCode.toString().substring(0, 8)));
+              Alarm.stop(
+                  int.parse(reminder.id.hashCode.toString().substring(0, 8)));
               Navigator.of(context).pop();
               _snoozeReminder(reminder);
             },
@@ -99,7 +108,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
       id: '${reminder.id}_snooze',
       title: reminder.title,
       description: reminder.description,
-      time: "${snoozeTime.hour.toString().padLeft(2, '0')}:${snoozeTime.minute.toString().padLeft(2, '0')}",
+      time:
+          "${snoozeTime.hour.toString().padLeft(2, '0')}:${snoozeTime.minute.toString().padLeft(2, '0')}",
       date: snoozeTime.toIso8601String(),
       isCompleted: false,
       priority: reminder.priority,
@@ -137,7 +147,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
         final data = response as TranscriptionResponse;
         notes.clear();
         reminders.clear();
-        
+
         for (var item in data.data!) {
           if (item.isReminder == true) {
             final reminder = Reminder(
@@ -156,12 +166,11 @@ class HomeListingViewmodel extends ReactiveViewModel {
             }
           } else {
             notes.add(Note(
-              id: item.iId!.oid.toString(),
-              title: item.transcription ?? "N/A",
-              content: item.transcription ?? "N/A",
-              createdAt: item.createdAt?.date??"",
-              isReminder: false
-            ));
+                id: item.iId!.oid.toString(),
+                title: item.transcription ?? "N/A",
+                content: item.transcription ?? "N/A",
+                createdAt: item.createdAt?.date ?? "",
+                isReminder: false));
           }
         }
 
@@ -187,7 +196,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final itemDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
-    
+
     if (itemDate == today) {
       return "Today";
     } else if (itemDate == today.add(Duration(days: 1))) {
@@ -199,7 +208,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
   Future<void> scheduleAlarmForReminder(Reminder reminder) async {
     if (reminder.date.isEmpty || reminder.time.isEmpty) return;
-    
+
     try {
       final DateTime scheduleDate = DateTime.parse(reminder.date);
       final List<String> timeParts = reminder.time.split(':');
@@ -238,7 +247,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
   Future<void> cancelAlarmForReminder(String reminderId) async {
     try {
-      await Alarm.stop(int.parse(reminderId.hashCode.toString().substring(0, 8)));
+      await Alarm.stop(
+          int.parse(reminderId.hashCode.toString().substring(0, 8)));
       print('Alarm canceled for reminder: $reminderId');
     } catch (e) {
       print('Error canceling alarm for reminder: $e');
@@ -250,12 +260,12 @@ class HomeListingViewmodel extends ReactiveViewModel {
     await scheduleAlarmForReminder(reminder);
   }
 
-
   void textClick() {
     toggleFab();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => VoiceView(isReminder: false)),
+      MaterialPageRoute(
+          builder: (context) => VoiceView(isReminder: selectedTabIndex == 1)),
     ).then((result) {
       if (result == true) {
         // Refresh data when returning from voice recording
@@ -266,12 +276,12 @@ class HomeListingViewmodel extends ReactiveViewModel {
     });
   }
 
-
   void voiceClick() {
     toggleFab();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => VoiceView(isReminder: false)),
+      MaterialPageRoute(
+          builder: (context) => VoiceView(isReminder: selectedTabIndex == 1)),
     ).then((result) {
       if (result == true) {
         // Refresh data when returning from voice recording
@@ -322,8 +332,20 @@ class HomeListingViewmodel extends ReactiveViewModel {
       fabController.reverse();
     }*/
   }
-}
 
+  void setSelectedTabIndex(int index) {
+    selectedTabIndex = index;
+    notifyListeners();
+  }
+
+  List<dynamic> getFilteredItems() {
+    if (selectedTabIndex == 0) {
+      return notes;
+    } else {
+      return reminders;
+    }
+  }
+}
 
 class Note {
   final String id;

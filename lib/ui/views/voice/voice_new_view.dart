@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
 
-import 'home_listing_viewmodel.dart';
+import 'viewmodel/home_listing_viewmodel.dart';
 
 class VoiceNewView extends StatefulWidget {
   const VoiceNewView({super.key});
@@ -20,7 +20,6 @@ class _MainScreenState extends State<VoiceNewView>
 
   // Tab controller
   late TabController _tabController;
-  int _selectedTabIndex = 0;
 
   @override
   void initState() {
@@ -35,11 +34,6 @@ class _MainScreenState extends State<VoiceNewView>
     );
 
     _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      setState(() {
-        _selectedTabIndex = _tabController.index;
-      });
-    });
   }
 
   @override
@@ -95,8 +89,13 @@ class _MainScreenState extends State<VoiceNewView>
         viewModelBuilder: () => HomeListingViewmodel(context)..init(),
         builder: (context, model, child) {
           // Filter items based on selected tab
-          List<dynamic> filteredItems = _getFilteredItems(model);
+          List<dynamic> filteredItems = model.getFilteredItems();
           bool isEmpty = filteredItems.isEmpty;
+
+          // Sync tab controller with viewmodel
+          if (_tabController.index != model.selectedTabIndex) {
+            _tabController.animateTo(model.selectedTabIndex);
+          }
 
           if (model.isFabOpen) {
             _fabController.forward();
@@ -111,7 +110,7 @@ class _MainScreenState extends State<VoiceNewView>
               backgroundColor: const Color(0xFFF8F9FA),
               elevation: 0,
               title: Text(
-                context.t.app.title,
+                "Voice Pad",
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w600,
@@ -136,6 +135,7 @@ class _MainScreenState extends State<VoiceNewView>
                     ),
                     child: TabBar(
                       controller: _tabController,
+                      onTap: (index) => model.setSelectedTabIndex(index),
                       indicator: BoxDecoration(
                         color: const Color(0xFF667eea),
                         borderRadius: BorderRadius.circular(22),
@@ -164,7 +164,7 @@ class _MainScreenState extends State<VoiceNewView>
             body: Container(
               color: const Color(0xFFF8F9FA),
               child: isEmpty
-                  ? _buildEmptyState(screenWidth)
+                  ? _buildEmptyState(screenWidth, model)
                   : _buildNotesGrid(filteredItems, columnCount, responsivePadding, gridSpacing),
             ),
             floatingActionButton: _buildSpeedDial(model),
@@ -172,19 +172,12 @@ class _MainScreenState extends State<VoiceNewView>
         });
   }
 
-  List<dynamic> _getFilteredItems(HomeListingViewmodel model) {
-    if (_selectedTabIndex == 0) {
-      return model.notes;
-    } else {
-      return model.reminders;
-    }
-  }
 
-  Widget _buildEmptyState(double screenWidth) {
-    String emptyMessage = _selectedTabIndex == 0
+  Widget _buildEmptyState(double screenWidth, HomeListingViewmodel model) {
+    String emptyMessage = model.selectedTabIndex == 0
         ? 'No notes yet'
         : 'No reminder notes yet';
-    String emptySubMessage = _selectedTabIndex == 0
+    String emptySubMessage = model.selectedTabIndex == 0
         ? 'Tap the + button to create your first note'
         : 'Tap the + button to create your first reminder';
 
@@ -207,7 +200,7 @@ class _MainScreenState extends State<VoiceNewView>
                 borderRadius: BorderRadius.circular(iconSize / 2),
               ),
               child: Icon(
-                _selectedTabIndex == 0 ? Icons.lightbulb_outline : Icons.notifications_outlined,
+                model.selectedTabIndex == 0 ? Icons.lightbulb_outline : Icons.notifications_outlined,
                 size: iconSize * 0.5,
                 color: const Color(0xFF667eea),
               ),
