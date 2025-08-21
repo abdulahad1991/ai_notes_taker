@@ -1,10 +1,9 @@
-import 'package:ai_notes_taker/shared/app_colors.dart';
-import 'package:ai_notes_taker/ui/views/voice/voice_new_viewmodel.dart';
-import 'package:ai_notes_taker/ui/views/voice/voice_view.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
+
+import 'home_listing_viewmodel.dart';
 
 class VoiceNewView extends StatefulWidget {
   const VoiceNewView({super.key});
@@ -91,8 +90,8 @@ class _MainScreenState extends State<VoiceNewView>
     final responsivePadding = _getResponsivePadding(screenWidth);
     final gridSpacing = _getGridSpacing(screenWidth);
 
-    return ViewModelBuilder<VoiceNewViewmodel>.reactive(
-        viewModelBuilder: () => VoiceNewViewmodel(context)..init(),
+    return ViewModelBuilder<HomeListingViewmodel>.reactive(
+        viewModelBuilder: () => HomeListingViewmodel(context)..init(),
         builder: (context, model, child) {
           // Filter items based on selected tab
           List<dynamic> filteredItems = _getFilteredItems(model);
@@ -172,7 +171,7 @@ class _MainScreenState extends State<VoiceNewView>
         });
   }
 
-  List<dynamic> _getFilteredItems(VoiceNewViewmodel model) {
+  List<dynamic> _getFilteredItems(HomeListingViewmodel model) {
     if (_selectedTabIndex == 0) {
       return model.notes;
     } else {
@@ -332,7 +331,7 @@ class _MainScreenState extends State<VoiceNewView>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        InkWell(
+                        /*InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => _editNote(note),
                           child: Container(
@@ -343,7 +342,7 @@ class _MainScreenState extends State<VoiceNewView>
                               color: Colors.grey[600],
                             ),
                           ),
-                        ),
+                        ),*/
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => _showDeleteConfirmation(note),
@@ -456,7 +455,7 @@ class _MainScreenState extends State<VoiceNewView>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        InkWell(
+                        /*InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => _editReminder(reminder),
                           child: Container(
@@ -467,7 +466,7 @@ class _MainScreenState extends State<VoiceNewView>
                               color: Colors.grey[600],
                             ),
                           ),
-                        ),
+                        ),*/
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => _showDeleteConfirmation(reminder),
@@ -707,7 +706,7 @@ class _MainScreenState extends State<VoiceNewView>
     // Implement reminder deletion logic
   }
 
-  Widget _buildSpeedDial(VoiceNewViewmodel model) {
+  Widget _buildSpeedDial(HomeListingViewmodel model) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isCompact = screenWidth < 600;
 

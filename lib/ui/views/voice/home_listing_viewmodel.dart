@@ -13,14 +13,14 @@ import '../../../app/app.locator.dart';
 import '../../../services/api_service.dart';
 import '../../../services/app_auth_service.dart';
 
-class VoiceNewViewmodel extends ReactiveViewModel {
+class HomeListingViewmodel extends ReactiveViewModel {
   BuildContext context;
 
   bool isFabOpen = false;
   List<Note> notes = [];
   List<Reminder> reminders = [];
 
-  VoiceNewViewmodel(this.context);
+  HomeListingViewmodel(this.context);
 
   final api = locator<ApiService>();
   final authService = locator<AppAuthService>();

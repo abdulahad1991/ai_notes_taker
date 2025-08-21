@@ -315,45 +315,52 @@ class VoiceViewmodel extends ReactiveViewModel {
 
   Future<void> sendVoiceAndProcessResponse({required File file}) async {
     try {
-      var response = await runBusyFuture(
-        api.transcribe(
-            file: file,
-            is_reminder: isReminder == true ? 1 : 0,
-            user_current_datetime: DateTime.now().toUtc().toIso8601String(),
-            offset: getTimezoneOffsetFormatted()),
-        busyObject: "transcribe",
-        throwException: true,
-      );
+      dynamic response;
+      if (isReminder) {
+        response = await runBusyFuture(
+          api.reminderVoice(
+              file: file,
+              is_reminder: isReminder == true ? 1 : 0,
+              user_current_datetime: DateTime.now().toUtc().toIso8601String(),
+              offset: getTimezoneOffsetFormatted()),
+          busyObject: "transcribe",
+          throwException: true,
+        );
+      } else {
+        response = await runBusyFuture(
+          api.noteVoice(
+              file: file,
+              is_reminder: isReminder == true ? 1 : 0,
+              user_current_datetime: DateTime.now().toUtc().toIso8601String(),
+              offset: getTimezoneOffsetFormatted()),
+          busyObject: "transcribe",
+          throwException: true,
+        );
+      }
       if (response != null) {
         isProcessing = false;
         final data = response as TranscribeResponse;
 
         Navigator.of(context).pop();
-        if(data.success == false){
-          showErrorDialog("We could not process your voice, please try again", context);
-        }else {
+        if (data.success == false) {
+          showErrorDialog(
+              "We could not process your voice, please try again", context);
+        } else {
           Navigator.of(context).pop(true);
         }
       }
     } on FormatException catch (e) {
       print(e);
-      showErrorDialog("We could not process your voice, please try again", context);
+      showErrorDialog(
+          "We could not process your voice, please try again", context);
     } catch (e) {
       print(e);
-      showErrorDialog("We could not process your voice, please try again", context);
+      showErrorDialog(
+          "We could not process your voice, please try again", context);
     }
   }
 
   Future<void> playText(String message) async {
-    /*String lang = "ur";
-    String text = "";
-    if (LocaleSettings.currentLocale == AppLocale.ur) {
-      lang = "ur";
-      text = message.ur!;
-    } else {
-      lang = "en";
-      text = message.en!;
-    }*/
     showServerResponsePopup(message, "en");
     await flutterTts.setLanguage("en");
     await flutterTts.setPitch(1.0);
@@ -382,7 +389,8 @@ class VoiceViewmodel extends ReactiveViewModel {
           TextButton(
             onPressed: () {
               flutterTts.stop();
-              Navigator.of(context).pop(); // Close dialog// Navigate back with refresh signal
+              Navigator.of(context)
+                  .pop(); // Close dialog// Navigate back with refresh signal
             },
             child: Text(lang == "ur" ? "بند کریں" : "Close"),
           ),

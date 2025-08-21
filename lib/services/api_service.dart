@@ -135,4 +135,89 @@ class ApiService {
       rethrow;
     }
   }
+
+  Future<dynamic> reminderVoice({
+    required File file,
+    required int is_reminder,
+    required String user_current_datetime,
+    required String offset,
+  }) async {
+    try {
+      String? fileExt = file?.path.split('.').last.toLowerCase();
+      String mimeType =
+      fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
+      MultipartFile? multipartFile;
+      if (file != null) {
+        multipartFile = await MultipartFile.fromFile(
+          "${file?.path.toString()}",
+          contentType: MediaType.parse(mimeType),
+          filename: file?.path.split('/').last,
+        );
+      }
+
+      Map<String, dynamic> dataMap = {
+        "file": multipartFile,
+        // "is_reminder": 1,
+        "user_current_datetime": user_current_datetime,
+        // "offset": offset,
+      };
+
+      FormData formData = FormData.fromMap(dataMap);
+
+      var response = await _apiClient?.postReq("reminder/voice", data: formData);
+      return TranscribeResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> noteVoice({
+    required File file,
+    required int is_reminder,
+    required String user_current_datetime,
+    required String offset,
+  }) async {
+    try {
+      String? fileExt = file?.path.split('.').last.toLowerCase();
+      String mimeType =
+      fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
+      MultipartFile? multipartFile;
+      if (file != null) {
+        multipartFile = await MultipartFile.fromFile(
+          "${file?.path.toString()}",
+          contentType: MediaType.parse(mimeType),
+          filename: file?.path.split('/').last,
+        );
+      }
+
+      Map<String, dynamic> dataMap = {
+        "file": multipartFile,
+        // "is_reminder": 1,
+        "user_current_datetime": user_current_datetime,
+        // "offset": offset,
+      };
+
+      FormData formData = FormData.fromMap(dataMap);
+
+      var response = await _apiClient?.postReq("note/voice", data: formData);
+      return TranscribeResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  Future<dynamic> deleteTranscriptions({
+    required String transcription_id,
+  }) async {
+    try {
+      var response = await _apiClient?.deleteReq("transcriptions", data: {
+        "transcription_id": transcription_id,
+      });
+      return LoginResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }
