@@ -1,13 +1,12 @@
 import 'dart:io';
-import 'package:ai_notes_taker/ui/views/voice/voice_new_viewmodel.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
 
 import '../../../shared/playback_confirmation_dialog.dart';
 import '../../../shared/processing_dialog.dart';
+import 'home_listing_viewmodel.dart';
 
 // Voice Recording Screen (Updated)
 class VoiceView extends StatefulWidget {
