@@ -1,4 +1,5 @@
 
+import 'package:ai_notes_taker/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
@@ -110,7 +111,7 @@ class _MainScreenState extends State<VoiceNewView>
               backgroundColor: const Color(0xFFF8F9FA),
               elevation: 0,
               title: Text(
-                'Voice Pad',
+                context.t.app.title,
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w600,
@@ -305,7 +306,7 @@ class _MainScreenState extends State<VoiceNewView>
                         child: Text(
                           note.title,
                           style: TextStyle(
-                            fontSize: isSmallScreen ? 13 : (isMediumScreen ? 14 : 16),
+                            fontSize: isSmallScreen ? 11 : (isMediumScreen ? 14 : 16),
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[800],
                           ),
@@ -331,7 +332,7 @@ class _MainScreenState extends State<VoiceNewView>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        /*InkWell(
+                        InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => _editNote(note),
                           child: Container(
@@ -342,7 +343,7 @@ class _MainScreenState extends State<VoiceNewView>
                               color: Colors.grey[600],
                             ),
                           ),
-                        ),*/
+                        ),
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => _showDeleteConfirmation(note),
@@ -561,7 +562,7 @@ class _MainScreenState extends State<VoiceNewView>
                 ),
 
                 // Description
-                if (reminder.title.isNotEmpty && reminder.description.isNotEmpty) ...[
+                /*if (reminder.title.isNotEmpty && reminder.description.isNotEmpty) ...[
                   SizedBox(height: isSmallScreen ? 6 : 10),
                   Text(
                     reminder.description,
@@ -573,7 +574,7 @@ class _MainScreenState extends State<VoiceNewView>
                     maxLines: isSmallScreen ? 3 : 4,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ],
+                ],*/
               ],
             ),
           ),
@@ -637,7 +638,7 @@ class _MainScreenState extends State<VoiceNewView>
 
   // Action methods
   void _editNote(Note note) {
-    // Navigate to edit note screen
+
   }
 
   void _editReminder(Reminder reminder) {
@@ -734,11 +735,10 @@ class _MainScreenState extends State<VoiceNewView>
                   ],
                 ),
                 child: FloatingActionButton(
-                  heroTag: 'reminder',
                   mini: isCompact,
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  onPressed: model.addReminder,
+                  onPressed: model.voiceClick,
                   child: Icon(
                     Icons.mic,
                     color: Colors.white,
@@ -773,7 +773,7 @@ class _MainScreenState extends State<VoiceNewView>
                   ],
                 ),
                 child: Text(
-                  'Reminder',
+                  'Voice',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: isCompact ? 10 : 12,
@@ -804,13 +804,12 @@ class _MainScreenState extends State<VoiceNewView>
                   ],
                 ),
                 child: FloatingActionButton(
-                  heroTag: 'note',
                   mini: isCompact,
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  onPressed: model.addNote,
+                  onPressed: model.textClick,
                   child: Icon(
-                    Icons.edit,
+                    Icons.text_fields,
                     color: Colors.white,
                     size: isCompact ? 20 : 24,
                   ),
@@ -819,7 +818,6 @@ class _MainScreenState extends State<VoiceNewView>
             ),
           ),
 
-        // Text Note Label
         if (model.isFabOpen)
           Positioned(
             right: isCompact ? 45 : 50,
@@ -843,7 +841,7 @@ class _MainScreenState extends State<VoiceNewView>
                   ],
                 ),
                 child: Text(
-                  'Text Note',
+                  'Text',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: isCompact ? 10 : 12,

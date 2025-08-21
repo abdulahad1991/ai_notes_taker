@@ -250,6 +250,38 @@ class HomeListingViewmodel extends ReactiveViewModel {
     await scheduleAlarmForReminder(reminder);
   }
 
+
+  void textClick() {
+    toggleFab();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => VoiceView(isReminder: false)),
+    ).then((result) {
+      if (result == true) {
+        // Refresh data when returning from voice recording
+        fetchAll();
+      } else if (result != null) {
+        notes.add(result);
+      }
+    });
+  }
+
+
+  void voiceClick() {
+    toggleFab();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => VoiceView(isReminder: false)),
+    ).then((result) {
+      if (result == true) {
+        // Refresh data when returning from voice recording
+        fetchAll();
+      } else if (result != null) {
+        notes.add(result);
+      }
+    });
+  }
+
   void addNote() {
     toggleFab();
     Navigator.push(
