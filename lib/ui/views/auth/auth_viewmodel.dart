@@ -121,8 +121,8 @@ class AuthViewModel extends ReactiveViewModel {
     notifyListeners();*/
 
     // if (!formKey.currentState!.validate()) return;
-    emailController.text = "saad@gmail.com";
-    passwordController.text = "saad123";
+    // emailController.text = "saad@gmail.com";
+    // passwordController.text = "saad123";
     if (isLogin) {
       try {
         var response = await runBusyFuture(
