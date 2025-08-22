@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:ai_notes_taker/models/response/login_response.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
+import '../models/response/create_note_text_response.dart';
+import '../models/response/notes_response.dart';
 import '../models/response/transcribe_response.dart';
 import '../models/response/transcription_response.dart';
 import 'api_client.dart';
@@ -123,6 +125,26 @@ class ApiService {
     }
   }
 
+  Future<dynamic> getReminders() async {
+    try {
+      var response =
+      await _apiClient?.getReq("reminders?skip=0&limit=10");
+      return TranscriptionResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> getNotes() async {
+    try {
+      var response =
+      await _apiClient?.getReq("notes?skip=0&limit=10");
+      return NotesResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<dynamic> updateUser({
     required String fcm_token,
   }) async {
@@ -223,13 +245,32 @@ class ApiService {
 
 
   Future<dynamic> createNoteText({
-    required String transcription_id,
+    required String title,
+    required String text,
   }) async {
     try {
-      var response = await _apiClient?.deleteReq("note/text", data: {
-        "transcription_id": transcription_id,
+      var response = await _apiClient?.postReq("note/text", data: {
+        "title": title,
+        "text": text,
       });
-      return LoginResponse.fromJson(response.data);
+      return CreateNoteTextResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  Future<dynamic> createReminderText({
+    required String title,
+    required String reminder_time,
+  }) async {
+    try {
+      var response = await _apiClient?.postReq("reminder/text", data: {
+        "title": title,
+        "reminder_time": reminder_time,
+        "user_current_datetime": DateTime.now().toUtc().toIso8601String(),
+      });
+      return CreateNoteTextResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

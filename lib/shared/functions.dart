@@ -7,3 +7,8 @@ String getTimezoneOffsetFormatted() {
   return '$sign$hours:$minutes';
 }
 
+DateTime parseUtc(String s) {
+  final hasTz = RegExp(r'(Z|[+\-]\d{2}:\d{2})$').hasMatch(s);
+  final normalized = hasTz ? s : '${s}Z'; // treat as UTC if no TZ suffix
+  return DateTime.parse(normalized);      // returns a UTC DateTime
+}

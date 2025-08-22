@@ -17,7 +17,7 @@ class ApiClient {
     customHeaders['Content-Type'] = 'application/json';
     customHeaders['Accept'] = 'application/json';
     _dio!
-      ..options.baseUrl = "http://voice-pad-backend-fastapi.vercel.app/"
+      ..options.baseUrl = "https://voice-pad-backend-fastapi.vercel.app/"
       // ..options.connectTimeout = _defaultConnectTimeout
       // ..options.receiveTimeout = _defaultReceiveTimeout
       ..httpClientAdapter

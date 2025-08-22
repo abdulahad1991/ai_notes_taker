@@ -1,9 +1,9 @@
-class TranscriptionResponse {
+class NotesResponse {
   List<Data>? data;
 
-  TranscriptionResponse({this.data});
+  NotesResponse({this.data});
 
-  TranscriptionResponse.fromJson(json) {
+  NotesResponse.fromJson(json) {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
@@ -24,36 +24,42 @@ class TranscriptionResponse {
 class Data {
   String? sId;
   String? user;
-  String? runTime;
+  String? filename;
   String? title;
   String? text;
-  String? userCurrentDatetime;
-  bool? isVoice;
-  bool? isDelivered;
+  int? fileSize;
+  int? isVoice;
+  bool? isActive;
+  bool? isComplete;
+  bool? isDeleted;
   String? createdAt;
   String? updatedAt;
 
   Data(
       {this.sId,
         this.user,
-        this.runTime,
+        this.filename,
         this.title,
         this.text,
-        this.userCurrentDatetime,
+        this.fileSize,
         this.isVoice,
-        this.isDelivered,
+        this.isActive,
+        this.isComplete,
+        this.isDeleted,
         this.createdAt,
         this.updatedAt});
 
   Data.fromJson(json) {
     sId = json['_id'];
     user = json['user'];
-    runTime = json['run_time'];
+    filename = json['filename'];
     title = json['title'];
     text = json['text'];
-    userCurrentDatetime = json['user_current_datetime'];
+    fileSize = json['file_size'];
     isVoice = json['is_voice'];
-    isDelivered = json['is_delivered'];
+    isActive = json['is_active'];
+    isComplete = json['is_complete'];
+    isDeleted = json['is_deleted'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
@@ -62,12 +68,14 @@ class Data {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['_id'] = this.sId;
     data['user'] = this.user;
-    data['run_time'] = this.runTime;
+    data['filename'] = this.filename;
     data['title'] = this.title;
     data['text'] = this.text;
-    data['user_current_datetime'] = this.userCurrentDatetime;
+    data['file_size'] = this.fileSize;
     data['is_voice'] = this.isVoice;
-    data['is_delivered'] = this.isDelivered;
+    data['is_active'] = this.isActive;
+    data['is_complete'] = this.isComplete;
+    data['is_deleted'] = this.isDeleted;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
