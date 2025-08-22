@@ -1,9 +1,9 @@
+import 'package:ai_notes_taker/models/response/notes_response.dart';
 import 'package:ai_notes_taker/models/response/transcription_response.dart';
 import 'package:ai_notes_taker/ui/views/voice/text_input_view.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart';
 import 'package:firebase_messaging/firebase_messaging.dart'
     hide NotificationSettings;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Priority;
@@ -15,6 +15,7 @@ import 'package:alarm/alarm.dart';
 import '../../../../app/app.locator.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/app_auth_service.dart';
+import '../../../../shared/functions.dart';
 
 class HomeListingViewmodel extends ReactiveViewModel {
   BuildContext context;
@@ -36,7 +37,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
     await _initializeNotifications();
     await _initializeAlarm();
     _setupAlarmListeners();
-    fetchAll();
+    fetchReminders();
+    fetchNotes();
     FirebaseMessaging.instance.getToken().then((value) {
       callUpdateUserProfile(value!);
     });
@@ -114,6 +116,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
       date: snoozeTime.toIso8601String(),
       isCompleted: false,
       priority: reminder.priority,
+      runtime: reminder.runtime,
     );
     scheduleAlarmForReminder(snoozeReminder);
   }
@@ -138,41 +141,57 @@ class HomeListingViewmodel extends ReactiveViewModel {
     );
   }
 
-  Future<void> fetchAll() async {
+  Future<void> fetchReminders() async {
     try {
       var response = await runBusyFuture(
-        api.getAll(),
+        api.getReminders(),
         throwException: true,
       );
       if (response != null) {
         final data = response as TranscriptionResponse;
-        notes.clear();
         reminders.clear();
 
         for (var item in data.data!) {
-          if (item.isReminder == true) {
-            final reminder = Reminder(
-              id: item.iId!.oid.toString(),
-              title: item.reminder?.title ?? "N/A",
-              description: item.reminder?.message ?? "N/A",
-              time: _formatTime(item.reminder?.date?.date.toString()),
-              date: item.reminder!.date!.date.toString(),
-              isCompleted: item.reminder?.isDelivered ?? false,
-              priority: Priority.medium,
-            );
-            reminders.add(reminder);
+          final reminder = Reminder(
+            id: item.sId!.toString(),
+            title: item.title ?? "N/A",
+            description: item.text ?? "N/A",
+            time: _formatTime(item.userCurrentDatetime),
+            date: _formatTime(item.userCurrentDatetime),
+            isCompleted: item.isDelivered ?? false,
+            priority: Priority.medium,
+            runtime: item.runTime.toString(),
+          );
+          reminders.add(reminder);
+          if (!reminder.isCompleted) {
             scheduleAlarmForReminder(reminder);
-            if (!reminder.isCompleted) {
-              scheduleAlarmForReminder(reminder);
-            }
-          } else {
-            notes.add(Note(
-                id: item.iId!.oid.toString(),
-                title: item.transcription ?? "N/A",
-                content: item.transcription ?? "N/A",
-                createdAt: item.createdAt?.date ?? "",
-                isReminder: false));
           }
+        }
+
+        notifyListeners();
+      }
+    } on FormatException catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> fetchNotes() async {
+    try {
+      var response = await runBusyFuture(
+        api.getNotes(),
+        throwException: true,
+      );
+      if (response != null) {
+        final data = response as NotesResponse;
+        notes.clear();
+
+        for (var item in data.data!) {
+          notes.add(Note(
+              id: item.sId.toString(),
+              title: item.title ?? "N/A",
+              content: item.text ?? "N/A",
+              createdAt: item.createdAt ?? "",
+              isReminder: false));
         }
 
         notifyListeners();
@@ -192,31 +211,16 @@ class HomeListingViewmodel extends ReactiveViewModel {
     }
   }
 
-  String _formatDate(DateTime? dateTime) {
-    if (dateTime == null) return "N/A";
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final itemDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
-
-    if (itemDate == today) {
-      return "Today";
-    } else if (itemDate == today.add(Duration(days: 1))) {
-      return "Tomorrow";
-    } else {
-      return "${dateTime.day}/${dateTime.month}/${dateTime.year}";
-    }
-  }
-
   Future<void> scheduleAlarmForReminder(Reminder reminder) async {
-    if (reminder.date.isEmpty || reminder.time.isEmpty) return;
+    if (reminder.runtime.isEmpty) return;
 
     try {
-      final DateTime scheduleDate = DateTime.parse(reminder.date);
+      final DateTime scheduledLocalTime = parseUtc(reminder.runtime).toLocal();
       final List<String> timeParts = reminder.time.split(':');
       final DateTime scheduledTime = DateTime(
-        scheduleDate.year,
-        scheduleDate.month,
-        scheduleDate.day,
+        scheduledLocalTime.year,
+        scheduledLocalTime.month,
+        scheduledLocalTime.day,
         int.parse(timeParts[0]),
         int.parse(timeParts[1]),
       );
@@ -266,13 +270,13 @@ class HomeListingViewmodel extends ReactiveViewModel {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => TextInputView(isReminder: selectedTabIndex == 1)),
+          builder: (context) =>
+              TextInputView(isReminder: selectedTabIndex == 1)),
     ).then((result) {
-      if (result == true) {
-        // Refresh data when returning from voice recording
-        fetchAll();
-      } else if (result != null) {
-        notes.add(result);
+      if (selectedTabIndex == 1) {
+        fetchReminders();
+      } else {
+        fetchNotes();
       }
     });
   }
@@ -284,41 +288,10 @@ class HomeListingViewmodel extends ReactiveViewModel {
       MaterialPageRoute(
           builder: (context) => VoiceView(isReminder: selectedTabIndex == 1)),
     ).then((result) {
-      if (result == true) {
-        // Refresh data when returning from voice recording
-        fetchAll();
-      } else if (result != null) {
-        notes.add(result);
-      }
-    });
-  }
-
-  void addNote() {
-    toggleFab();
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => VoiceView(isReminder: false)),
-    ).then((result) {
-      if (result == true) {
-        // Refresh data when returning from voice recording
-        fetchAll();
-      } else if (result != null) {
-        notes.add(result);
-      }
-    });
-  }
-
-  void addReminder() {
-    toggleFab();
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => VoiceView(isReminder: true)),
-    ).then((result) {
-      if (result == true) {
-        // Refresh data when returning from voice recording
-        fetchAll();
-      } else if (result != null) {
-        reminders.add(result);
+      if (selectedTabIndex == 1) {
+        fetchReminders();
+      } else {
+        fetchNotes();
       }
     });
   }
@@ -370,6 +343,7 @@ class Reminder {
   final String description;
   final String time;
   final String date;
+  final String runtime;
   bool isCompleted;
   final Priority priority;
 
@@ -379,6 +353,7 @@ class Reminder {
     required this.description,
     required this.time,
     required this.date,
+    required this.runtime,
     required this.isCompleted,
     required this.priority,
   });

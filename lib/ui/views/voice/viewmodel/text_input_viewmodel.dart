@@ -1,5 +1,9 @@
+import 'package:ai_notes_taker/ui/common/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import '../../../../app/app.locator.dart';
+import '../../../../models/response/create_note_text_response.dart';
+import '../../../../services/api_service.dart';
 import '../reminders_list.dart';
 import 'home_listing_viewmodel.dart' hide Reminder;
 
@@ -8,6 +12,8 @@ class TextInputViewmodel extends ReactiveViewModel {
   final bool isReminder;
 
   TextInputViewmodel(this.context, this.isReminder);
+
+  final api = locator<ApiService>();
 
   // Controllers
   final titleController = TextEditingController();
@@ -53,8 +59,8 @@ class TextInputViewmodel extends ReactiveViewModel {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: const Color(0xFF667eea),
-            ),
+                  primary: const Color(0xFF667eea),
+                ),
           ),
           child: child!,
         );
@@ -74,8 +80,8 @@ class TextInputViewmodel extends ReactiveViewModel {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: const Color(0xFF667eea),
-            ),
+                  primary: const Color(0xFF667eea),
+                ),
           ),
           child: child!,
         );
@@ -144,10 +150,11 @@ class TextInputViewmodel extends ReactiveViewModel {
   }
 
   String get contentHint {
-    return isReminder ? 'Reminder description (optional)' : 'Write your note here...';
+    return isReminder
+        ? 'Reminder description (optional)'
+        : 'Write your note here...';
   }
 
-  // Save functionality
   void saveInput() {
     if (formKey.currentState!.validate()) {
       if (isReminder) {
@@ -159,32 +166,49 @@ class TextInputViewmodel extends ReactiveViewModel {
             selectedTime!.hour,
             selectedTime!.minute,
           );
-          
-          final reminder = Reminder(
-            id: 1,
-            title: titleController.text.trim(),
-            description: descriptionController.text.trim(),
-            time: "${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}",
-            date: scheduleDateTime.toIso8601String(),
-            isCompleted: false,
-            priority: Priority.medium,
-          );
-          Navigator.pop(context, reminder);
+
+          final String isoLocal = scheduleDateTime.toIso8601String();
+          createReminder("${isoLocal}Z");
         }
       } else {
-        final note = Note(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          title: titleController.text.trim(),
-          content: descriptionController.text.trim(),
-          createdAt: DateTime.now().toIso8601String(),
-          isReminder: false,
-        );
-        Navigator.pop(context, note);
+        createNote();
       }
     }
   }
 
   void onBackPressed() {
     Navigator.pop(context);
+  }
+
+  Future<void> createReminder(String scheduleDateTime) async {
+    try {
+      var response = await runBusyFuture(
+          api.createReminderText(
+              title: titleController.text.trim(),
+              reminder_time: scheduleDateTime.toString()),
+          throwException: true);
+      if (response != null) {
+        final data = response as CreateNoteTextResponse;
+        Navigator.pop(context);
+      }
+    } on FormatException catch (e) {
+      showErrorDialog(e.message, context);
+    }
+  }
+
+  Future<void> createNote() async {
+    try {
+      var response = await runBusyFuture(
+          api.createNoteText(
+              title: titleController.text.trim(),
+              text: descriptionController.text.trim()),
+          throwException: true);
+      if (response != null) {
+        final data = response as CreateNoteTextResponse;
+        Navigator.pop(context);
+      }
+    } on FormatException catch (e) {
+      showErrorDialog(e.message, context);
+    }
   }
 }
