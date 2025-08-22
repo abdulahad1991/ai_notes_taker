@@ -1,4 +1,5 @@
 import 'package:ai_notes_taker/models/response/transcription_response.dart';
+import 'package:ai_notes_taker/ui/views/voice/text_input_view.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart';
 import 'package:firebase_messaging/firebase_messaging.dart'
     hide NotificationSettings;
@@ -265,7 +266,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => VoiceView(isReminder: selectedTabIndex == 1)),
+          builder: (context) => TextInputView(isReminder: selectedTabIndex == 1)),
     ).then((result) {
       if (result == true) {
         // Refresh data when returning from voice recording
