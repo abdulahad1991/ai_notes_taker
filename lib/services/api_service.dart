@@ -220,4 +220,20 @@ class ApiService {
     }
   }
 
+
+
+  Future<dynamic> createNoteText({
+    required String transcription_id,
+  }) async {
+    try {
+      var response = await _apiClient?.deleteReq("note/text", data: {
+        "transcription_id": transcription_id,
+      });
+      return LoginResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
 }
