@@ -39,15 +39,72 @@ class TextInputView extends StatelessWidget {
                 _buildDescriptionField(model, isCompact),
                 SizedBox(height: isCompact ? 20 : 28),
                 _buildDateTimeSection(model, isCompact),
-                if (model.showDateTimeWarning)
-                  _buildValidationWarning(isCompact),
               ] else ...[
                 _buildContentField(model, isCompact),
               ],
 
               SizedBox(height: isCompact ? 28 : 36),
-              _buildTipSection(model, isCompact),
-              SizedBox(height: isCompact ? 20 : 28), // Bottom padding
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: model.canSave
+                      ? const LinearGradient(
+                          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : LinearGradient(
+                          colors: [Colors.grey.shade300, Colors.grey.shade400],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: model.canSave
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFF667eea).withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: TextButton(
+                  onPressed: model.canSave ? model.saveInput : null,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isCompact ? 20 : 24,
+                      vertical: isCompact ? 12 : 14,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.check_rounded,
+                        size: isCompact ? 16 : 18,
+                        color: model.canSave ? Colors.white : Colors.grey.shade600,
+                      ),
+                      SizedBox(width: isCompact ? 6 : 8),
+                      Text(
+                        'Save',
+                        style: TextStyle(
+                          fontSize: isCompact ? 14 : 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                          color: model.canSave ? Colors.white : Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // _buildTipSection(model, isCompact),
+              // SizedBox(height: isCompact ? 20 : 28), // Bottom padding
             ],
           ),
         ),
@@ -98,57 +155,6 @@ class TextInputView extends StatelessWidget {
         ),
       ),
       actions: [
-        Padding(
-          padding: EdgeInsets.only(right: isCompact ? 16 : 24),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF667eea).withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: TextButton(
-              onPressed: model.saveInput,
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(
-                  horizontal: isCompact ? 20 : 24,
-                  vertical: isCompact ? 12 : 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.check_rounded,
-                    size: isCompact ? 16 : 18,
-                  ),
-                  SizedBox(width: isCompact ? 6 : 8),
-                  Text(
-                    'Save',
-                    style: TextStyle(
-                      fontSize: isCompact ? 14 : 16,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ai_notes_taker/models/response/base_response.dart';
 import 'package:ai_notes_taker/models/response/login_response.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
@@ -229,14 +230,16 @@ class ApiService {
   }
 
 
-  Future<dynamic> deleteTranscriptions({
-    required String transcription_id,
+  Future<dynamic> delete({
+    required String context_id,
+    required String context,
   }) async {
     try {
-      var response = await _apiClient?.deleteReq("transcriptions", data: {
-        "transcription_id": transcription_id,
+      var response = await _apiClient?.deleteReq("delete", data: {
+        "context_id": context_id,
+        "context": context,
       });
-      return LoginResponse.fromJson(response.data);
+      return BaseResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

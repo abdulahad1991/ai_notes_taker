@@ -139,15 +139,6 @@ class AuthViewModel extends ReactiveViewModel {
         if (response != null) {
           final data = response as LoginResponse;
           authService.setLoginData(data);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(isLogin
-                  ? t.auth.loginSuccessful
-                  : t.auth.accountCreated),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
           NavigationService().navigateTo(Routes.voiceNewView);
         }
       } on FormatException catch (e) {

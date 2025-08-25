@@ -27,7 +27,13 @@ class TextInputViewmodel extends ReactiveViewModel {
   bool isDescriptionFocused = false;
 
   void init() {
-    // Initialize any required setup
+    // Add listeners to text controllers for form validation
+    titleController.addListener(_onFormChanged);
+    descriptionController.addListener(_onFormChanged);
+  }
+
+  void _onFormChanged() {
+    notifyListeners();
   }
 
   @override
@@ -113,7 +119,16 @@ class TextInputViewmodel extends ReactiveViewModel {
   }
 
   bool get canSave {
-    return formKey.currentState?.validate() == true && isReminderValid;
+    // Check if title is not empty
+    final titleNotEmpty = titleController.text.trim().isNotEmpty;
+    
+    // Check if content is not empty (only for notes, not reminders)
+    final contentValid = isReminder || descriptionController.text.trim().isNotEmpty;
+    
+    // Check if reminder date/time is selected (only for reminders)
+    final reminderDateTimeValid = !isReminder || (selectedDate != null && selectedTime != null);
+    
+    return titleNotEmpty && contentValid && reminderDateTimeValid;
   }
 
   // Getters for UI
