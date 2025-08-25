@@ -36,12 +36,22 @@ class HomeListingViewmodel extends ReactiveViewModel {
     tz.initializeTimeZones();
     await _initializeNotifications();
     await _initializeAlarm();
-    _setupAlarmListeners();
-    fetchReminders();
-    fetchNotes();
+
+    // Add a small delay to ensure everything is properly initialized
+    Future.delayed(Duration(milliseconds: 500), () {
+      fetchReminders();
+      fetchNotes();
+    });
+
     FirebaseMessaging.instance.getToken().then((value) {
       callUpdateUserProfile(value!);
     });
+    try{
+
+      _setupAlarmListeners();
+    }catch(e){
+      print(e);
+    }
   }
 
   Future<void> _initializeAlarm() async {
@@ -151,27 +161,31 @@ class HomeListingViewmodel extends ReactiveViewModel {
         final data = response as TranscriptionResponse;
         reminders.clear();
 
-        for (var item in data.data!) {
-          final reminder = Reminder(
-            id: item.sId!.toString(),
-            title: item.title ?? "N/A",
-            description: item.text ?? "N/A",
-            time: _formatTime(item.userCurrentDatetime),
-            date: _formatTime(item.userCurrentDatetime),
-            isCompleted: item.isDelivered ?? false,
-            priority: Priority.medium,
-            runtime: item.runTime.toString(),
-          );
-          reminders.add(reminder);
-          if (!reminder.isCompleted) {
-            scheduleAlarmForReminder(reminder);
+        if (data.data != null) {
+          for (var item in data.data!) {
+            final reminder = Reminder(
+              id: item.sId!.toString(),
+              title: item.title ?? "N/A",
+              description: item.text ?? "N/A",
+              time: _formatTime(item.userCurrentDatetime),
+              date: item.userCurrentDatetime ?? "N/A",
+              isCompleted: item.isDelivered ?? false,
+              priority: Priority.medium,
+              runtime: item.runTime ?? "",
+            );
+            reminders.add(reminder);
+            if (!reminder.isCompleted) {
+              scheduleAlarmForReminder(reminder);
+            }
           }
         }
 
         notifyListeners();
       }
     } on FormatException catch (e) {
-      print(e);
+      print('FormatException in fetchReminders: $e');
+    } catch (e) {
+      print('General exception in fetchReminders: $e');
     }
   }
 
@@ -208,6 +222,32 @@ class HomeListingViewmodel extends ReactiveViewModel {
       return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
     } catch (e) {
       return "N/A";
+    }
+  }
+
+  Future<void> deleteNote(Note note) async {
+    try {
+      await runBusyFuture(
+        api.delete(context_id: note.id, context: "note"),
+        throwException: true,
+      );
+
+      init();
+    } on FormatException catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> deleteReminder(Reminder reminder) async {
+    try {
+      await runBusyFuture(
+        api.delete(context_id: reminder.id, context: "reminder"),
+        throwException: true,
+      );
+
+      init();
+    } on FormatException catch (e) {
+      print(e);
     }
   }
 

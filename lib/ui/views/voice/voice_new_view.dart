@@ -165,7 +165,8 @@ class _MainScreenState extends State<VoiceNewView>
               color: const Color(0xFFF8F9FA),
               child: isEmpty
                   ? _buildEmptyState(screenWidth, model)
-                  : _buildNotesGrid(filteredItems, columnCount, responsivePadding, gridSpacing),
+                  : _buildNotesGrid(filteredItems,
+                  columnCount, responsivePadding, gridSpacing,model),
             ),
             floatingActionButton: _buildSpeedDial(model),
           );
@@ -231,7 +232,11 @@ class _MainScreenState extends State<VoiceNewView>
     );
   }
 
-  Widget _buildNotesGrid(List<dynamic> items, int columnCount, EdgeInsets padding, double spacing) {
+  Widget _buildNotesGrid(List<dynamic> items,
+      int columnCount,
+      EdgeInsets padding,
+      double spacing,
+      HomeListingViewmodel model) {
     return Padding(
       padding: padding,
       child: MasonryGridView.count(
@@ -242,9 +247,9 @@ class _MainScreenState extends State<VoiceNewView>
         itemBuilder: (context, index) {
           final item = items[index];
           if (item is Note) {
-            return _buildNoteCard(item);
+            return _buildNoteCard(item, model);
           } else if (item is Reminder) {
-            return _buildReminderCard(item);
+            return _buildReminderCard(item, model);
           }
           return const SizedBox.shrink();
         },
@@ -252,7 +257,7 @@ class _MainScreenState extends State<VoiceNewView>
     );
   }
 
-  Widget _buildNoteCard(Note note) {
+  Widget _buildNoteCard(Note note, HomeListingViewmodel model) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 500;
     final isMediumScreen = screenWidth < 800;
@@ -339,7 +344,7 @@ class _MainScreenState extends State<VoiceNewView>
                         ),
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
-                          onTap: () => _showDeleteConfirmation(note),
+                          onTap: () => _showDeleteConfirmation(note, model),
                           child: Container(
                             padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
                             child: Icon(
@@ -376,7 +381,8 @@ class _MainScreenState extends State<VoiceNewView>
     );
   }
 
-  Widget _buildReminderCard(Reminder reminder) {
+  Widget _buildReminderCard(Reminder reminder,
+      HomeListingViewmodel model) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 500;
     final isMediumScreen = screenWidth < 800;
@@ -463,7 +469,7 @@ class _MainScreenState extends State<VoiceNewView>
                         ),*/
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
-                          onTap: () => _showDeleteConfirmation(reminder),
+                          onTap: () => _showDeleteConfirmation(reminder, model),
                           child: Container(
                             padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
                             child: Icon(
@@ -638,7 +644,7 @@ class _MainScreenState extends State<VoiceNewView>
     // Navigate to edit reminder screen
   }
 
-  void _showDeleteConfirmation(dynamic item) {
+  void _showDeleteConfirmation(dynamic item, HomeListingViewmodel model) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -673,9 +679,9 @@ class _MainScreenState extends State<VoiceNewView>
               onPressed: () {
                 Navigator.of(context).pop();
                 if (item is Note) {
-                  _deleteNote(item);
+                  model.deleteNote(item);
                 } else if (item is Reminder) {
-                  _deleteReminder(item);
+                  model.deleteReminder(item);
                 }
               },
               child: const Text(
@@ -690,14 +696,6 @@ class _MainScreenState extends State<VoiceNewView>
         );
       },
     );
-  }
-
-  void _deleteNote(Note note) {
-    // Implement note deletion logic
-  }
-
-  void _deleteReminder(Reminder reminder) {
-    // Implement reminder deletion logic
   }
 
   Widget _buildSpeedDial(HomeListingViewmodel model) {
