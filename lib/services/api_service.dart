@@ -279,5 +279,42 @@ class ApiService {
     }
   }
 
-
+  Future<dynamic> editNoteText({
+    required String id,
+    required String title,
+    required String text,
+  }) async {
+    try {
+      var response = await _apiClient?.postReq("update/${id}", data: {
+        "context": "note",
+        "updatePayload": {
+          "title": title,
+          "text": text,
+        },
+      });
+      return BaseResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+  Future<dynamic> editReminderText({
+    required String id,
+    required String title,
+    required String text,
+    required String dateTime,
+  }) async {
+    try {
+      var response = await _apiClient?.postReq("update/${id}", data: {
+        "context": "reminder",
+        "updatePayload": {
+          "title": title,
+          "text": text,
+          "run_time": dateTime,
+        },
+      });
+      return BaseResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -20,7 +20,7 @@ class TextInputView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<TextInputViewmodel>.reactive(
-      viewModelBuilder: () => TextInputViewmodel(context, isReminder)..init(),
+      viewModelBuilder: () => TextInputViewmodel(context, isReminder, isEdit, reminder, note)..init(),
       builder: (context, model, child) => _buildView(context, model),
     );
   }

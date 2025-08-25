@@ -4,14 +4,17 @@ import 'package:stacked/stacked.dart';
 import '../../../../app/app.locator.dart';
 import '../../../../models/response/create_note_text_response.dart';
 import '../../../../services/api_service.dart';
-import '../reminders_list.dart';
-import 'home_listing_viewmodel.dart' hide Reminder;
+import 'home_listing_viewmodel.dart';
 
 class TextInputViewmodel extends ReactiveViewModel {
   BuildContext context;
   final bool isReminder;
+  final bool isEdit;
+  Reminder? reminder;
+  Note? note;
 
-  TextInputViewmodel(this.context, this.isReminder);
+  TextInputViewmodel(
+      this.context, this.isReminder, this.isEdit, this.reminder, this.note);
 
   final api = locator<ApiService>();
 
@@ -27,9 +30,17 @@ class TextInputViewmodel extends ReactiveViewModel {
   bool isDescriptionFocused = false;
 
   void init() {
-    // Add listeners to text controllers for form validation
     titleController.addListener(_onFormChanged);
     descriptionController.addListener(_onFormChanged);
+    if (isEdit) {
+      if (reminder != null) {
+        titleController.text = reminder!.title;
+        descriptionController.text = reminder!.description;
+      } else {
+        titleController.text = note!.title;
+        descriptionController.text = note!.content;
+      }
+    }
   }
 
   void _onFormChanged() {
@@ -121,13 +132,15 @@ class TextInputViewmodel extends ReactiveViewModel {
   bool get canSave {
     // Check if title is not empty
     final titleNotEmpty = titleController.text.trim().isNotEmpty;
-    
+
     // Check if content is not empty (only for notes, not reminders)
-    final contentValid = isReminder || descriptionController.text.trim().isNotEmpty;
-    
+    final contentValid =
+        isReminder || descriptionController.text.trim().isNotEmpty;
+
     // Check if reminder date/time is selected (only for reminders)
-    final reminderDateTimeValid = !isReminder || (selectedDate != null && selectedTime != null);
-    
+    final reminderDateTimeValid =
+        !isReminder || (selectedDate != null && selectedTime != null);
+
     return titleNotEmpty && contentValid && reminderDateTimeValid;
   }
 
@@ -183,10 +196,18 @@ class TextInputViewmodel extends ReactiveViewModel {
           );
 
           final String isoLocal = scheduleDateTime.toIso8601String();
-          createReminder("${isoLocal}Z");
+          if (isEdit) {
+            editReminder("${isoLocal}Z");
+          } else {
+            createReminder("${isoLocal}Z");
+          }
         }
       } else {
-        createNote();
+        if (isEdit) {
+          editNote();
+        } else {
+          createNote();
+        }
       }
     }
   }
@@ -211,6 +232,23 @@ class TextInputViewmodel extends ReactiveViewModel {
     }
   }
 
+  Future<void> editReminder(String scheduleDateTime) async {
+    try {
+      var response = await runBusyFuture(
+          api.editReminderText(
+              id: reminder!.id.toString(),
+              title: titleController.text.trim(),
+              text: descriptionController.text.trim(),
+              dateTime: scheduleDateTime.toString()),
+          throwException: true);
+      if (response != null) {
+        Navigator.pop(context);
+      }
+    } on FormatException catch (e) {
+      showErrorDialog(e.message, context);
+    }
+  }
+
   Future<void> createNote() async {
     try {
       var response = await runBusyFuture(
@@ -219,7 +257,22 @@ class TextInputViewmodel extends ReactiveViewModel {
               text: descriptionController.text.trim()),
           throwException: true);
       if (response != null) {
-        final data = response as CreateNoteTextResponse;
+        Navigator.pop(context);
+      }
+    } on FormatException catch (e) {
+      showErrorDialog(e.message, context);
+    }
+  }
+
+  Future<void> editNote() async {
+    try {
+      var response = await runBusyFuture(
+          api.editNoteText(
+              id: note!.id.toString(),
+              title: titleController.text.trim(),
+              text: descriptionController.text.trim()),
+          throwException: true);
+      if (response != null) {
         Navigator.pop(context);
       }
     } on FormatException catch (e) {
