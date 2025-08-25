@@ -280,7 +280,7 @@ class _MainScreenState extends State<VoiceNewView>
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            _editNote(note);
+            // _editNote(note);
           },
           child: Padding(
             padding: EdgeInsets.all(isSmallScreen ? 10 : 14),
@@ -332,7 +332,7 @@ class _MainScreenState extends State<VoiceNewView>
                       children: [
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
-                          onTap: () => _editNote(note),
+                          onTap: () => model.editNote(note),
                           child: Container(
                             padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
                             child: Icon(
@@ -405,7 +405,7 @@ class _MainScreenState extends State<VoiceNewView>
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            _editReminder(reminder);
+            model.editReminder(reminder);
           },
           child: Padding(
             padding: EdgeInsets.all(isSmallScreen ? 10 : 14),
@@ -635,15 +635,6 @@ class _MainScreenState extends State<VoiceNewView>
     return '$hour:$minute$period';
   }
 
-  // Action methods
-  void _editNote(Note note) {
-
-  }
-
-  void _editReminder(Reminder reminder) {
-    // Navigate to edit reminder screen
-  }
-
   void _showDeleteConfirmation(dynamic item, HomeListingViewmodel model) {
     showDialog(
       context: context,
@@ -684,7 +675,7 @@ class _MainScreenState extends State<VoiceNewView>
                   model.deleteReminder(item);
                 }
               },
-              child: const Text(
+              child:  Text(
                 'Yes',
                 style: TextStyle(
                   color: Colors.red,

@@ -39,17 +39,15 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
     // Add a small delay to ensure everything is properly initialized
     Future.delayed(Duration(milliseconds: 500), () {
-      fetchReminders();
       fetchNotes();
     });
 
     FirebaseMessaging.instance.getToken().then((value) {
       callUpdateUserProfile(value!);
     });
-    try{
-
+    try {
       _setupAlarmListeners();
-    }catch(e){
+    } catch (e) {
       print(e);
     }
   }
@@ -174,12 +172,15 @@ class HomeListingViewmodel extends ReactiveViewModel {
               runtime: item.runTime ?? "",
             );
             reminders.add(reminder);
-            if (!reminder.isCompleted) {
-              scheduleAlarmForReminder(reminder);
+            try {
+              if (!reminder.isCompleted) {
+                scheduleAlarmForReminder(reminder);
+              }
+            } catch (e) {
+              print(e);
             }
           }
         }
-
         notifyListeners();
       }
     } on FormatException catch (e) {
@@ -208,6 +209,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
               isReminder: false));
         }
 
+        fetchReminders();
         notifyListeners();
       }
     } on FormatException catch (e) {
@@ -310,8 +312,10 @@ class HomeListingViewmodel extends ReactiveViewModel {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>
-              TextInputView(isReminder: selectedTabIndex == 1)),
+          builder: (context) => TextInputView(
+                isReminder: selectedTabIndex == 1,
+                isEdit: false,
+              )),
     ).then((result) {
       if (selectedTabIndex == 1) {
         fetchReminders();
@@ -345,6 +349,42 @@ class HomeListingViewmodel extends ReactiveViewModel {
     } else {
       fabController.reverse();
     }*/
+  }
+
+  void editNote(Note note) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => TextInputView(
+            isReminder: selectedTabIndex == 1,
+            isEdit: true,
+            note: note,
+          )),
+    ).then((result) {
+      if (selectedTabIndex == 1) {
+        fetchReminders();
+      } else {
+        fetchNotes();
+      }
+    });
+  }
+
+  void editReminder(Reminder reminder) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => TextInputView(
+            isReminder: selectedTabIndex == 1,
+            isEdit: true,
+            reminder: reminder,
+          )),
+    ).then((result) {
+      if (selectedTabIndex == 1) {
+        fetchReminders();
+      } else {
+        fetchNotes();
+      }
+    });
   }
 
   void setSelectedTabIndex(int index) {

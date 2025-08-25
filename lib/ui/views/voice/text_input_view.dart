@@ -1,11 +1,21 @@
+import 'package:ai_notes_taker/ui/views/voice/viewmodel/home_listing_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'viewmodel/text_input_viewmodel.dart';
 
 class TextInputView extends StatelessWidget {
   final bool isReminder;
+  final bool isEdit;
+  Reminder? reminder = null;
+  Note? note = null;
 
-  const TextInputView({super.key, required this.isReminder});
+   TextInputView({
+    super.key,
+    required this.isReminder,
+    required this.isEdit,
+    this.reminder,
+    this.note,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +97,8 @@ class TextInputView extends StatelessWidget {
                       Icon(
                         Icons.check_rounded,
                         size: isCompact ? 16 : 18,
-                        color: model.canSave ? Colors.white : Colors.grey.shade600,
+                        color:
+                            model.canSave ? Colors.white : Colors.grey.shade600,
                       ),
                       SizedBox(width: isCompact ? 6 : 8),
                       Text(
@@ -96,7 +107,9 @@ class TextInputView extends StatelessWidget {
                           fontSize: isCompact ? 14 : 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.2,
-                          color: model.canSave ? Colors.white : Colors.grey.shade600,
+                          color: model.canSave
+                              ? Colors.white
+                              : Colors.grey.shade600,
                         ),
                       ),
                     ],
@@ -112,7 +125,8 @@ class TextInputView extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, TextInputViewmodel model, bool isCompact) {
+  PreferredSizeWidget _buildAppBar(
+      BuildContext context, TextInputViewmodel model, bool isCompact) {
     return AppBar(
       backgroundColor: const Color(0xFFF8F9FA),
       elevation: 0,
@@ -154,8 +168,7 @@ class TextInputView extends StatelessWidget {
           ),
         ),
       ),
-      actions: [
-      ],
+      actions: [],
     );
   }
 
@@ -337,13 +350,11 @@ class TextInputView extends StatelessWidget {
             isFirst: true,
             isCompact: isCompact,
           ),
-
           Container(
             height: 1,
             margin: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 20),
             color: Colors.grey.shade100,
           ),
-
           _buildDateTimeTile(
             icon: Icons.schedule_rounded,
             label: 'Time',
@@ -419,9 +430,8 @@ class TextInputView extends StatelessWidget {
                     value,
                     style: TextStyle(
                       fontSize: isCompact ? 15 : 17,
-                      color: isSelected
-                          ? Colors.grey[800]
-                          : Colors.grey.shade400,
+                      color:
+                          isSelected ? Colors.grey[800] : Colors.grey.shade400,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.2,
                     ),
