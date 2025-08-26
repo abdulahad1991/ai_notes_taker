@@ -199,6 +199,7 @@ class ApiService {
     required int is_reminder,
     required String user_current_datetime,
     required String offset,
+    String? title,
   }) async {
     try {
       String? fileExt = file?.path.split('.').last.toLowerCase();
@@ -219,6 +220,10 @@ class ApiService {
         "user_current_datetime": user_current_datetime,
         // "offset": offset,
       };
+      
+      if (title != null && title.isNotEmpty) {
+        dataMap["title"] = title;
+      }
 
       FormData formData = FormData.fromMap(dataMap);
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
 
+import '../../../shared/functions.dart';
 import 'viewmodel/home_listing_viewmodel.dart';
 
 class VoiceNewView extends StatefulWidget {
@@ -88,11 +89,9 @@ class _MainScreenState extends State<VoiceNewView>
     return ViewModelBuilder<HomeListingViewmodel>.reactive(
         viewModelBuilder: () => HomeListingViewmodel(context)..init(),
         builder: (context, model, child) {
-          // Filter items based on selected tab
           List<dynamic> filteredItems = model.getFilteredItems();
           bool isEmpty = filteredItems.isEmpty;
 
-          // Sync tab controller with viewmodel
           if (_tabController.index != model.selectedTabIndex) {
             _tabController.animateTo(model.selectedTabIndex);
           }
@@ -152,7 +151,7 @@ class _MainScreenState extends State<VoiceNewView>
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
-                      tabs: const [
+                      tabs:  [
                         Tab(text: 'Notes'),
                         Tab(text: 'Reminder'),
                       ],
@@ -451,13 +450,12 @@ class _MainScreenState extends State<VoiceNewView>
                         ),
                       ),
                     ],
-                    // Action buttons
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        /*InkWell(
+                        InkWell(
                           borderRadius: BorderRadius.circular(16),
-                          onTap: () => _editReminder(reminder),
+                          onTap: () => model.editReminder(reminder),
                           child: Container(
                             padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
                             child: Icon(
@@ -466,7 +464,7 @@ class _MainScreenState extends State<VoiceNewView>
                               color: Colors.grey[600],
                             ),
                           ),
-                        ),*/
+                        ),
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => _showDeleteConfirmation(reminder, model),
@@ -547,7 +545,7 @@ class _MainScreenState extends State<VoiceNewView>
                           ),
                           SizedBox(width: isSmallScreen ? 2 : 3),
                           Text(
-                            _formatScheduledTime(reminder.date),
+                            _formatScheduledTime(reminder.runtime),
                             style: TextStyle(
                               fontSize: isSmallScreen ? 9 : 10,
                               color: Colors.grey[600],
@@ -601,8 +599,8 @@ class _MainScreenState extends State<VoiceNewView>
 
   String _formatScheduledTime(String scheduledTimeString) {
     try {
-      final scheduledTime = DateTime.parse(scheduledTimeString);
-      final now = DateTime.now();
+      final scheduledTime = parseUtc(scheduledTimeString).toLocal();
+      /*final now = DateTime.now();
       final difference = scheduledTime.difference(now);
 
       if (difference.inDays > 0) {
@@ -621,8 +619,9 @@ class _MainScreenState extends State<VoiceNewView>
       } else if (difference.inMinutes > -60) {
         return 'Late ${difference.inMinutes.abs()}m';
       } else {
-        return '${_formatTime(scheduledTime)}';
-      }
+
+      }*/
+      return '${_formatTime(scheduledTime)}';
     } catch (e) {
       return scheduledTimeString;
     }
