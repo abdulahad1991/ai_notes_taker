@@ -125,7 +125,9 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                         ? 'Listening...'
                         : isProcessing
                             ? 'Processing...'
-                            : 'Tap to record',
+                            : model.showTitleField && !widget.isReminder
+                                ? 'Add a title for your note'
+                                : 'Tap to record',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w400,
@@ -134,8 +136,90 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 60),
 
+                  // Title field for notes (not reminders) after recording
+                  if (model.showTitleField && !widget.isReminder) ...[
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 32),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: TextField(
+                        controller: model.titleController,
+                        decoration: const InputDecoration(
+                          hintText: 'Enter title (optional)',
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            model.showTitleField = false;
+                            model.titleController.clear();
+                            model.currentRecordingFile = null;
+                            model.rebuildUi();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey.shade300,
+                            foregroundColor: Colors.black87,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () async {
+                            // Process the note with title
+                            model.showTitleField = false;
+                            model.rebuildUi();
+                            
+                            // Show processing dialog
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => const ProcessingDialog(),
+                            );
+                            
+                            // Process the recording
+                            if (model.currentRecordingFile != null) {
+                              stopRecording(model.currentRecordingFile!);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF667eea),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Save Note'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+
                   // Recording Button
-                  GestureDetector(
+                  if (!model.showTitleField)
+                    GestureDetector(
                     onTap: isProcessing
                         ? null
                         : (isRecording
@@ -149,13 +233,20 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                     audioFile: file,
                                     onConfirm: () async {
                                       Navigator.of(context).pop();
-                                      // Show processing dialog
-                                      showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (context) => const ProcessingDialog(),
-                                      );
-                                      stopRecording(file);
+                                      if (!widget.isReminder) {
+                                        // Store the file and show title field for notes
+                                        model.currentRecordingFile = file;
+                                        model.showTitleField = true;
+                                        model.rebuildUi();
+                                      } else {
+                                        // Show processing dialog for reminders
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (context) => const ProcessingDialog(),
+                                        );
+                                        stopRecording(file);
+                                      }
                                     },
                                     onCancel: () {
                                       Navigator.of(context).pop();

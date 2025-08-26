@@ -34,6 +34,10 @@ class VoiceViewmodel extends ReactiveViewModel {
 
   bool isRecording = false;
   bool isProcessing = false;
+  bool showTitleField = false;
+  File? currentRecordingFile;
+
+  final TextEditingController titleController = TextEditingController();
 
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   String? _recordedPath;
@@ -90,6 +94,7 @@ class VoiceViewmodel extends ReactiveViewModel {
     _player.closePlayer();
     _recorder.closeRecorder();
     _recordingDataController.close();
+    titleController.dispose();
     super.dispose();
   }
 
@@ -332,7 +337,8 @@ class VoiceViewmodel extends ReactiveViewModel {
               file: file,
               is_reminder: isReminder == true ? 1 : 0,
               user_current_datetime: DateTime.now().toUtc().toIso8601String(),
-              offset: getTimezoneOffsetFormatted()),
+              offset: getTimezoneOffsetFormatted(),
+              title: titleController.text.trim().isEmpty ? null : titleController.text.trim()),
           busyObject: "transcribe",
           throwException: true,
         );
@@ -346,6 +352,10 @@ class VoiceViewmodel extends ReactiveViewModel {
           showErrorDialog(
               "We could not process your voice, please try again", context);
         } else {
+          // Clear title field and reset state
+          titleController.clear();
+          showTitleField = false;
+          currentRecordingFile = null;
           Navigator.of(context).pop(true);
         }
       }
