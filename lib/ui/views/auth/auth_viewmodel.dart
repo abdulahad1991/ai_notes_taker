@@ -32,9 +32,10 @@ class AuthViewModel extends ReactiveViewModel {
 
   final formKey = GlobalKey<FormState>();
 
-  void init() {
+  void init() async {
     initFirebase();
     _getUserRegion();
+    await authService.init();
     if(authService.loginData!=null){
       NavigationService().navigateTo(Routes.voiceNewView);
     }

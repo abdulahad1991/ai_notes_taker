@@ -13,9 +13,11 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:alarm/alarm.dart';
 
 import '../../../../app/app.locator.dart';
+import '../../../../app/app.router.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/app_auth_service.dart';
 import '../../../../shared/functions.dart';
+import 'package:stacked_services/stacked_services.dart';
 
 class HomeListingViewmodel extends ReactiveViewModel {
   BuildContext context;
@@ -33,13 +35,15 @@ class HomeListingViewmodel extends ReactiveViewModel {
       FlutterLocalNotificationsPlugin();
 
   void init() async {
+    setBusy(true);
     tz.initializeTimeZones();
     await _initializeNotifications();
     await _initializeAlarm();
 
     // Add a small delay to ensure everything is properly initialized
-    Future.delayed(Duration(milliseconds: 500), () {
-      fetchNotes();
+    Future.delayed(Duration(milliseconds: 500), () async {
+      await fetchNotes();
+      setBusy(false);
     });
 
     FirebaseMessaging.instance.getToken().then((value) {
@@ -146,6 +150,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
     await runBusyFuture(
       api.updateUser(fcm_token: token),
       throwException: true,
+      busyObject: "update_user"
     );
   }
 
@@ -398,6 +403,11 @@ class HomeListingViewmodel extends ReactiveViewModel {
     } else {
       return reminders;
     }
+  }
+
+  Future<void> logout() async {
+    await authService.resetAuthData();
+    NavigationService().navigateTo(Routes.authScreen);
   }
 }
 

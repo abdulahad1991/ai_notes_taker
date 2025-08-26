@@ -56,8 +56,6 @@ class AppAuthService with ListenableServiceMixin {
   }
 
   init() async {
-    var existingData =
-        await locator<AppSharedPrefService>().getMapData(_authDataKey);
 
     var existingLoginData =
         await locator<AppSharedPrefService>().getMapData(_loginDataKey);

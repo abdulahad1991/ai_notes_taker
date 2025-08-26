@@ -116,6 +116,15 @@ class _MainScreenState extends State<VoiceNewView>
                   fontSize: screenWidth < 600 ? 20 : 24,
                 ),
               ),
+              actions: [
+                IconButton(
+                  onPressed: () => model.logout(),
+                  icon: Icon(
+                    Icons.logout,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ],
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),
                 child: Padding(
@@ -162,16 +171,26 @@ class _MainScreenState extends State<VoiceNewView>
             ),
             body: Container(
               color: const Color(0xFFF8F9FA),
-              child: isEmpty
-                  ? _buildEmptyState(screenWidth, model)
-                  : _buildNotesGrid(filteredItems,
-                  columnCount, responsivePadding, gridSpacing,model),
+              child: model.isBusy
+                  ? _buildLoadingState()
+                  : isEmpty
+                      ? _buildEmptyState(screenWidth, model)
+                      : _buildNotesGrid(filteredItems,
+                      columnCount, responsivePadding, gridSpacing,model),
             ),
             floatingActionButton: _buildSpeedDial(model),
           );
         });
   }
 
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+      ),
+    );
+  }
 
   Widget _buildEmptyState(double screenWidth, HomeListingViewmodel model) {
     String emptyMessage = model.selectedTabIndex == 0
