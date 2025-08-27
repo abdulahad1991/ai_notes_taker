@@ -25,6 +25,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
   List<Note> notes = [];
   List<Reminder> reminders = [];
   int selectedTabIndex = 0;
+  int notesPage = 0;
+  int reminderPage = 0;
 
   HomeListingViewmodel(this.context);
 
@@ -156,7 +158,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
   Future<void> fetchReminders() async {
     try {
       var response = await runBusyFuture(
-        api.getReminders(),
+        api.getReminders(reminderPage),
         throwException: true,
       );
       if (response != null) {
@@ -197,7 +199,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
   Future<void> fetchNotes() async {
     try {
       var response = await runBusyFuture(
-        api.getNotes(),
+        api.getNotes(notesPage),
         throwException: true,
       );
       if (response != null) {

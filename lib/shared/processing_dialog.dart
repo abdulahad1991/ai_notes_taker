@@ -38,7 +38,7 @@ class _ProcessingDialogState extends State<ProcessingDialog>
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => false, // Prevent dismissing with back button
+      onWillPop: () async => false,
       child: AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

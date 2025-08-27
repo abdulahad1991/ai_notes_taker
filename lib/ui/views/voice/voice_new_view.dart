@@ -298,7 +298,7 @@ class _MainScreenState extends State<VoiceNewView>
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            // _editNote(note);
+            model.editNote(note);
           },
           child: Padding(
             padding: EdgeInsets.all(isSmallScreen ? 10 : 14),
@@ -339,7 +339,7 @@ class _MainScreenState extends State<VoiceNewView>
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[800],
                           ),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -376,8 +376,6 @@ class _MainScreenState extends State<VoiceNewView>
                     ),
                   ],
                 ),
-
-                // Content
                 if (note.title.isNotEmpty) ...[
                   SizedBox(height: isSmallScreen ? 6 : 10),
                   Text(
@@ -387,7 +385,7 @@ class _MainScreenState extends State<VoiceNewView>
                       color: Colors.grey.shade600,
                       height: 1.3,
                     ),
-                    maxLines: isSmallScreen ? 4 : 6,
+                    maxLines: isSmallScreen ? 2 : 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -430,7 +428,6 @@ class _MainScreenState extends State<VoiceNewView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with title and action buttons
                 Row(
                   children: [
                     if (reminder.title.isNotEmpty) ...[

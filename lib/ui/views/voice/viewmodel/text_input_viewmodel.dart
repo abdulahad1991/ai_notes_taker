@@ -130,6 +130,13 @@ class TextInputViewmodel extends ReactiveViewModel {
   }
 
   bool get canSave {
+    // If in edit mode, allow save if any field has content
+    if (isEdit) {
+      return titleController.text.trim().isNotEmpty ||
+             descriptionController.text.trim().isNotEmpty;
+    }
+    
+    // Original validation for new items
     // Check if title is not empty
     final titleNotEmpty = titleController.text.trim().isNotEmpty;
 
@@ -170,7 +177,21 @@ class TextInputViewmodel extends ReactiveViewModel {
   }
 
   String get appBarTitle {
-    return isReminder ? 'New Reminder' : 'New Note';
+    String title = "";
+    if(isReminder){
+      if(!isEdit){
+        title = "New Reminder";
+      }else {
+        title = "Edit Reminder";
+      }
+    }else {
+      if(!isEdit){
+        title = "New Note";
+      }else {
+        title = "Edit Note";
+      }
+    }
+    return title;
   }
 
   String get titleHint {
@@ -184,7 +205,7 @@ class TextInputViewmodel extends ReactiveViewModel {
   }
 
   void saveInput() {
-    if (formKey.currentState!.validate()) {
+    if (isEdit || formKey.currentState!.validate()) {
       if (isReminder) {
         if (selectedDate != null && selectedTime != null) {
           final DateTime scheduleDateTime = DateTime(
