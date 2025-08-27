@@ -126,20 +126,20 @@ class ApiService {
     }
   }
 
-  Future<dynamic> getReminders() async {
+  Future<dynamic> getReminders(int page) async {
     try {
       var response =
-      await _apiClient?.getReq("reminders?skip=0&limit=10");
+      await _apiClient?.getReq("reminders?skip=${page}&limit=30");
       return TranscriptionResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<dynamic> getNotes() async {
+  Future<dynamic> getNotes(int page) async {
     try {
       var response =
-      await _apiClient?.getReq("notes?skip=0&limit=10");
+      await _apiClient?.getReq("notes?skip=${page}&limit=30");
       return NotesResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
@@ -182,9 +182,7 @@ class ApiService {
 
       Map<String, dynamic> dataMap = {
         "file": multipartFile,
-        // "is_reminder": 1,
         "user_current_datetime": user_current_datetime,
-        // "offset": offset,
       };
 
       FormData formData = FormData.fromMap(dataMap);

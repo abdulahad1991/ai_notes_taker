@@ -244,11 +244,14 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                     onConfirm: (title) async {
                                       Navigator.of(context).pop();
                                       model.currentRecordingFile = file;
-                                      model.noteTitle = title; // Store the title
+                                      model.noteTitle = title;
                                       if (title != null) {
-                                        model.titleController.text = title; // Pre-fill the title field
+                                        model.titleController.text = title;
                                       }
-                                      model.showTitleField = true;
+                                      // Only show title field for notes, not reminders
+                                      if (!widget.isReminder) {
+                                        model.showTitleField = true;
+                                      }
                                       showDialog(
                                         context: context,
                                         barrierDismissible: false,
@@ -263,7 +266,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                       model.showTitleField = false;
                                       model.currentRecordingFile = null;
                                       model.noteTitle = null;
-                                      // model.rebuildUi();
+                                      model.rebuildUi();
                                     },
                                   ),
                                 );

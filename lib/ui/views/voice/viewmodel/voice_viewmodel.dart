@@ -357,6 +357,10 @@ class VoiceViewmodel extends ReactiveViewModel {
           titleController.clear();
           showTitleField = false;
           currentRecordingFile = null;
+          noteTitle = null;
+          // rebuildUi(); // Rebuild UI to show recording button again
+          // Don't close the screen - let user record again
+          // print("Voice processing completed successfully. showTitleField: $showTitleField");
           Navigator.of(context).pop(true);
         }
       }
