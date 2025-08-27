@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Priority;
 import 'package:stacked/stacked.dart';
-import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:alarm/alarm.dart';
 
@@ -63,7 +62,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
   void _setupAlarmListeners() {
     Alarm.ringStream.stream.listen((alarmSettings) {
       print(
-          'Alarm ringing for reminder: ${alarmSettings.notificationSettings?.title}');
+          'Alarm ringing for reminder: ${alarmSettings.notificationSettings.title}');
       _handleAlarmRinging(alarmSettings);
     });
   }

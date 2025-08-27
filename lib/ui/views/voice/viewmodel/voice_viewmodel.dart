@@ -36,6 +36,7 @@ class VoiceViewmodel extends ReactiveViewModel {
   bool isProcessing = false;
   bool showTitleField = false;
   File? currentRecordingFile;
+  String? noteTitle;
 
   final TextEditingController titleController = TextEditingController();
 

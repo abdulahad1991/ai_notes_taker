@@ -194,18 +194,15 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                         const SizedBox(width: 16),
                         ElevatedButton(
                           onPressed: () async {
-                            // Process the note with title
                             model.showTitleField = false;
                             model.rebuildUi();
-                            
-                            // Show processing dialog
+
                             showDialog(
                               context: context,
                               barrierDismissible: false,
                               builder: (context) => const ProcessingDialog(),
                             );
-                            
-                            // Process the recording
+
                             if (model.currentRecordingFile != null) {
                               stopRecording(model.currentRecordingFile!);
                             }
@@ -233,31 +230,40 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                         : (isRecording
                             ? () async {
                                 File file = await model.stopAndGetAudioBytes();
+
+                                model.isRecording = false;
+                                model.isProcessing = false;
+                                model.rebuildUi();
                                 showDialog(
                                   context: context,
                                   barrierDismissible: false,
                                   builder: (context) =>
                                       PlaybackConfirmationDialog(
                                     audioFile: file,
-                                    onConfirm: () async {
+                                    isReminder: widget.isReminder,
+                                    onConfirm: (title) async {
                                       Navigator.of(context).pop();
-                                      if (!widget.isReminder) {
-                                        // Store the file and show title field for notes
-                                        model.currentRecordingFile = file;
-                                        model.showTitleField = true;
-                                        model.rebuildUi();
-                                      } else {
-                                        // Show processing dialog for reminders
-                                        showDialog(
-                                          context: context,
-                                          barrierDismissible: false,
-                                          builder: (context) => const ProcessingDialog(),
-                                        );
-                                        stopRecording(file);
+                                      model.currentRecordingFile = file;
+                                      model.noteTitle = title; // Store the title
+                                      if (title != null) {
+                                        model.titleController.text = title; // Pre-fill the title field
                                       }
+                                      model.showTitleField = true;
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => const ProcessingDialog(),
+                                      );
+                                      stopRecording(file);
                                     },
                                     onCancel: () {
                                       Navigator.of(context).pop();
+                                      model.isRecording = false;
+                                      model.isProcessing = false;
+                                      model.showTitleField = false;
+                                      model.currentRecordingFile = null;
+                                      model.noteTitle = null;
+                                      // model.rebuildUi();
                                     },
                                   ),
                                 );
@@ -276,7 +282,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                   ? Colors.red.shade500
                                   : isProcessing
                                       ? Colors.orange.shade500
-                                      : Color(0xFF667eea),
+                                      : const Color(0xFF667eea),
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
@@ -284,7 +290,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                           ? Colors.red
                                           : isProcessing
                                               ? Colors.orange
-                                              : Color(0xFF667eea))
+                                              : const Color(0xFF667eea))
                                       .withOpacity(0.3),
                                   blurRadius: 20,
                                   spreadRadius: 5,
