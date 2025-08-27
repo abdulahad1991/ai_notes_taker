@@ -129,7 +129,7 @@ class ApiService {
   Future<dynamic> getReminders(int page) async {
     try {
       var response =
-      await _apiClient?.getReq("reminders?skip=${page}&limit=30");
+      await _apiClient?.getReq("reminders?skip=${page}&limit=40");
       return TranscriptionResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
@@ -139,7 +139,7 @@ class ApiService {
   Future<dynamic> getNotes(int page) async {
     try {
       var response =
-      await _apiClient?.getReq("notes?skip=${page}&limit=30");
+      await _apiClient?.getReq("notes?skip=${page}&limit=40");
       return NotesResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
@@ -271,11 +271,13 @@ class ApiService {
   Future<dynamic> createReminderText({
     required String title,
     required String reminder_time,
+    required String description,
   }) async {
     try {
       var response = await _apiClient?.postReq("reminder/text", data: {
         "title": title,
         "reminder_time": reminder_time,
+        "text": description,
         "user_current_datetime": DateTime.now().toUtc().toIso8601String(),
       });
       return CreateNoteTextResponse.fromJson(response.data);
@@ -290,7 +292,7 @@ class ApiService {
     required String text,
   }) async {
     try {
-      var response = await _apiClient?.postReq("update/${id}", data: {
+      var response = await _apiClient?.putReq("update/${id}", data: {
         "context": "note",
         "updatePayload": {
           "title": title,
@@ -309,7 +311,7 @@ class ApiService {
     required String dateTime,
   }) async {
     try {
-      var response = await _apiClient?.postReq("update/${id}", data: {
+      var response = await _apiClient?.putReq("update/${id}", data: {
         "context": "reminder",
         "updatePayload": {
           "title": title,

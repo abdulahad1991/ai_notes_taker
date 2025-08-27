@@ -4,6 +4,7 @@ import 'package:stacked/stacked.dart';
 import '../../../../app/app.locator.dart';
 import '../../../../models/response/create_note_text_response.dart';
 import '../../../../services/api_service.dart';
+import '../../../../shared/functions.dart';
 import 'home_listing_viewmodel.dart';
 
 class TextInputViewmodel extends ReactiveViewModel {
@@ -36,6 +37,29 @@ class TextInputViewmodel extends ReactiveViewModel {
       if (reminder != null) {
         titleController.text = reminder!.title;
         descriptionController.text = reminder!.description;
+        
+        // Parse and set date and time from reminder data
+        if (reminder!.date.isNotEmpty && reminder!.date != "N/A") {
+          try {
+            final DateTime dateTime = DateTime.parse(reminder!.date);
+            selectedDate = dateTime;
+          } catch (e) {
+            print('Error parsing reminder date: $e');
+          }
+        }
+        
+        if (reminder!.time.isNotEmpty && reminder!.time != "N/A") {
+          try {
+            final List<String> timeParts = reminder!.time.split(':');
+            if (timeParts.length >= 2) {
+              final int hour = int.parse(timeParts[0]);
+              final int minute = int.parse(timeParts[1]);
+              selectedTime = TimeOfDay(hour: hour, minute: minute);
+            }
+          } catch (e) {
+            print('Error parsing reminder time: $e');
+          }
+        }
       } else {
         titleController.text = note!.title;
         descriptionController.text = note!.content;
@@ -94,13 +118,16 @@ class TextInputViewmodel extends ReactiveViewModel {
       context: context,
       initialTime: selectedTime ?? TimeOfDay.now(),
       builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: const Color(0xFF667eea),
-                ),
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                    primary: const Color(0xFF667eea),
+                  ),
+            ),
+            child: child!,
           ),
-          child: child!,
         );
       },
     );
@@ -159,7 +186,13 @@ class TextInputViewmodel extends ReactiveViewModel {
 
   String get timeText {
     if (selectedTime == null) return 'Select time';
-    return '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}';
+    
+    // Convert 24-hour format to 12-hour format with AM/PM
+    int hour = selectedTime!.hour;
+    String period = hour >= 12 ? 'PM' : 'AM';
+    int displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    
+    return '${displayHour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')} $period';
   }
 
   bool get showDateTimeWarning {
@@ -214,13 +247,16 @@ class TextInputViewmodel extends ReactiveViewModel {
             selectedDate!.day,
             selectedTime!.hour,
             selectedTime!.minute,
-          );
+          ).toUtc();
 
+
+          // final String isoLocal = scheduleDateTime.toIso8601String();
           final String isoLocal = scheduleDateTime.toIso8601String();
+
           if (isEdit) {
-            editReminder("${isoLocal}Z");
+            editReminder("${isoLocal}");
           } else {
-            createReminder("${isoLocal}Z");
+            createReminder("${isoLocal}");
           }
         }
       } else {
@@ -242,6 +278,7 @@ class TextInputViewmodel extends ReactiveViewModel {
       var response = await runBusyFuture(
           api.createReminderText(
               title: titleController.text.trim(),
+              description: descriptionController.text.trim(),
               reminder_time: scheduleDateTime.toString()),
           throwException: true);
       if (response != null) {
