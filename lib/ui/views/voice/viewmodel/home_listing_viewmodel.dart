@@ -264,7 +264,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
     try {
       final DateTime scheduledLocalTime = parseUtc(reminder.runtime).toLocal();
-      final List<String> timeParts = reminder.time.split(':');
+
+      final List<String> timeParts = scheduledLocalTime.toString().split(" ").last.split(":");
       final DateTime scheduledTime = DateTime(
         scheduledLocalTime.year,
         scheduledLocalTime.month,
