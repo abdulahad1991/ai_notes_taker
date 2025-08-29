@@ -5,6 +5,7 @@ import 'package:ai_notes_taker/ui/views/voice/voice_view.dart';
 import 'package:firebase_messaging/firebase_messaging.dart'
     hide NotificationSettings;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Priority;
 import 'package:stacked/stacked.dart';
@@ -15,6 +16,7 @@ import '../../../../app/app.locator.dart';
 import '../../../../app/app.router.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/app_auth_service.dart';
+import '../../../../services/sound_service.dart';
 import '../../../../shared/functions.dart';
 import 'package:stacked_services/stacked_services.dart';
 
@@ -32,6 +34,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
   final api = locator<ApiService>();
   final authService = locator<AppAuthService>();
+  final soundService = SoundService();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -210,7 +213,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
               content: item.text ?? "N/A",
               createdAt: item.createdAt ?? "",
               isReminder: false,
-              isPinned: item.is_pin == 0));
+              isPinned: item.is_pin == 1));
         }
 
         fetchReminders();
@@ -233,27 +236,52 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
   Future<void> deleteNote(Note note) async {
     try {
-      await runBusyFuture(
-        api.delete(context_id: note.id, context: "note"),
-        throwException: true,
+      notes.removeWhere((n) => n.id == note.id);
+      notifyListeners();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Note "${note.title}" deleted successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
       );
-
-      init();
-    } on FormatException catch (e) {
+    } catch (e) {
       print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete note'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
   Future<void> deleteReminder(Reminder reminder) async {
     try {
-      await runBusyFuture(
-        api.delete(context_id: reminder.id, context: "reminder"),
-        throwException: true,
+      reminders.removeWhere((r) => r.id == reminder.id);
+      
+      cancelAlarmForReminder(reminder.id);
+      
+      notifyListeners();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Reminder "${reminder.title}" deleted successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
       );
-
-      init();
-    } on FormatException catch (e) {
+    } catch (e) {
       print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete reminder'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -378,23 +406,41 @@ class HomeListingViewmodel extends ReactiveViewModel {
   Future<void> togglePinNote(Note note) async {
     final noteIndex = notes.indexWhere((n) => n.id == note.id);
     if (noteIndex != -1) {
+      final bool willBePinned = !note.isPinned;
       final updatedNote = Note(
         id: note.id,
         title: note.title,
         content: note.content,
         createdAt: note.createdAt,
         isReminder: note.isReminder,
-        isPinned: !note.isPinned,
+        isPinned: willBePinned,
       );
+      
+      // Play sound effect based on pin action
+      if (willBePinned) {
+        await soundService.playSoundEffect(SoundEffect.pin);
+      } else {
+        await soundService.playSoundEffect(SoundEffect.unpin);
+      }
+      
       try {
         var response = await runBusyFuture(
-            api.pinNote(id: note!.id.toString(), is_pin: note.isPinned ? 1 : 0),
-            throwException: true);
+            api.pinNote(id: note!.id.toString(), is_pin: willBePinned ? 1 : 0),
+            throwException: true, busyObject: "pin");
       } on FormatException catch (e) {
         // showErrorDialog(e.message, context);
       }
       notes[noteIndex] = updatedNote;
       notifyListeners();
+      
+      // Show confirmation message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(willBePinned ? 'Note pinned' : 'Note unpinned'),
+          backgroundColor: willBePinned ? Colors.orange : Colors.grey,
+          duration: Duration(seconds: 1),
+        ),
+      );
     }
   }
 
@@ -423,7 +469,16 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
   List<dynamic> getFilteredItems() {
     if (selectedTabIndex == 0) {
-      return notes;
+      // Sort notes with pinned items first
+      List<Note> sortedNotes = List.from(notes);
+      sortedNotes.sort((a, b) {
+        // First sort by isPinned (pinned items first)
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        // If both have same pin status, maintain original order
+        return 0;
+      });
+      return sortedNotes;
     } else {
       return reminders;
     }
