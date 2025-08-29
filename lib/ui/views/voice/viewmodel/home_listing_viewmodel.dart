@@ -148,11 +148,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
   }
 
   Future<void> callUpdateUserProfile(String token) async {
-    await runBusyFuture(
-      api.updateUser(fcm_token: token),
-      throwException: true,
-      busyObject: "update_user"
-    );
+    await runBusyFuture(api.updateUser(fcm_token: token),
+        throwException: true, busyObject: "update_user");
   }
 
   Future<void> fetchReminders() async {
@@ -212,7 +209,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
               title: item.title ?? "N/A",
               content: item.text ?? "N/A",
               createdAt: item.createdAt ?? "",
-              isReminder: false));
+              isReminder: false,
+              isPinned: item.is_pin == 0));
         }
 
         fetchReminders();
@@ -265,7 +263,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
     try {
       final DateTime scheduledLocalTime = parseUtc(reminder.runtime).toLocal();
 
-      final List<String> timeParts = scheduledLocalTime.toString().split(" ").last.split(":");
+      final List<String> timeParts =
+          scheduledLocalTime.toString().split(" ").last.split(":");
       final DateTime scheduledTime = DateTime(
         scheduledLocalTime.year,
         scheduledLocalTime.month,
@@ -363,10 +362,10 @@ class HomeListingViewmodel extends ReactiveViewModel {
       context,
       MaterialPageRoute(
           builder: (context) => TextInputView(
-            isReminder: selectedTabIndex == 1,
-            isEdit: true,
-            note: note,
-          )),
+                isReminder: selectedTabIndex == 1,
+                isEdit: true,
+                note: note,
+              )),
     ).then((result) {
       if (selectedTabIndex == 1) {
         fetchReminders();
@@ -376,7 +375,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
     });
   }
 
-  void togglePinNote(Note note) {
+  Future<void> togglePinNote(Note note) async {
     final noteIndex = notes.indexWhere((n) => n.id == note.id);
     if (noteIndex != -1) {
       final updatedNote = Note(
@@ -387,7 +386,13 @@ class HomeListingViewmodel extends ReactiveViewModel {
         isReminder: note.isReminder,
         isPinned: !note.isPinned,
       );
-      
+      try {
+        var response = await runBusyFuture(
+            api.pinNote(id: note!.id.toString(), is_pin: note.isPinned ? 1 : 0),
+            throwException: true);
+      } on FormatException catch (e) {
+        // showErrorDialog(e.message, context);
+      }
       notes[noteIndex] = updatedNote;
       notifyListeners();
     }
@@ -398,10 +403,10 @@ class HomeListingViewmodel extends ReactiveViewModel {
       context,
       MaterialPageRoute(
           builder: (context) => TextInputView(
-            isReminder: selectedTabIndex == 1,
-            isEdit: true,
-            reminder: reminder,
-          )),
+                isReminder: selectedTabIndex == 1,
+                isEdit: true,
+                reminder: reminder,
+              )),
     ).then((result) {
       if (selectedTabIndex == 1) {
         fetchReminders();

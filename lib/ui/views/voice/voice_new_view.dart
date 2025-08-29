@@ -1,5 +1,6 @@
 
 import 'package:ai_notes_taker/i18n/strings.g.dart';
+import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
@@ -356,7 +357,7 @@ class _MainScreenState extends State<VoiceNewView>
                             child: Icon(
                               note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
                               size: isSmallScreen ? 14 : 16,
-                              color: note.isPinned ? const Color(0xFF667eea) : Colors.grey[600],
+                              color: note.isPinned ? AppColors.red : Colors.grey[600],
                             ),
                           ),
                         ),
