@@ -350,6 +350,18 @@ class _MainScreenState extends State<VoiceNewView>
                       children: [
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
+                          onTap: () => model.togglePinNote(note),
+                          child: Container(
+                            padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
+                            child: Icon(
+                              note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                              size: isSmallScreen ? 14 : 16,
+                              color: note.isPinned ? const Color(0xFF667eea) : Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(16),
                           onTap: () => model.editNote(note),
                           child: Container(
                             padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
