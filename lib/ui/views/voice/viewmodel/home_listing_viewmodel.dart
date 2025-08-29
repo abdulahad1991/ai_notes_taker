@@ -376,6 +376,23 @@ class HomeListingViewmodel extends ReactiveViewModel {
     });
   }
 
+  void togglePinNote(Note note) {
+    final noteIndex = notes.indexWhere((n) => n.id == note.id);
+    if (noteIndex != -1) {
+      final updatedNote = Note(
+        id: note.id,
+        title: note.title,
+        content: note.content,
+        createdAt: note.createdAt,
+        isReminder: note.isReminder,
+        isPinned: !note.isPinned,
+      );
+      
+      notes[noteIndex] = updatedNote;
+      notifyListeners();
+    }
+  }
+
   void editReminder(Reminder reminder) {
     Navigator.push(
       context,
@@ -419,6 +436,7 @@ class Note {
   final String content;
   final String createdAt;
   final bool isReminder;
+  final bool isPinned;
 
   Note({
     required this.id,
@@ -426,6 +444,7 @@ class Note {
     required this.content,
     required this.createdAt,
     required this.isReminder,
+    this.isPinned = false,
   });
 }
 
