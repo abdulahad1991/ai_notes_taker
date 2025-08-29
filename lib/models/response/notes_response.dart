@@ -29,6 +29,7 @@ class Data {
   String? text;
   int? fileSize;
   int? isVoice;
+  int? is_pin;
   bool? isActive;
   bool? isComplete;
   bool? isDeleted;
@@ -43,6 +44,7 @@ class Data {
         this.text,
         this.fileSize,
         this.isVoice,
+        this.is_pin,
         this.isActive,
         this.isComplete,
         this.isDeleted,
@@ -57,6 +59,7 @@ class Data {
     text = json['text'];
     fileSize = json['file_size'];
     isVoice = json['is_voice'];
+    is_pin = json['is_pin'];
     isActive = json['is_active'];
     isComplete = json['is_complete'];
     isDeleted = json['is_deleted'];

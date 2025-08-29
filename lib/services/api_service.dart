@@ -304,6 +304,24 @@ class ApiService {
       rethrow;
     }
   }
+
+  Future<dynamic> pinNote({
+    required String id,
+    required int is_pin,
+  }) async {
+    try {
+      var response = await _apiClient?.putReq("update/${id}", data: {
+        "context": "note",
+        "updatePayload": {
+          "is_pin": is_pin,
+        },
+      });
+      return BaseResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<dynamic> editReminderText({
     required String id,
     required String title,
