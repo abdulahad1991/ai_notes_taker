@@ -6,15 +6,16 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:ai_notes_taker/ui/views/auth/auth_screen.dart' as _i6;
+import 'package:ai_notes_taker/ui/views/auth/user_form_view.dart' as _i8;
 import 'package:ai_notes_taker/ui/views/home/home_view.dart' as _i2;
 import 'package:ai_notes_taker/ui/views/startup/startup_view.dart' as _i3;
 import 'package:ai_notes_taker/ui/views/voice/reminders_list.dart' as _i5;
 import 'package:ai_notes_taker/ui/views/voice/voice_new_view.dart' as _i7;
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart' as _i4;
-import 'package:flutter/material.dart' as _i8;
+import 'package:flutter/material.dart' as _i9;
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart' as _i1;
-import 'package:stacked_services/stacked_services.dart' as _i9;
+import 'package:stacked_services/stacked_services.dart' as _i10;
 
 class Routes {
   static const homeView = '/home-view';
@@ -29,6 +30,8 @@ class Routes {
 
   static const voiceNewView = '/voice-new-view';
 
+  static const userFormView = '/user-form-view';
+
   static const all = <String>{
     homeView,
     startupView,
@@ -36,6 +39,7 @@ class Routes {
     remindersListScreen,
     authScreen,
     voiceNewView,
+    userFormView,
   };
 }
 
@@ -65,44 +69,54 @@ class StackedRouter extends _i1.RouterBase {
       Routes.voiceNewView,
       page: _i7.VoiceNewView,
     ),
+    _i1.RouteDef(
+      Routes.userFormView,
+      page: _i8.UserFormView,
+    ),
   ];
 
   final _pagesMap = <Type, _i1.StackedRouteFactory>{
     _i2.HomeView: (data) {
-      return _i8.MaterialPageRoute<dynamic>(
+      return _i9.MaterialPageRoute<dynamic>(
         builder: (context) => const _i2.HomeView(),
         settings: data,
       );
     },
     _i3.StartupView: (data) {
-      return _i8.MaterialPageRoute<dynamic>(
+      return _i9.MaterialPageRoute<dynamic>(
         builder: (context) => const _i3.StartupView(),
         settings: data,
       );
     },
     _i4.VoiceView: (data) {
       final args = data.getArgs<VoiceViewArguments>(nullOk: false);
-      return _i8.MaterialPageRoute<dynamic>(
+      return _i9.MaterialPageRoute<dynamic>(
         builder: (context) =>
             _i4.VoiceView(key: args.key, isReminder: args.isReminder),
         settings: data,
       );
     },
     _i5.RemindersListScreen: (data) {
-      return _i8.MaterialPageRoute<dynamic>(
+      return _i9.MaterialPageRoute<dynamic>(
         builder: (context) => const _i5.RemindersListScreen(),
         settings: data,
       );
     },
     _i6.AuthScreen: (data) {
-      return _i8.MaterialPageRoute<dynamic>(
+      return _i9.MaterialPageRoute<dynamic>(
         builder: (context) => const _i6.AuthScreen(),
         settings: data,
       );
     },
     _i7.VoiceNewView: (data) {
-      return _i8.MaterialPageRoute<dynamic>(
+      return _i9.MaterialPageRoute<dynamic>(
         builder: (context) => const _i7.VoiceNewView(),
+        settings: data,
+      );
+    },
+    _i8.UserFormView: (data) {
+      return _i9.MaterialPageRoute<dynamic>(
+        builder: (context) => const _i8.UserFormView(),
         settings: data,
       );
     },
@@ -121,7 +135,7 @@ class VoiceViewArguments {
     required this.isReminder,
   });
 
-  final _i8.Key? key;
+  final _i9.Key? key;
 
   final bool isReminder;
 
@@ -142,7 +156,7 @@ class VoiceViewArguments {
   }
 }
 
-extension NavigatorStateExtension on _i9.NavigationService {
+extension NavigatorStateExtension on _i10.NavigationService {
   Future<dynamic> navigateToHomeView([
     int? routerId,
     bool preventDuplicates = true,
@@ -172,7 +186,7 @@ extension NavigatorStateExtension on _i9.NavigationService {
   }
 
   Future<dynamic> navigateToVoiceView({
-    _i8.Key? key,
+    _i9.Key? key,
     required bool isReminder,
     int? routerId,
     bool preventDuplicates = true,
@@ -230,6 +244,20 @@ extension NavigatorStateExtension on _i9.NavigationService {
         transition: transition);
   }
 
+  Future<dynamic> navigateToUserFormView([
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  ]) async {
+    return navigateTo<dynamic>(Routes.userFormView,
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
   Future<dynamic> replaceWithHomeView([
     int? routerId,
     bool preventDuplicates = true,
@@ -259,7 +287,7 @@ extension NavigatorStateExtension on _i9.NavigationService {
   }
 
   Future<dynamic> replaceWithVoiceView({
-    _i8.Key? key,
+    _i9.Key? key,
     required bool isReminder,
     int? routerId,
     bool preventDuplicates = true,
@@ -311,6 +339,20 @@ extension NavigatorStateExtension on _i9.NavigationService {
         transition,
   ]) async {
     return replaceWith<dynamic>(Routes.voiceNewView,
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> replaceWithUserFormView([
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  ]) async {
+    return replaceWith<dynamic>(Routes.userFormView,
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,

@@ -1,5 +1,6 @@
 import 'package:ai_notes_taker/ui/bottom_sheets/notice/notice_sheet.dart';
 import 'package:ai_notes_taker/ui/dialogs/info_alert/info_alert_dialog.dart';
+import 'package:ai_notes_taker/ui/views/auth/user_form_view.dart';
 import 'package:ai_notes_taker/ui/views/home/home_view.dart';
 import 'package:ai_notes_taker/ui/views/startup/startup_view.dart';
 import 'package:ai_notes_taker/ui/views/voice/reminders_list.dart';
@@ -23,6 +24,7 @@ import '../ui/views/voice/voice_new_view.dart';
     MaterialRoute(page: RemindersListScreen),
     MaterialRoute(page: AuthScreen),
     MaterialRoute(page: VoiceNewView),
+    MaterialRoute(page: UserFormView),
     // @stacked-route
   ],
   dependencies: [
