@@ -140,7 +140,8 @@ class AuthViewModel extends ReactiveViewModel {
         if (response != null) {
           final data = response as LoginResponse;
           authService.setLoginData(data);
-          NavigationService().navigateTo(Routes.voiceNewView);
+          NavigationService().navigateTo(Routes.userFormView);
+          // NavigationService().navigateTo(Routes.voiceNewView);
         }
       } on FormatException catch (e) {
         print(e);
