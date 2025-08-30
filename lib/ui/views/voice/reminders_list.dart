@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+import '../../../services/data_service.dart';
+
 class RemindersListScreen extends StatefulWidget {
   const RemindersListScreen({super.key});
 
@@ -18,69 +20,7 @@ class _RemindersListScreenState extends State<RemindersListScreen>
   late Animation<double> _headerFadeAnimation;
 
   List<Reminder> reminders = [
-    Reminder(
-      id: 1,
-      title: 'Call mom',
-      description: 'Weekly check-in call',
-      time: '3:00 PM',
-      date: 'Today',
-      isCompleted: false,
-      priority: Priority.high,
-    ),
-    Reminder(
-      id: 2,
-      title: 'Buy groceries',
-      description: 'Milk, bread, eggs, fruits',
-      time: '6:00 PM',
-      date: 'Today',
-      isCompleted: false,
-      priority: Priority.medium,
-    ),
-    Reminder(
-      id: 3,
-      title: 'Team meeting',
-      description: 'Monthly team sync',
-      time: '10:00 AM',
-      date: 'Tomorrow',
-      isCompleted: false,
-      priority: Priority.high,
-    ),
-    Reminder(
-      id: 4,
-      title: 'Dentist appointment',
-      description: 'Regular checkup',
-      time: '2:00 PM',
-      date: 'Friday',
-      isCompleted: true,
-      priority: Priority.medium,
-    ),
-    Reminder(
-      id: 5,
-      title: 'Pay bills',
-      description: 'Electricity and water bills',
-      time: '5:00 PM',
-      date: 'Tomorrow',
-      isCompleted: false,
-      priority: Priority.low,
-    ),
-    Reminder(
-      id: 6,
-      title: 'Walk dog',
-      description: 'Evening walk in park',
-      time: '7:00 PM',
-      date: 'Today',
-      isCompleted: false,
-      priority: Priority.low,
-    ),
-    Reminder(
-      id: 7,
-      title: 'Read book',
-      description: 'Finish "Flutter in Action"',
-      time: '9:00 PM',
-      date: 'Tomorrow',
-      isCompleted: false,
-      priority: Priority.medium,
-    ),
+
   ];
 
   @override
@@ -788,7 +728,7 @@ class _StaggeredAnimatedReminderCardState
 }
 
 // --- Models ---
-
+/*
 enum Priority { high, medium, low }
 
 class Reminder {
@@ -809,4 +749,4 @@ class Reminder {
     required this.isCompleted,
     required this.priority,
   });
-}
+}*/

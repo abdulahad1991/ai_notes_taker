@@ -1,6 +1,9 @@
 import 'package:ai_notes_taker/ui/views/auth/user_form_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked_services/stacked_services.dart';
+import '../../../app/app.locator.dart';
+import '../../../app/app.router.dart';
 import '../../../models/response/signup_form_response.dart';
 import '../../../shared/app_colors.dart';
 
@@ -23,7 +26,7 @@ class UserFormView extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
           ),
           actions: [
-            _buildLanguageToggle(model),
+            _buildSkipButton(),
             SizedBox(width: 16),
           ],
         ),
@@ -80,39 +83,17 @@ class UserFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildLanguageToggle(UserFormViewModel model) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.platinum),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildLanguageOption(model, 'EN'),
-          Container(width: 1, height: 30, color: AppColors.platinum),
-          _buildLanguageOption(model, 'DE'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLanguageOption(UserFormViewModel model, String language) {
-    final isSelected = model.currentLanguage == language;
-    return GestureDetector(
-      onTap: () => model.changeLanguage(language),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          language,
-          style: TextStyle(
-            color: isSelected ? Colors.white : AppColors.grey,
-            fontWeight: FontWeight.w500,
-          ),
+  Widget _buildSkipButton() {
+    return TextButton(
+      onPressed: () {
+        locator<NavigationService>().navigateTo(Routes.voiceNewView);
+      },
+      child: Text(
+        'Skip',
+        style: TextStyle(
+          color: AppColors.grey,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

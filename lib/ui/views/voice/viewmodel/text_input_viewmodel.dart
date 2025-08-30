@@ -4,6 +4,7 @@ import 'package:stacked/stacked.dart';
 import '../../../../app/app.locator.dart';
 import '../../../../models/response/create_note_text_response.dart';
 import '../../../../services/api_service.dart';
+import '../../../../services/data_service.dart';
 import '../../../../shared/functions.dart';
 import 'home_listing_viewmodel.dart';
 
@@ -48,12 +49,13 @@ class TextInputViewmodel extends ReactiveViewModel {
           }
         }
         
-        if (reminder!.time.isNotEmpty && reminder!.time != "N/A") {
+        if (reminder!.runtime.isNotEmpty && reminder!.runtime != "N/A") {
           try {
-            final List<String> timeParts = reminder!.time.split(':');
+            String localTime = formatScheduledTime(reminder!.runtime);
+            final List<String> timeParts = localTime.split(':');
             if (timeParts.length >= 2) {
               final int hour = int.parse(timeParts[0]);
-              final int minute = int.parse(timeParts[1]);
+              final int minute = int.parse(timeParts[1].replaceAll("AM", "").replaceAll("PM", ""));
               selectedTime = TimeOfDay(hour: hour, minute: minute);
             }
           } catch (e) {
@@ -249,8 +251,6 @@ class TextInputViewmodel extends ReactiveViewModel {
             selectedTime!.minute,
           ).toUtc();
 
-
-          // final String isoLocal = scheduleDateTime.toIso8601String();
           final String isoLocal = scheduleDateTime.toIso8601String();
 
           if (isEdit) {

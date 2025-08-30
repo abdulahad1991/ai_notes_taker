@@ -25,6 +25,7 @@ class User {
   String? firstName;
   String? lastName;
   String? token;
+  String? last_login;
   int? userType;
 
   User(
@@ -32,6 +33,7 @@ class User {
         this.email,
         this.firstName,
         this.lastName,
+        this.last_login,
         this.token,
         this.userType});
 
@@ -42,6 +44,7 @@ class User {
     lastName = json['last_name'];
     token = json['token'];
     userType = json['user_type'];
+    last_login = json['last_login'];
   }
 
   Map<String, dynamic> toJson() {

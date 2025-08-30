@@ -12,6 +12,10 @@ import '../services/api_service.dart';
 import '../services/app_auth_service.dart';
 import '../services/app_preferences_service.dart';
 import '../services/app_shared_pref_service.dart';
+import '../services/database_helper.dart';
+import '../services/sync_service.dart';
+import '../services/connectivity_service.dart';
+import '../services/data_service.dart';
 import '../ui/views/auth/auth_screen.dart';
 import '../ui/views/voice/voice_new_view.dart';
 // @stacked-import
@@ -35,6 +39,10 @@ import '../ui/views/voice/voice_new_view.dart';
     LazySingleton(classType: AppAuthService),
     LazySingleton(classType: AppPreferencesService),
     LazySingleton(classType: AppSharedPrefService),
+    LazySingleton(classType: DatabaseHelper),
+    LazySingleton(classType: SyncService),
+    LazySingleton(classType: ConnectivityService),
+    LazySingleton(classType: DataService),
     // @stacked-service
   ],
   bottomsheets: [
