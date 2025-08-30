@@ -186,9 +186,19 @@ class UserFormViewModel extends ReactiveViewModel {
       _errorMessage = null;
       notifyListeners();
       
-      // Submit form data to API
-      // Replace with actual API call
-      await Future.delayed(Duration(seconds: 2)); // Simulate API call
+      // Submit each form answer to API using updateInfoForm
+      for (final entry in _formAnswers.entries) {
+        try {
+          await api.updateInfoForm(
+            key: entry.key,
+            value: entry.value,
+          );
+          debugPrint('Successfully updated ${entry.key}: ${entry.value}');
+        } catch (e) {
+          debugPrint('Error updating ${entry.key}: $e');
+          throw e; // Rethrow to trigger error handling
+        }
+      }
       
       _isLoading = false;
       notifyListeners();
@@ -200,6 +210,7 @@ class UserFormViewModel extends ReactiveViewModel {
       _isLoading = false;
       _errorMessage = 'Failed to submit form. Please try again.';
       notifyListeners();
+      debugPrint('Form submission error: $e');
     }
   }
   
