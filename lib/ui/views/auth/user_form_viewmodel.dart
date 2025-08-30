@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
+import '../../../app/app.router.dart';
 import '../../../models/response/signup_form_response.dart';
 import '../../../services/api_service.dart';
 
 class UserFormViewModel extends ReactiveViewModel {
   final api = locator<ApiService>();
+  final navigationService = locator<NavigationService>();
   final formKey = GlobalKey<FormState>();
   
   SignupFormResponse? _formResponse;
@@ -190,7 +193,8 @@ class UserFormViewModel extends ReactiveViewModel {
       _isLoading = false;
       notifyListeners();
       
-      // Navigate to next screen or show success message
+      // Navigate to voice view after successful submission
+      navigationService.navigateTo(Routes.voiceNewView);
       debugPrint('Form submitted successfully: $_formAnswers');
     } catch (e) {
       _isLoading = false;

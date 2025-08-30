@@ -29,7 +29,7 @@ class Data {
   String? text;
   int? fileSize;
   int? isVoice;
-  int? is_pin;
+  bool? is_pin;
   bool? isActive;
   bool? isComplete;
   bool? isDeleted;

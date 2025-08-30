@@ -6,7 +6,11 @@ import 'package:ai_notes_taker/app/app.bottomsheets.dart';
 import 'package:ai_notes_taker/app/app.dialogs.dart';
 import 'package:ai_notes_taker/app/app.locator.dart';
 import 'package:ai_notes_taker/app/app.router.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:ai_notes_taker/services/sync_service.dart';
+import 'package:ai_notes_taker/services/connectivity_service.dart';
+import 'package:ai_notes_taker/services/api_service.dart';
+import 'package:ai_notes_taker/services/data_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Priority;
 import 'package:stacked_services/stacked_services.dart';
 import 'package:alarm/alarm.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -39,6 +43,9 @@ Future<void> main() async {
   await setupLocator();
   await _initializeLocalNotifications();
   await Alarm.init();
+  
+  // Initialize database and sync services
+  await _initializeDatabaseServices();
 
   _setupFirebaseMessaging();
 
@@ -135,16 +142,16 @@ void _setupFirebaseMessaging() {
 }
 
 void _showLocalNotification(RemoteNotification notification) async {
-  const AndroidNotificationDetails androidDetails =
+  final AndroidNotificationDetails androidDetails =
   AndroidNotificationDetails(
     'android_channel_id',
     'android_channel_name',
     importance: Importance.max,
-    priority: Priority.high,
+    // priority: AndroidNotificationPriority.high,
     icon: '@mipmap/ic_launcher',
   );
 
-  const NotificationDetails platformDetails = NotificationDetails(
+  final NotificationDetails platformDetails = NotificationDetails(
     android: androidDetails,
     // iOS settings can be added here
   );
@@ -156,4 +163,46 @@ void _showLocalNotification(RemoteNotification notification) async {
     platformDetails,
     payload: notification.title,
   );
+}
+
+Future<void> _initializeDatabaseServices() async {
+  try {
+    // Get services from locator
+    final syncService = locator<SyncService>();
+    final connectivityService = locator<ConnectivityService>();
+    final apiService = locator<ApiService>();
+    final dataService = locator<DataService>();
+    
+    // Add a small delay to ensure platform channels are ready
+    await Future.delayed(Duration(milliseconds: 100));
+    
+    // Initialize connectivity monitoring with error handling
+    try {
+      connectivityService.initialize();
+    } catch (e) {
+      debugPrint('ConnectivityService initialization failed: $e');
+      // Continue without connectivity monitoring
+    }
+    
+    // Initialize sync service with API service
+    try {
+      syncService.initialize(apiService);
+    } catch (e) {
+      debugPrint('SyncService initialization failed: $e');
+      // Continue without sync service
+    }
+    
+    // Initialize data service
+    try {
+      dataService.initialize(apiService, connectivityService);
+    } catch (e) {
+      debugPrint('DataService initialization failed: $e');
+      // Continue without data service
+    }
+    
+    debugPrint('Database and sync services initialization completed');
+  } catch (e) {
+    debugPrint('Error initializing database services: $e');
+    // Don't throw - let the app continue without these services
+  }
 }

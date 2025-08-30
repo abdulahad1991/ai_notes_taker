@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
 
+import '../../../services/data_service.dart';
 import '../../../shared/functions.dart';
 import 'viewmodel/home_listing_viewmodel.dart';
 
@@ -574,7 +575,7 @@ class _MainScreenState extends State<VoiceNewView>
                           ),
                           SizedBox(width: isSmallScreen ? 2 : 3),
                           Text(
-                            _formatScheduledTime(reminder.runtime),
+                            formatScheduledTime(reminder.runtime),
                             style: TextStyle(
                               fontSize: isSmallScreen ? 9 : 10,
                               color: Colors.grey[600],
@@ -626,42 +627,7 @@ class _MainScreenState extends State<VoiceNewView>
     }
   }
 
-  String _formatScheduledTime(String scheduledTimeString) {
-    try {
-      final scheduledTime = parseUtc(scheduledTimeString).toLocal();
-      /*final now = DateTime.now();
-      final difference = scheduledTime.difference(now);
 
-      if (difference.inDays > 0) {
-        if (difference.inDays == 1) {
-          return 'Tomorrow ${_formatTime(scheduledTime)}';
-        } else if (difference.inDays < 7) {
-          final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-          return '${weekdays[scheduledTime.weekday - 1]} ${_formatTime(scheduledTime)}';
-        } else {
-          return '${scheduledTime.day}/${scheduledTime.month} ${_formatTime(scheduledTime)}';
-        }
-      } else if (difference.inHours > 0) {
-        return 'Today ${_formatTime(scheduledTime)}';
-      } else if (difference.inMinutes > 0) {
-        return 'In ${difference.inMinutes}m';
-      } else if (difference.inMinutes > -60) {
-        return 'Late ${difference.inMinutes.abs()}m';
-      } else {
-
-      }*/
-      return '${_formatTime(scheduledTime)}';
-    } catch (e) {
-      return scheduledTimeString;
-    }
-  }
-
-  String _formatTime(DateTime time) {
-    final hour = time.hour > 12 ? time.hour - 12 : time.hour == 0 ? 12 : time.hour;
-    final minute = time.minute.toString().padLeft(2, '0');
-    final period = time.hour >= 12 ? 'PM' : 'AM';
-    return '$hour:$minute$period';
-  }
 
   void _showDeleteConfirmation(dynamic item, HomeListingViewmodel model) {
     showDialog(

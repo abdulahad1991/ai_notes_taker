@@ -1,6 +1,7 @@
 import 'package:ai_notes_taker/ui/views/voice/viewmodel/home_listing_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import '../../../services/data_service.dart';
 import 'viewmodel/text_input_viewmodel.dart';
 
 class TextInputView extends StatelessWidget {
