@@ -342,4 +342,22 @@ class ApiService {
       rethrow;
     }
   }
+
+
+
+  Future<dynamic> updateInfoForm({
+    required String key,
+    required String value,
+  }) async {
+    try {
+      var response = await _apiClient?.putReq("user/update", data: {
+        "updatePayload":{
+          key: value,
+        }
+      });
+      return LoginResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
