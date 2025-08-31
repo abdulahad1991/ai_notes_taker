@@ -74,7 +74,7 @@ class SyncService {
   Future<void> syncData() async {
     if (_isSyncing || _apiService == null) return;
 
-    final hasInternet = await _hasInternetConnection();
+    final hasInternet  = await _hasInternetConnection();
     if (!hasInternet) {
       debugPrint('No internet connection, skipping sync');
       return;

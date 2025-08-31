@@ -1,5 +1,4 @@
 
-import 'package:ai_notes_taker/i18n/strings.g.dart';
 import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';

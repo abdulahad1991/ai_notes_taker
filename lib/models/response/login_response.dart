@@ -27,6 +27,7 @@ class User {
   String? token;
   String? last_login;
   int? userType;
+  bool? post_signup_form_submitted;
 
   User(
       {this.dob,
@@ -35,6 +36,7 @@ class User {
         this.lastName,
         this.last_login,
         this.token,
+        this.post_signup_form_submitted,
         this.userType});
 
   User.fromJson(json) {
@@ -45,6 +47,12 @@ class User {
     token = json['token'];
     userType = json['user_type'];
     last_login = json['last_login'];
+    try{
+
+      post_signup_form_submitted = json['post_signup_form_submitted'];
+    }catch(e){
+      print(e);
+    }
   }
 
   Map<String, dynamic> toJson() {

@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data' hide Uint8List;
 
+import 'package:ai_notes_taker/models/response/create_note_response.dart';
 import 'package:ai_notes_taker/models/response/transcribe_response.dart';
+import 'package:ai_notes_taker/services/data_service.dart';
+import 'package:ai_notes_taker/ui/views/voice/create_notes_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -346,7 +349,7 @@ class VoiceViewmodel extends ReactiveViewModel {
       }
       if (response != null) {
         isProcessing = false;
-        final data = response as TranscribeResponse;
+        final data = response as CreateNoteResponse;
 
         Navigator.of(context).pop();
         if (data.success == false) {
@@ -361,7 +364,17 @@ class VoiceViewmodel extends ReactiveViewModel {
           // rebuildUi(); // Rebuild UI to show recording button again
           // Don't close the screen - let user record again
           // print("Voice processing completed successfully. showTitleField: $showTitleField");
-          Navigator.of(context).pop(true);
+          // Navigator.of(context).pop(true);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => CreateNotesView(isEdit: true,
+                    note: Note(id: data.data!.id.toString(), title: "${data.data!.title}",
+                        content: "${data.data!.text}", createdAt: "", isReminder: false),)),
+          )/*.then((result) {
+
+          })*/;
         }
       }
     } on FormatException catch (e) {
