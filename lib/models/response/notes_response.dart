@@ -28,7 +28,7 @@ class Data {
   String? title;
   String? text;
   int? fileSize;
-  int? isVoice;
+  bool? isVoice;
   bool? is_pin;
   bool? isActive;
   bool? isComplete;
@@ -58,7 +58,7 @@ class Data {
     title = json['title'];
     text = json['text'];
     fileSize = json['file_size'];
-    isVoice = json['is_voice'];
+    // isVoice = json['is_voice'];
     is_pin = json['is_pin'];
     isActive = json['is_active'];
     isComplete = json['is_complete'];

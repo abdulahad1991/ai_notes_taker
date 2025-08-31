@@ -121,9 +121,9 @@ class AuthViewModel extends ReactiveViewModel {
     isLoading = false;
     notifyListeners();*/
 
-    // if (!formKey.currentState!.validate()) return;
-    emailController.text = "saad@gmail.com";
-    passwordController.text = "saad123";
+    if (!formKey.currentState!.validate()) return;
+    // emailController.text = "saad@gmail.com";
+    // passwordController.text = "saad123";
     if (isLogin) {
       try {
         var response = await runBusyFuture(
@@ -140,7 +140,7 @@ class AuthViewModel extends ReactiveViewModel {
         if (response != null) {
           final data = response as LoginResponse;
           authService.setLoginData(data);
-          if(data.user?.last_login!=null){
+          if(data.user?.post_signup_form_submitted == true){
             NavigationService().navigateTo(Routes.voiceNewView);
           }else {
             NavigationService().navigateTo(Routes.userFormView);

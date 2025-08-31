@@ -1,4 +1,5 @@
 import 'package:ai_notes_taker/ui/common/ui_helpers.dart';
+import 'package:ai_notes_taker/ui/views/voice/voice_new_view.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import '../../../../app/app.locator.dart';
@@ -186,7 +187,12 @@ class CreateNotesViewmodel extends ReactiveViewModel {
   }
 
   void onBackPressed() {
-    Navigator.pop(context);
+    // Navigator.pop(context);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+          builder: (context) => const VoiceNewView()),
+    );
   }
 
   Future<void> createReminder(String scheduleDateTime) async {
@@ -230,7 +236,12 @@ class CreateNotesViewmodel extends ReactiveViewModel {
               text: descriptionController.text.trim()),
           throwException: true);
       if (response != null) {
-        Navigator.pop(context);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const VoiceNewView()),
+        );
+        // Navigator.pop(context);
       }
     } on FormatException catch (e) {
       showErrorDialog(e.message, context);

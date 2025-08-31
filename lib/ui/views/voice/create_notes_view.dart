@@ -28,90 +28,11 @@ class CreateNotesView extends StatelessWidget {
     final isCompact = screenWidth < 600;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(context, model, isCompact),
       body: Form(
         key: model.formKey,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: isCompact ? 20 : 32,
-            vertical: isCompact ? 16 : 24,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTitleField(model, isCompact),
-              SizedBox(height: isCompact ? 20 : 28),
-              _buildContentField(model, isCompact),
-
-              SizedBox(height: isCompact ? 28 : 36),
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: model.canSave
-                      ? const LinearGradient(
-                          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )
-                      : LinearGradient(
-                          colors: [Colors.grey.shade300, Colors.grey.shade400],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: model.canSave
-                      ? [
-                          BoxShadow(
-                            color: const Color(0xFF667eea).withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: TextButton(
-                  onPressed: model.canSave ? model.saveInput : null,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isCompact ? 20 : 24,
-                      vertical: isCompact ? 12 : 14,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.check_rounded,
-                        size: isCompact ? 16 : 18,
-                        color:
-                            model.canSave ? Colors.white : Colors.grey.shade600,
-                      ),
-                      SizedBox(width: isCompact ? 6 : 8),
-                      Text(
-                        'Save',
-                        style: TextStyle(
-                          fontSize: isCompact ? 14 : 16,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
-                          color: model.canSave
-                              ? Colors.white
-                              : Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // _buildTipSection(model, isCompact),
-              // SizedBox(height: isCompact ? 20 : 28), // Bottom padding
-            ],
-          ),
-        ),
+        child: _buildContentField(model, isCompact),
       ),
     );
   }
@@ -119,47 +40,45 @@ class CreateNotesView extends StatelessWidget {
   PreferredSizeWidget _buildAppBar(
       BuildContext context, CreateNotesViewmodel model, bool isCompact) {
     return AppBar(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Colors.white,
       elevation: 0,
-      centerTitle: false,
-      leading: Container(
-        margin: EdgeInsets.only(left: isCompact ? 8 : 12),
-        child: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new,
-              color: Colors.grey[700],
-              size: isCompact ? 18 : 20,
+      leading: IconButton(
+        icon: Icon(
+          Icons.arrow_back,
+          color: Colors.grey[700],
+          size: 24,
+        ),
+        onPressed: model.onBackPressed,
+      ),
+      title: Container(
+        child: TextFormField(
+          controller: model.titleController,
+          decoration: InputDecoration(
+            hintText: model.titleHint.isEmpty ? 'Title' : model.titleHint,
+            border: InputBorder.none,
+            hintStyle: TextStyle(
+              fontSize: 18,
+              color: Colors.grey.shade400,
+              fontWeight: FontWeight.w400,
             ),
           ),
-          onPressed: model.onBackPressed,
-        ),
-      ),
-      title: Padding(
-        padding: EdgeInsets.only(left: isCompact ? 8 : 16),
-        child: Text(
-          model.appBarTitle,
           style: TextStyle(
+            fontSize: 18,
             color: Colors.grey[800],
-            fontWeight: FontWeight.w700,
-            fontSize: isCompact ? 20 : 24,
-            letterSpacing: -0.5,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
-      actions: [],
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.check,
+            color: model.canSave ? Colors.blue : Colors.grey,
+            size: 24,
+          ),
+          onPressed: model.canSave ? model.saveInput : null,
+        ),
+      ],
     );
   }
 
@@ -262,53 +181,30 @@ class CreateNotesView extends StatelessWidget {
 
   Widget _buildContentField(CreateNotesViewmodel model, bool isCompact) {
     return Container(
-      height: isCompact ? 240 : 320,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: model.isDescriptionFocused
-              ? const Color(0xFF667eea)
-              : Colors.grey.shade200,
-          width: model.isDescriptionFocused ? 2 : 1.5,
+      color: Colors.white,
+      padding: EdgeInsets.all(16),
+      child: TextFormField(
+        controller: model.descriptionController,
+        maxLines: null,
+        expands: true,
+        textAlignVertical: TextAlignVertical.top,
+        decoration: InputDecoration(
+          hintText: model.contentHint.isEmpty ? 'Note' : model.contentHint,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+          hintStyle: TextStyle(
+            fontSize: 16,
+            color: Colors.grey.shade400,
+            fontWeight: FontWeight.w400,
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: model.isDescriptionFocused
-                ? const Color(0xFF667eea).withOpacity(0.1)
-                : Colors.black.withOpacity(0.06),
-            blurRadius: model.isDescriptionFocused ? 16 : 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Focus(
-        onFocusChange: model.setDescriptionFocus,
-        child: TextFormField(
-          controller: model.descriptionController,
-          maxLines: null,
-          expands: true,
-          textAlignVertical: TextAlignVertical.top,
-          decoration: InputDecoration(
-            hintText: model.contentHint,
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.all(isCompact ? 18 : 22),
-            hintStyle: TextStyle(
-              fontSize: isCompact ? 14 : 16,
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 0.2,
-            ),
-          ),
-          style: TextStyle(
-            fontSize: isCompact ? 14 : 16,
-            color: Colors.grey[800],
-            fontWeight: FontWeight.w500,
-            height: 1.6,
-            letterSpacing: 0.2,
-          ),
-          validator: model.validateContent,
+        style: TextStyle(
+          fontSize: 16,
+          color: Colors.grey[800],
+          fontWeight: FontWeight.w400,
+          height: 1.5,
         ),
+        validator: model.validateContent,
       ),
     );
   }

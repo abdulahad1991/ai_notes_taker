@@ -4,6 +4,7 @@ import 'package:ai_notes_taker/models/response/base_response.dart';
 import 'package:ai_notes_taker/models/response/login_response.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
+import '../models/response/create_note_response.dart';
 import '../models/response/create_note_text_response.dart';
 import '../models/response/notes_response.dart';
 import '../models/response/transcribe_response.dart';
@@ -228,7 +229,7 @@ class ApiService {
       FormData formData = FormData.fromMap(dataMap);
 
       var response = await _apiClient?.postReq("note/voice", data: formData);
-      return TranscribeResponse.fromJson(response.data);
+      return CreateNoteResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
@@ -261,7 +262,7 @@ class ApiService {
         "title": title,
         "text": text,
       });
-      return CreateNoteTextResponse.fromJson(response.data);
+      return CreateNoteResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
@@ -353,6 +354,8 @@ class ApiService {
       var response = await _apiClient?.putReq("user/update", data: {
         "updatePayload":{
           key: value,
+          "form_submitted": true,
+          "post_signup_form_submitted": true,
         }
       });
       return LoginResponse.fromJson(response.data);

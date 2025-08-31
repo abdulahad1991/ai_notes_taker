@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:ai_notes_taker/ui/views/voice/create_notes_view.dart';
 import 'package:ai_notes_taker/ui/views/voice/text_input_view.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart' hide Priority;
@@ -32,6 +33,9 @@ class HomeListingViewmodel extends ReactiveViewModel {
   int selectedTabIndex = 0;
   int notesPage = 0;
   int reminderPage = 0;
+  
+  StreamSubscription<SyncStatus>? _syncStatusSubscription;
+  StreamSubscription<bool>? _connectivitySubscription;
 
   HomeListingViewmodel(this.context);
 
@@ -71,9 +75,13 @@ class HomeListingViewmodel extends ReactiveViewModel {
       print('Error initializing data service: $e');
     }
 
+    // Cancel existing subscriptions before creating new ones
+    _syncStatusSubscription?.cancel();
+    _connectivitySubscription?.cancel();
+
     // Listen to sync status with error handling
-    try {
-      syncService.syncStatusStream.listen((status) {
+   /* try {
+      _syncStatusSubscription = syncService.syncStatusStream.listen((status) {
         if (status == SyncStatus.completed) {
           // After sync, refresh data - offline items should be gone
           fetchData();
@@ -81,18 +89,18 @@ class HomeListingViewmodel extends ReactiveViewModel {
       });
     } catch (e) {
       print('Error setting up sync status listener: $e');
-    }
+    }*/
 
     // Listen to connectivity changes with error handling
-    try {
-      connectivityService.connectionStream.listen((isConnected) {
+    /*try {
+      _connectivitySubscription = connectivityService.connectionStream.listen((isConnected) {
         if (isConnected) {
           syncService.forceSyncNow();
         }
       });
     } catch (e) {
       print('Error setting up connectivity listener: $e');
-    }
+    }*/
 
     // Load data using offline-only database strategy
     await fetchData();
@@ -210,16 +218,6 @@ class HomeListingViewmodel extends ReactiveViewModel {
         throwException: true, busyObject: "update_user");
   }
 
-  Future<void> fetchLocalReminders() async {
-    // Deprecated: Use fetchData() instead
-    await fetchData();
-  }
-
-  Future<void> fetchReminders() async {
-    // Deprecated: Use fetchData() instead
-    await fetchData();
-  }
-
   // Priority conversion methods moved to DataService
 
   Future<void> fetchData() async {
@@ -248,16 +246,6 @@ class HomeListingViewmodel extends ReactiveViewModel {
     } catch (e) {
       print('Error fetching data: $e');
     }
-  }
-
-  Future<void> fetchLocalData() async {
-    // Deprecated: Use fetchData() instead
-    await fetchData();
-  }
-
-  Future<void> fetchNotes() async {
-    // Deprecated: Use fetchData() instead
-    await fetchData();
   }
 
   Future<void> deleteNote(Note note) async {
@@ -433,11 +421,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
                   isEdit: false,
                 )),
       ).then((result) {
-        if (selectedTabIndex == 1) {
-          fetchReminders();
-        } else {
-          fetchNotes();
-        }
+        fetchData();
       });
     } else {
       Navigator.push(
@@ -447,11 +431,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
                   isEdit: false,
                 )),
       ).then((result) {
-        if (selectedTabIndex == 1) {
-          fetchReminders();
-        } else {
-          fetchNotes();
-        }
+        fetchData();
       });
     }
   }
@@ -463,11 +443,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
       MaterialPageRoute(
           builder: (context) => VoiceView(isReminder: selectedTabIndex == 1)),
     ).then((result) {
-      if (selectedTabIndex == 1) {
-        fetchReminders();
-      } else {
-        fetchNotes();
-      }
+      fetchData();
     });
   }
 
@@ -491,11 +467,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
                 note: note,
               )),
     ).then((result) {
-      if (selectedTabIndex == 1) {
-        fetchReminders();
-      } else {
-        fetchNotes();
-      }
+      fetchData();
     });
   }
 
@@ -579,11 +551,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
                 reminder: reminder,
               )),
     ).then((result) {
-      if (selectedTabIndex == 1) {
-        fetchReminders();
-      } else {
-        fetchNotes();
-      }
+      fetchData();
     });
   }
 
@@ -758,6 +726,13 @@ class HomeListingViewmodel extends ReactiveViewModel {
   Future<void> logout() async {
     await authService.resetAuthData();
     NavigationService().navigateTo(Routes.authScreen);
+  }
+
+  @override
+  void dispose() {
+    _syncStatusSubscription?.cancel();
+    _connectivitySubscription?.cancel();
+    super.dispose();
   }
 }
 
