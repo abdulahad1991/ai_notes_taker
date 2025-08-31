@@ -497,7 +497,7 @@ class _StaggeredAnimatedReminderCardState
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12), // Reduced from 20
+          padding: const EdgeInsets.all(20), // Increased size
           child: IntrinsicHeight( // This helps with consistent heights
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -515,8 +515,8 @@ class _StaggeredAnimatedReminderCardState
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        width: 28, // Slightly smaller
-                        height: 28,
+                        width: 36, // Increased size
+                        height: 36,
                         decoration: BoxDecoration(
                           color: reminder.isCompleted
                               ? Colors.green.shade500
@@ -525,7 +525,7 @@ class _StaggeredAnimatedReminderCardState
                             color: reminder.isCompleted
                                 ? Colors.green.shade500
                                 : Colors.grey.shade400,
-                            width: 2, // Reduced from 3
+                            width: 3, // Restored original
                           ),
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: reminder.isCompleted
@@ -541,7 +541,7 @@ class _StaggeredAnimatedReminderCardState
                         child: reminder.isCompleted
                             ? const Icon(
                           Icons.check,
-                          size: 18, // Slightly smaller
+                          size: 24, // Increased size
                           color: Colors.white,
                         )
                             : null,
@@ -551,7 +551,7 @@ class _StaggeredAnimatedReminderCardState
                       onPressed: onOptions,
                       icon: Icon(
                         Icons.more_vert,
-                        size: 20, // Slightly smaller
+                        size: 24, // Increased size
                         color: Colors.grey.shade600,
                       ),
                     ),
@@ -566,8 +566,8 @@ class _StaggeredAnimatedReminderCardState
                       AnimatedDefaultTextStyle(
                         duration: const Duration(milliseconds: 200),
                         style: TextStyle(
-                          // fontSize: 12, // Reduced from 20
-                          // fontWeight: FontWeight.w700,
+                          fontSize: 20, // Increased title size
+                          fontWeight: FontWeight.w700,
                           color: reminder.isCompleted
                               ? Colors.grey.shade500
                               : Colors.grey.shade800,
@@ -582,11 +582,11 @@ class _StaggeredAnimatedReminderCardState
                         ),
                       ),
                       if (reminder.description.isNotEmpty) ...[
-                        const SizedBox(height: 4), // Reduced from 6
+                        const SizedBox(height: 8), // Increased spacing
                         AnimatedDefaultTextStyle(
                           duration: const Duration(milliseconds: 200),
                           style: TextStyle(
-                            fontSize: 14, // Reduced from 15
+                            fontSize: 18, // Increased size
                             color: reminder.isCompleted
                                 ? Colors.grey.shade400
                                 : Colors.grey.shade600,
@@ -598,7 +598,7 @@ class _StaggeredAnimatedReminderCardState
                           ),
                         ),
                       ],
-                      const SizedBox(height: 8), // Reduced from 12
+                      const SizedBox(height: 12), // Increased spacing
                       // Use Wrap instead of Row to handle overflow
                       Wrap(
                         spacing: 8,
@@ -606,24 +606,24 @@ class _StaggeredAnimatedReminderCardState
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4), // Reduced
+                                horizontal: 12, vertical: 6), // Increased
                             decoration: BoxDecoration(
                               color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(16), // Reduced
+                              borderRadius: BorderRadius.circular(18), // Increased
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
                                   Icons.schedule,
-                                  size: 14, // Reduced from 16
+                                  size: 18, // Increased size
                                   color: Colors.blue.shade600,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   reminder.time,
                                   style: TextStyle(
-                                    fontSize: 12, // Reduced from 13
+                                    fontSize: 16, // Increased size
                                     color: Colors.blue.shade600,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -633,10 +633,10 @@ class _StaggeredAnimatedReminderCardState
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4), // Reduced
+                                horizontal: 12, vertical: 6), // Increased
                             decoration: BoxDecoration(
                               color: Colors.purple.shade50,
-                              borderRadius: BorderRadius.circular(16), // Reduced
+                              borderRadius: BorderRadius.circular(18), // Increased
                             ),
                             child: Text(
                               reminder.date,

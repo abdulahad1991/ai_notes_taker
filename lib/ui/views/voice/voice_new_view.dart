@@ -303,7 +303,7 @@ class _MainScreenState extends State<VoiceNewView>
             model.editNote(note);
           },
           child: Padding(
-            padding: EdgeInsets.all(isSmallScreen ? 10 : 14),
+            padding: EdgeInsets.all(isSmallScreen ? 13 : 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -324,7 +324,7 @@ class _MainScreenState extends State<VoiceNewView>
                         child: Text(
                           note.title,
                           style: TextStyle(
-                            fontSize: isSmallScreen ? 11 : (isMediumScreen ? 14 : 16),
+                            fontSize: isSmallScreen ? 14 : (isMediumScreen ? 16 : 18),
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[800],
                           ),
@@ -337,7 +337,7 @@ class _MainScreenState extends State<VoiceNewView>
                         child: Text(
                           note.content,
                           style: TextStyle(
-                            fontSize: isSmallScreen ? 13 : (isMediumScreen ? 14 : 16),
+                            fontSize: isSmallScreen ? 14 : (isMediumScreen ? 15 : 17),
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[800],
                           ),
@@ -395,7 +395,7 @@ class _MainScreenState extends State<VoiceNewView>
                   Text(
                     note.content,
                     style: TextStyle(
-                      fontSize: isSmallScreen ? 11 : (isMediumScreen ? 12 : 14),
+                      fontSize: isSmallScreen ? 13 : (isMediumScreen ? 13 : 15),
                       color: Colors.grey.shade600,
                       height: 1.3,
                     ),
@@ -438,7 +438,7 @@ class _MainScreenState extends State<VoiceNewView>
             model.editReminder(reminder);
           },
           child: Padding(
-            padding: EdgeInsets.all(isSmallScreen ? 10 : 14),
+            padding: EdgeInsets.all(isSmallScreen ? 13 : 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -458,7 +458,7 @@ class _MainScreenState extends State<VoiceNewView>
                         child: Text(
                           reminder.title,
                           style: TextStyle(
-                            fontSize: isSmallScreen ? 11 : (isMediumScreen ? 14 : 16),
+                            fontSize: isSmallScreen ? 14 : (isMediumScreen ? 15 : 17),
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[800],
                           ),
