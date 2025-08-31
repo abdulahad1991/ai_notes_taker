@@ -1,10 +1,12 @@
+import 'package:ai_notes_taker/ui/views/voice/create_notes_view.dart';
 import 'package:ai_notes_taker/ui/views/voice/text_input_view.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart' hide Priority;
 import 'package:firebase_messaging/firebase_messaging.dart'
     hide NotificationSettings;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Priority;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    hide Priority;
 import 'package:stacked/stacked.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:alarm/alarm.dart';
@@ -48,28 +50,28 @@ class HomeListingViewmodel extends ReactiveViewModel {
     tz.initializeTimeZones();
     await _initializeNotifications();
     await _initializeAlarm();
-    
+
     // Initialize sync and connectivity services with error handling
     try {
       syncService.initialize(api);
     } catch (e) {
       print('Error initializing sync service: $e');
     }
-    
+
     try {
       connectivityService.initialize();
     } catch (e) {
       print('Error initializing connectivity service: $e');
     }
-    
+
     // Initialize data service
     try {
       dataService.initialize(api, connectivityService);
     } catch (e) {
       print('Error initializing data service: $e');
     }
-    
-      // Listen to sync status with error handling
+
+    // Listen to sync status with error handling
     try {
       syncService.syncStatusStream.listen((status) {
         if (status == SyncStatus.completed) {
@@ -80,7 +82,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
     } catch (e) {
       print('Error setting up sync status listener: $e');
     }
-    
+
     // Listen to connectivity changes with error handling
     try {
       connectivityService.connectionStream.listen((isConnected) {
@@ -95,7 +97,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
     // Load data using offline-only database strategy
     await fetchData();
     setBusy(false);
-    
+
     // Start background sync for any pending local changes
     try {
       syncService.forceSyncNow();
@@ -212,25 +214,25 @@ class HomeListingViewmodel extends ReactiveViewModel {
     // Deprecated: Use fetchData() instead
     await fetchData();
   }
-  
+
   Future<void> fetchReminders() async {
     // Deprecated: Use fetchData() instead
     await fetchData();
   }
-  
+
   // Priority conversion methods moved to DataService
 
   Future<void> fetchData() async {
     try {
       final fetchedNotes = await dataService.fetchNotes();
       final fetchedReminders = await dataService.fetchReminders();
-      
+
       notes.clear();
       notes.addAll(fetchedNotes);
-      
+
       reminders.clear();
       reminders.addAll(fetchedReminders);
-      
+
       // Schedule alarms for active reminders
       for (var reminder in reminders) {
         try {
@@ -241,32 +243,33 @@ class HomeListingViewmodel extends ReactiveViewModel {
           print('Error scheduling alarm for reminder ${reminder.id}: $e');
         }
       }
-      
+
       notifyListeners();
     } catch (e) {
       print('Error fetching data: $e');
     }
   }
-  
+
   Future<void> fetchLocalData() async {
     // Deprecated: Use fetchData() instead
     await fetchData();
   }
-  
+
   Future<void> fetchNotes() async {
     // Deprecated: Use fetchData() instead
     await fetchData();
   }
 
-
   Future<void> deleteNote(Note note) async {
     try {
       // Check if note exists in local database (offline items)
       final localNotes = await dbHelper.getAllNotes(includeDeleted: true);
-      final localNote = localNotes.where(
-        (n) => n.serverId == note.id || n.id.toString() == note.id,
-      ).firstOrNull;
-      
+      final localNote = localNotes
+          .where(
+            (n) => n.serverId == note.id || n.id.toString() == note.id,
+          )
+          .firstOrNull;
+
       if (localNote != null) {
         // Note is in local database - delete from database
         await dbHelper.deleteNote(localNote.id!);
@@ -284,11 +287,11 @@ class HomeListingViewmodel extends ReactiveViewModel {
           print('Note from API cannot be deleted while offline');
         }
       }
-      
+
       // Remove from UI immediately regardless of source
       notes.removeWhere((n) => n.id == note.id);
       notifyListeners();
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Note "${note.title}" deleted successfully'),
@@ -311,11 +314,14 @@ class HomeListingViewmodel extends ReactiveViewModel {
   Future<void> deleteReminder(Reminder reminder) async {
     try {
       // Check if reminder exists in local database (offline items)
-      final localReminders = await dbHelper.getAllReminders(includeDeleted: true);
-      final localReminder = localReminders.where(
-        (r) => r.serverId == reminder.id || r.id.toString() == reminder.id,
-      ).firstOrNull;
-      
+      final localReminders =
+          await dbHelper.getAllReminders(includeDeleted: true);
+      final localReminder = localReminders
+          .where(
+            (r) => r.serverId == reminder.id || r.id.toString() == reminder.id,
+          )
+          .firstOrNull;
+
       if (localReminder != null) {
         // Reminder is in local database - delete from database
         await dbHelper.deleteReminder(localReminder.id!);
@@ -333,14 +339,14 @@ class HomeListingViewmodel extends ReactiveViewModel {
           print('Reminder from API cannot be deleted while offline');
         }
       }
-      
+
       // Cancel alarm regardless of source
       cancelAlarmForReminder(reminder.id);
-      
+
       // Remove from UI immediately regardless of source
       reminders.removeWhere((r) => r.id == reminder.id);
       notifyListeners();
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Reminder "${reminder.title}" deleted successfully'),
@@ -418,20 +424,36 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
   void textClick() {
     toggleFab();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => TextInputView(
-                isReminder: selectedTabIndex == 1,
-                isEdit: false,
-              )),
-    ).then((result) {
-      if (selectedTabIndex == 1) {
-        fetchReminders();
-      } else {
-        fetchNotes();
-      }
-    });
+    if (selectedTabIndex == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => TextInputView(
+                  isReminder: true,
+                  isEdit: false,
+                )),
+      ).then((result) {
+        if (selectedTabIndex == 1) {
+          fetchReminders();
+        } else {
+          fetchNotes();
+        }
+      });
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CreateNotesView(
+                  isEdit: false,
+                )),
+      ).then((result) {
+        if (selectedTabIndex == 1) {
+          fetchReminders();
+        } else {
+          fetchNotes();
+        }
+      });
+    }
   }
 
   void voiceClick() {
@@ -464,8 +486,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => TextInputView(
-                isReminder: selectedTabIndex == 1,
+          builder: (context) => CreateNotesView(
                 isEdit: true,
                 note: note,
               )),
@@ -482,7 +503,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
     final noteIndex = notes.indexWhere((n) => n.id == note.id);
     if (noteIndex != -1) {
       final bool willBePinned = !note.isPinned;
-      
+
       try {
         // Find local note
         final localNotes = await dbHelper.getAllNotes(includeDeleted: true);
@@ -490,7 +511,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
           (n) => n.serverId == note.id || n.id.toString() == note.id,
           orElse: () => throw Exception('Note not found'),
         );
-        
+
         // Update local database
         final updatedLocalNote = localNote.copyWith(
           isPinned: willBePinned,
@@ -498,7 +519,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
           pendingAction: 'update',
         );
         await dbHelper.updateNote(updatedLocalNote);
-        
+
         // Update UI immediately
         final updatedNote = Note(
           id: note.id,
@@ -510,14 +531,14 @@ class HomeListingViewmodel extends ReactiveViewModel {
         );
         notes[noteIndex] = updatedNote;
         notifyListeners();
-        
+
         // Play sound effect
         if (willBePinned) {
           await soundService.playSoundEffect(SoundEffect.pin);
         } else {
           await soundService.playSoundEffect(SoundEffect.unpin);
         }
-        
+
         // Trigger sync if connected
         try {
           if (connectivityService.isConnected) {
@@ -526,7 +547,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
         } catch (e) {
           print('Error triggering sync: $e');
         }
-        
+
         // Show confirmation message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -602,12 +623,12 @@ class HomeListingViewmodel extends ReactiveViewModel {
         isReminder: isReminder,
         isPinned: isPinned,
       );
-      
+
       if (note != null) {
         // Add to UI immediately
         notes.insert(0, note);
         notifyListeners();
-        
+
         // Trigger sync if connected
         try {
           if (connectivityService.isConnected) {
@@ -621,7 +642,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
       print('Error adding note: $e');
     }
   }
-  
+
   // Add new reminder using DataService
   Future<void> addReminder({
     required String title,
@@ -640,18 +661,18 @@ class HomeListingViewmodel extends ReactiveViewModel {
         runtime: runtime,
         priority: priority,
       );
-      
+
       if (reminder != null) {
         // Add to UI immediately
         reminders.insert(0, reminder);
-        
+
         // Schedule alarm if runtime is provided
         if (runtime.isNotEmpty) {
           scheduleAlarmForReminder(reminder);
         }
-        
+
         notifyListeners();
-        
+
         // Trigger sync if connected
         try {
           if (connectivityService.isConnected) {
@@ -665,9 +686,10 @@ class HomeListingViewmodel extends ReactiveViewModel {
       print('Error adding reminder: $e');
     }
   }
-  
+
   // Update existing note
-  Future<void> updateNote(Note note, {String? title, String? content, bool? isPinned}) async {
+  Future<void> updateNote(Note note,
+      {String? title, String? content, bool? isPinned}) async {
     try {
       // Find local note
       final localNotes = await dbHelper.getAllNotes(includeDeleted: true);
@@ -675,7 +697,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
         (n) => n.serverId == note.id || n.id.toString() == note.id,
         orElse: () => throw Exception('Note not found'),
       );
-      
+
       // Update local database
       final updatedLocalNote = localNote.copyWith(
         title: title ?? localNote.title,
@@ -685,7 +707,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
         pendingAction: 'update',
       );
       await dbHelper.updateNote(updatedLocalNote);
-      
+
       // Update UI
       final noteIndex = notes.indexWhere((n) => n.id == note.id);
       if (noteIndex != -1) {
@@ -699,7 +721,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
         );
         notifyListeners();
       }
-      
+
       // Trigger sync if connected
       try {
         if (connectivityService.isConnected) {
@@ -712,17 +734,17 @@ class HomeListingViewmodel extends ReactiveViewModel {
       print('Error updating note: $e');
     }
   }
-  
+
   // Get sync status for UI indication
   bool isDataSyncing() {
     return syncService.isSyncing;
   }
-  
+
   // Force sync manually
   Future<void> forceSyncData() async {
     await syncService.forceSyncNow();
   }
-  
+
   // Get connectivity status
   bool hasInternetConnection() {
     try {
