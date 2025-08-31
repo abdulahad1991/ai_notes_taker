@@ -222,7 +222,6 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
   Future<void> fetchData() async {
     try {
-      // Use offline-only strategy from DataService
       final fetchedNotes = await dataService.fetchNotes();
       final fetchedReminders = await dataService.fetchReminders();
       
