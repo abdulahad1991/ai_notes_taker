@@ -1,3 +1,4 @@
+import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:ai_notes_taker/ui/common/ui_helpers.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_new_view.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +71,7 @@ class CreateNotesViewmodel extends ReactiveViewModel {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: const Color(0xFF667eea),
+                  primary: AppColors.primary,
                 ),
           ),
           child: child!,
@@ -93,7 +94,7 @@ class CreateNotesViewmodel extends ReactiveViewModel {
           child: Theme(
             data: Theme.of(context).copyWith(
               colorScheme: Theme.of(context).colorScheme.copyWith(
-                    primary: const Color(0xFF667eea),
+                    primary: AppColors.primary,
                   ),
             ),
             child: child!,
@@ -245,6 +246,47 @@ class CreateNotesViewmodel extends ReactiveViewModel {
       }
     } on FormatException catch (e) {
       showErrorDialog(e.message, context);
+    }
+  }
+
+
+  Future<void> deleteNote(Note note) async {
+    // Remove from UI immediately for realtime feel
+    /*final noteIndex = notes.indexWhere((n) => n.id == note.id);
+    final deletedNote = note; // Keep reference for potential rollback
+    notes.removeWhere((n) => n.id == note.id);
+    notifyListeners();*/
+
+    try {
+      // Call API to delete note
+      await api.delete(context_id: note.id, context: 'note');
+      print('Deleted note from server');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Note "${note.title}" deleted successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      print('Error deleting note from server: $e');
+
+      // Revert UI changes on API failure - restore note at original position
+      /*if (noteIndex != -1) {
+        notes.insert(noteIndex, deletedNote);
+      } else {
+        notes.add(deletedNote);
+      }
+      notifyListeners();*/
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete note'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 }

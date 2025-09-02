@@ -1,3 +1,4 @@
+import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:ai_notes_taker/ui/common/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -102,7 +103,7 @@ class TextInputViewmodel extends ReactiveViewModel {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: const Color(0xFF667eea),
+                  primary: AppColors.primary,
                 ),
           ),
           child: child!,
@@ -125,7 +126,7 @@ class TextInputViewmodel extends ReactiveViewModel {
           child: Theme(
             data: Theme.of(context).copyWith(
               colorScheme: Theme.of(context).colorScheme.copyWith(
-                    primary: const Color(0xFF667eea),
+                    primary: AppColors.primary,
                   ),
             ),
             child: child!,

@@ -21,8 +21,9 @@ class _MainScreenState extends State<VoiceNewView>
   late AnimationController _fabController;
   late Animation<double> _fabAnimation;
 
-  // Tab controller
+  // Tab controller and Page controller for swipe functionality
   late TabController _tabController;
+  late PageController _pageController;
 
   @override
   void initState() {
@@ -37,12 +38,14 @@ class _MainScreenState extends State<VoiceNewView>
     );
 
     _tabController = TabController(length: 2, vsync: this);
+    _pageController = PageController(initialPage: 0);
   }
 
   @override
   void dispose() {
     _fabController.dispose();
     _tabController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -81,6 +84,24 @@ class _MainScreenState extends State<VoiceNewView>
     }
   }
 
+  // Handle tab selection and sync with page view
+  void _onTabSelected(int index, HomeListingViewmodel model) {
+    model.setSelectedTabIndex(index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  // Handle page view changes and sync with tab controller
+  void _onPageChanged(int index, HomeListingViewmodel model) {
+    model.setSelectedTabIndex(index);
+    if (_tabController.index != index) {
+      _tabController.animateTo(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -91,8 +112,6 @@ class _MainScreenState extends State<VoiceNewView>
     return ViewModelBuilder<HomeListingViewmodel>.reactive(
         viewModelBuilder: () => HomeListingViewmodel(context)..init(),
         builder: (context, model, child) {
-          List<dynamic> filteredItems = model.getFilteredItems();
-          bool isEmpty = filteredItems.isEmpty;
 
           if (_tabController.index != model.selectedTabIndex) {
             _tabController.animateTo(model.selectedTabIndex);
@@ -111,7 +130,7 @@ class _MainScreenState extends State<VoiceNewView>
               backgroundColor: const Color(0xFFF8F9FA),
               elevation: 0,
               title: Text(
-                "Voice Pad",
+                "${model.authService.loginData?.user?.firstName}",
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w600,
@@ -152,9 +171,9 @@ class _MainScreenState extends State<VoiceNewView>
                     ),
                     child: TabBar(
                       controller: _tabController,
-                      onTap: (index) => model.setSelectedTabIndex(index),
+                      onTap: (index) => _onTabSelected(index, model),
                       indicator: BoxDecoration(
-                        color: const Color(0xFF667eea),
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(22),
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
@@ -182,16 +201,38 @@ class _MainScreenState extends State<VoiceNewView>
               onRefresh: () async {
                 await model.fetchData();
               },
-              color: const Color(0xFF667eea),
+              color: AppColors.primary,
               backgroundColor: Colors.white,
               child: Container(
                 color: const Color(0xFFF8F9FA),
                 child: model.isBusy
                     ? _buildLoadingState()
-                    : isEmpty
-                        ? _buildEmptyState(screenWidth, model)
-                        : _buildNotesGrid(filteredItems,
-                        columnCount, responsivePadding, gridSpacing,model),
+                    : PageView(
+                        controller: _pageController,
+                        onPageChanged: (index) => _onPageChanged(index, model),
+                        children: [
+                          // Notes page (index 0)
+                          _buildPageContent(
+                            model.notes,
+                            columnCount,
+                            responsivePadding,
+                            gridSpacing,
+                            model,
+                            screenWidth,
+                            0, // Notes tab
+                          ),
+                          // Reminders page (index 1)
+                          _buildPageContent(
+                            model.reminders,
+                            columnCount,
+                            responsivePadding,
+                            gridSpacing,
+                            model,
+                            screenWidth,
+                            1, // Reminders tab
+                          ),
+                        ],
+                      ),
               ),
             ),
             floatingActionButton: _buildSpeedDial(model),
@@ -203,16 +244,35 @@ class _MainScreenState extends State<VoiceNewView>
   Widget _buildLoadingState() {
     return const Center(
       child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
       ),
     );
   }
 
-  Widget _buildEmptyState(double screenWidth, HomeListingViewmodel model) {
-    String emptyMessage = model.selectedTabIndex == 0
+  Widget _buildPageContent(
+    List<dynamic> items,
+    int columnCount,
+    EdgeInsets padding,
+    double spacing,
+    HomeListingViewmodel model,
+    double screenWidth,
+    int tabIndex,
+  ) {
+    final isEmpty = items.isEmpty;
+    
+    if (isEmpty) {
+      return _buildEmptyState(screenWidth, model, tabIndex);
+    }
+    
+    return _buildNotesGrid(items, columnCount, padding, spacing, model);
+  }
+
+  Widget _buildEmptyState(double screenWidth, HomeListingViewmodel model, [int? tabIndex]) {
+    final currentTab = tabIndex ?? model.selectedTabIndex;
+    String emptyMessage = currentTab == 0
         ? 'No notes yet'
         : 'No reminder notes yet';
-    String emptySubMessage = model.selectedTabIndex == 0
+    String emptySubMessage = currentTab == 0
         ? 'Tap the + button to create your first note'
         : 'Tap the + button to create your first reminder';
 
@@ -231,13 +291,13 @@ class _MainScreenState extends State<VoiceNewView>
               width: iconSize,
               height: iconSize,
               decoration: BoxDecoration(
-                color: const Color(0xFF667eea).withOpacity(0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(iconSize / 2),
               ),
               child: Icon(
-                model.selectedTabIndex == 0 ? Icons.lightbulb_outline : Icons.notifications_outlined,
+                currentTab == 0 ? Icons.lightbulb_outline : Icons.notifications_outlined,
                 size: iconSize * 0.5,
-                color: const Color(0xFF667eea),
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 24),
@@ -307,7 +367,7 @@ class _MainScreenState extends State<VoiceNewView>
           borderRadius: BorderRadius.circular(12),
           color: Colors.white,
           border: Border.all(
-            color: const Color(0xFF667eea).withOpacity(0.1),
+            color: AppColors.primary.withOpacity(0.1),
             width: 1,
           ),
         ),
@@ -329,7 +389,7 @@ class _MainScreenState extends State<VoiceNewView>
                         width: 3,
                         height: isSmallScreen ? 14 : 18,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF667eea),
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -371,32 +431,20 @@ class _MainScreenState extends State<VoiceNewView>
                             padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
                             child: Icon(
                               note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                              size: isSmallScreen ? 14 : 16,
+                              size: isSmallScreen ? 16 : 18,
                               color: note.isPinned ? AppColors.red : Colors.grey[600],
                             ),
                           ),
                         ),
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
-                          onTap: () => model.editNote(note),
+                          // onTap: () => model.togglePinNote(note),
                           child: Container(
                             padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
                             child: Icon(
-                              Icons.edit_outlined,
-                              size: isSmallScreen ? 14 : 16,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => _showDeleteConfirmation(note, model),
-                          child: Container(
-                            padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
-                            child: Icon(
-                              Icons.delete_outline,
-                              size: isSmallScreen ? 14 : 16,
-                              color: Colors.red[400],
+                              Icons.share,
+                              size: isSmallScreen ? 15 : 17,
+                              color: AppColors.grey,
                             ),
                           ),
                         ),
@@ -497,7 +545,7 @@ class _MainScreenState extends State<VoiceNewView>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        InkWell(
+                        /*InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => model.editReminder(reminder),
                           child: Container(
@@ -508,6 +556,18 @@ class _MainScreenState extends State<VoiceNewView>
                               color: Colors.grey[600],
                             ),
                           ),
+                        ),*/
+                        InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          // onTap: () => model.togglePinNote(note),
+                          child: Container(
+                            padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
+                            child: Icon(
+                              Icons.share,
+                              size: isSmallScreen ? 15 : 17,
+                              color: AppColors.grey,
+                            ),
+                          ),
                         ),
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
@@ -516,7 +576,7 @@ class _MainScreenState extends State<VoiceNewView>
                             padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
                             child: Icon(
                               Icons.delete_outline,
-                              size: isSmallScreen ? 14 : 16,
+                              size: isSmallScreen ? 15 : 17,
                               color: Colors.red[400],
                             ),
                           ),
@@ -792,11 +852,11 @@ class _MainScreenState extends State<VoiceNewView>
               scale: _fabAnimation,
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF667eea),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(isCompact ? 24 : 28),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF667eea).withOpacity(0.3),
+                      color: AppColors.primary.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -857,11 +917,11 @@ class _MainScreenState extends State<VoiceNewView>
           bottom: 0,
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF667eea),
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(isCompact ? 24 : 28),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF667eea).withOpacity(0.4),
+                  color: AppColors.primary.withOpacity(0.4),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),

@@ -110,7 +110,7 @@ class AuthScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF667eea) : Colors.transparent,
+          color: isSelected ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -143,7 +143,7 @@ class AuthScreen extends StatelessWidget {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: const Color(0xFF667eea),
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(14),
           ),
           child: const Icon(
@@ -283,7 +283,7 @@ class AuthScreen extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFF667eea), width: 2),
+          borderSide: BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -303,7 +303,7 @@ class AuthScreen extends StatelessWidget {
       child: ElevatedButton(
         onPressed: model.isBusy ? null : () => model.submitForm(context),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF667eea),
+          backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -365,8 +365,8 @@ class AuthScreen extends StatelessWidget {
             onTap: model.toggleAuthMode,
             child: Text(
               model.isLogin ? t.auth.signUp : t.auth.signIn,
-              style: const TextStyle(
-                color: Color(0xFF667eea),
+              style: TextStyle(
+                color: AppColors.primary,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
