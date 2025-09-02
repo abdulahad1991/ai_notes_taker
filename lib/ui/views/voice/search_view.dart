@@ -177,7 +177,7 @@ class _SearchViewState extends State<SearchView> {
               child: model.isSearching
                   ? const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                       ),
                     )
                   : model.searchResults.isEmpty
@@ -206,13 +206,13 @@ class _SearchViewState extends State<SearchView> {
               width: iconSize,
               height: iconSize,
               decoration: BoxDecoration(
-                color: const Color(0xFF667eea).withOpacity(0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(iconSize / 2),
               ),
               child: Icon(
                 model.hasSearched ? Icons.search_off : Icons.search,
                 size: iconSize * 0.5,
-                color: const Color(0xFF667eea),
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 24),
@@ -280,7 +280,7 @@ class _SearchViewState extends State<SearchView> {
           borderRadius: BorderRadius.circular(12),
           color: Colors.white,
           border: Border.all(
-            color: const Color(0xFF667eea).withOpacity(0.1),
+            color: AppColors.primary.withOpacity(0.1),
             width: 1,
           ),
         ),
@@ -302,7 +302,7 @@ class _SearchViewState extends State<SearchView> {
                         width: 3,
                         height: isSmallScreen ? 14 : 18,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF667eea),
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),

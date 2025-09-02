@@ -1,3 +1,4 @@
+import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:ai_notes_taker/ui/common/ui_helpers.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_new_view.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +71,7 @@ class CreateNotesViewmodel extends ReactiveViewModel {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: const Color(0xFF667eea),
+                  primary: AppColors.primary,
                 ),
           ),
           child: child!,
@@ -93,7 +94,7 @@ class CreateNotesViewmodel extends ReactiveViewModel {
           child: Theme(
             data: Theme.of(context).copyWith(
               colorScheme: Theme.of(context).colorScheme.copyWith(
-                    primary: const Color(0xFF667eea),
+                    primary: AppColors.primary,
                   ),
             ),
             child: child!,

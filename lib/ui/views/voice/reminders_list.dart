@@ -1,3 +1,4 @@
+import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -83,7 +84,7 @@ class _RemindersListScreenState extends State<RemindersListScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF667eea),
+              AppColors.primary,
               Color(0xFF764ba2),
               Color(0xFFf093fb),
             ],
@@ -157,17 +158,17 @@ class _RemindersListScreenState extends State<RemindersListScreen>
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF667eea),
+                AppColors.primary,
                 Color(0xFF764ba2),
               ],
             ),
             boxShadow: [
               BoxShadow(
-                color: Color(0xFF667eea).withOpacity(0.3),
+                color: AppColors.primary.withOpacity(0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),

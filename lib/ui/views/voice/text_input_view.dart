@@ -1,3 +1,4 @@
+import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:ai_notes_taker/ui/views/voice/viewmodel/home_listing_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -59,8 +60,8 @@ class TextInputView extends StatelessWidget {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: model.canSave
-                      ? const LinearGradient(
-                          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                      ? LinearGradient(
+                          colors: [AppColors.primary, Color(0xFF764ba2)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         )
@@ -73,7 +74,7 @@ class TextInputView extends StatelessWidget {
                   boxShadow: model.canSave
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF667eea).withOpacity(0.3),
+                            color: AppColors.primary.withOpacity(0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -180,14 +181,14 @@ class TextInputView extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: model.isTitleFocused
-              ? const Color(0xFF667eea)
+              ? AppColors.primary
               : Colors.grey.shade200,
           width: model.isTitleFocused ? 2 : 1.5,
         ),
         boxShadow: [
           BoxShadow(
             color: model.isTitleFocused
-                ? const Color(0xFF667eea).withOpacity(0.1)
+                ? AppColors.primary.withOpacity(0.1)
                 : Colors.black.withOpacity(0.06),
             blurRadius: model.isTitleFocused ? 16 : 10,
             offset: const Offset(0, 4),
@@ -228,14 +229,14 @@ class TextInputView extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: model.isDescriptionFocused
-              ? const Color(0xFF667eea)
+              ? AppColors.primary
               : Colors.grey.shade200,
           width: model.isDescriptionFocused ? 2 : 1.5,
         ),
         boxShadow: [
           BoxShadow(
             color: model.isDescriptionFocused
-                ? const Color(0xFF667eea).withOpacity(0.1)
+                ? AppColors.primary.withOpacity(0.1)
                 : Colors.black.withOpacity(0.06),
             blurRadius: model.isDescriptionFocused ? 16 : 10,
             offset: const Offset(0, 4),
@@ -278,14 +279,14 @@ class TextInputView extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: model.isDescriptionFocused
-              ? const Color(0xFF667eea)
+              ? AppColors.primary
               : Colors.grey.shade200,
           width: model.isDescriptionFocused ? 2 : 1.5,
         ),
         boxShadow: [
           BoxShadow(
             color: model.isDescriptionFocused
-                ? const Color(0xFF667eea).withOpacity(0.1)
+                ? AppColors.primary.withOpacity(0.1)
                 : Colors.black.withOpacity(0.06),
             blurRadius: model.isDescriptionFocused ? 16 : 10,
             offset: const Offset(0, 4),
@@ -398,7 +399,7 @@ class TextInputView extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF667eea).withOpacity(0.1),
+                    AppColors.primary.withOpacity(0.1),
                     const Color(0xFF764ba2).withOpacity(0.1),
                   ],
                   begin: Alignment.topLeft,
@@ -408,7 +409,7 @@ class TextInputView extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                color: const Color(0xFF667eea),
+                color: AppColors.primary,
                 size: isCompact ? 20 : 22,
               ),
             ),
@@ -519,7 +520,7 @@ class TextInputView extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF667eea).withOpacity(0.08),
+            AppColors.primary.withOpacity(0.08),
             const Color(0xFF764ba2).withOpacity(0.08),
           ],
           begin: Alignment.topLeft,
@@ -527,7 +528,7 @@ class TextInputView extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF667eea).withOpacity(0.15),
+          color: AppColors.primary.withOpacity(0.15),
           width: 1.5,
         ),
       ),
@@ -537,12 +538,12 @@ class TextInputView extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(isCompact ? 8 : 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF667eea).withOpacity(0.15),
+              color: AppColors.primary.withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               model.tipIcon,
-              color: const Color(0xFF667eea),
+              color: AppColors.primary,
               size: isCompact ? 18 : 20,
             ),
           ),
@@ -555,7 +556,7 @@ class TextInputView extends StatelessWidget {
                   'Pro Tip',
                   style: TextStyle(
                     fontSize: isCompact ? 12 : 14,
-                    color: const Color(0xFF667eea),
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
                   ),
@@ -565,7 +566,7 @@ class TextInputView extends StatelessWidget {
                   model.tipText,
                   style: TextStyle(
                     fontSize: isCompact ? 13 : 15,
-                    color: const Color(0xFF667eea).withOpacity(0.9),
+                    color: AppColors.primary.withOpacity(0.9),
                     fontWeight: FontWeight.w500,
                     height: 1.4,
                     letterSpacing: 0.2,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:ai_notes_taker/ui/views/voice/viewmodel/voice_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -209,7 +210,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF667eea),
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                             shape: RoundedRectangleBorder(
@@ -286,7 +287,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                   ? Colors.red.shade500
                                   : isProcessing
                                       ? Colors.orange.shade500
-                                      : const Color(0xFF667eea),
+                                      : AppColors.primary,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
@@ -294,7 +295,7 @@ class _VoiceViewState extends State<VoiceView> with TickerProviderStateMixin {
                                           ? Colors.red
                                           : isProcessing
                                               ? Colors.orange
-                                              : const Color(0xFF667eea))
+                                              : AppColors.primary)
                                       .withOpacity(0.3),
                                   blurRadius: 20,
                                   spreadRadius: 5,

@@ -154,7 +154,7 @@ class _MainScreenState extends State<VoiceNewView>
                       controller: _tabController,
                       onTap: (index) => model.setSelectedTabIndex(index),
                       indicator: BoxDecoration(
-                        color: const Color(0xFF667eea),
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(22),
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
@@ -182,7 +182,7 @@ class _MainScreenState extends State<VoiceNewView>
               onRefresh: () async {
                 await model.fetchData();
               },
-              color: const Color(0xFF667eea),
+              color: AppColors.primary,
               backgroundColor: Colors.white,
               child: Container(
                 color: const Color(0xFFF8F9FA),
@@ -203,7 +203,7 @@ class _MainScreenState extends State<VoiceNewView>
   Widget _buildLoadingState() {
     return const Center(
       child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
       ),
     );
   }
@@ -231,13 +231,13 @@ class _MainScreenState extends State<VoiceNewView>
               width: iconSize,
               height: iconSize,
               decoration: BoxDecoration(
-                color: const Color(0xFF667eea).withOpacity(0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(iconSize / 2),
               ),
               child: Icon(
                 model.selectedTabIndex == 0 ? Icons.lightbulb_outline : Icons.notifications_outlined,
                 size: iconSize * 0.5,
-                color: const Color(0xFF667eea),
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 24),
@@ -307,7 +307,7 @@ class _MainScreenState extends State<VoiceNewView>
           borderRadius: BorderRadius.circular(12),
           color: Colors.white,
           border: Border.all(
-            color: const Color(0xFF667eea).withOpacity(0.1),
+            color: AppColors.primary.withOpacity(0.1),
             width: 1,
           ),
         ),
@@ -329,7 +329,7 @@ class _MainScreenState extends State<VoiceNewView>
                         width: 3,
                         height: isSmallScreen ? 14 : 18,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF667eea),
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -792,11 +792,11 @@ class _MainScreenState extends State<VoiceNewView>
               scale: _fabAnimation,
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF667eea),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(isCompact ? 24 : 28),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF667eea).withOpacity(0.3),
+                      color: AppColors.primary.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -857,11 +857,11 @@ class _MainScreenState extends State<VoiceNewView>
           bottom: 0,
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF667eea),
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(isCompact ? 24 : 28),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF667eea).withOpacity(0.4),
+                  color: AppColors.primary.withOpacity(0.4),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
