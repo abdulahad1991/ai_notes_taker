@@ -357,7 +357,7 @@ class ApiService {
   }) async {
     try {
       var response = await _apiClient?.getReq(
-        "search?query=${Uri.encodeComponent(query)}&skip=${page}&limit=${limit}"
+        "notes/search?query=${Uri.encodeComponent(query)}&skip=${page}&limit=${limit}"
       );
       return NotesResponse.fromJson(response.data);
     } catch (e) {
