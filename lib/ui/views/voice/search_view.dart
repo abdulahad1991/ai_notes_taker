@@ -1,10 +1,12 @@
 import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:stacked/stacked.dart';
 
 import '../../../services/data_service.dart';
 import '../../../shared/functions.dart';
 import 'viewmodel/home_listing_viewmodel.dart';
+import 'viewmodel/search_viewmodel.dart';
 
 class SearchView extends StatefulWidget {
   final HomeListingViewmodel model;
@@ -21,9 +23,6 @@ class SearchView extends StatefulWidget {
 class _SearchViewState extends State<SearchView> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  List<dynamic> searchResults = [];
-  bool isSearching = false;
-  bool hasSearched = false;
 
   @override
   void initState() {
@@ -32,83 +31,13 @@ class _SearchViewState extends State<SearchView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
-    
-    // Initialize with current notes
-    searchResults = widget.model.getFilteredItems();
-    
-    // Listen to search input changes
-    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
-  }
-
-  void _onSearchChanged() {
-    final query = _searchController.text.trim();
-    if (query.isEmpty) {
-      setState(() {
-        searchResults = widget.model.getFilteredItems();
-        hasSearched = false;
-      });
-    } else {
-      _performSearch(query);
-    }
-  }
-
-  Future<void> _performSearch(String query) async {
-    setState(() {
-      isSearching = true;
-      hasSearched = true;
-    });
-
-    try {
-      // TODO: Call search API when implemented
-      await _searchAPI(query);
-      
-      // For now, filter locally
-      final allItems = widget.model.getFilteredItems();
-      final filteredResults = allItems.where((item) {
-        if (item is Note) {
-          return item.title.toLowerCase().contains(query.toLowerCase()) ||
-                 item.content.toLowerCase().contains(query.toLowerCase());
-        } else if (item is Reminder) {
-          return item.title.toLowerCase().contains(query.toLowerCase()) ||
-                 item.description.toLowerCase().contains(query.toLowerCase());
-        }
-        return false;
-      }).toList();
-
-      setState(() {
-        searchResults = filteredResults;
-        isSearching = false;
-      });
-    } catch (e) {
-      setState(() {
-        isSearching = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Search failed: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  // Search API function (placeholder for future implementation)
-  Future<void> _searchAPI(String query) async {
-    // TODO: Implement API call
-    // Example API call structure:
-    // final response = await widget.model.api.searchNotes(query: query);
-    // return SearchResponse.fromJson(response.data);
-    
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   // Get responsive column count based on screen width
@@ -129,94 +58,139 @@ class _SearchViewState extends State<SearchView> {
     final screenWidth = MediaQuery.of(context).size.width;
     final columnCount = _getColumnCount(screenWidth);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
+    return ViewModelBuilder<SearchViewModel>.reactive(
+      viewModelBuilder: () => SearchViewModel(),
+      onViewModelReady: (model) {
+        // Initialize with current notes
+        model.initializeSearch(widget.model.getFilteredItems());
+        
+        // Listen to search input changes
+        _searchController.addListener(() {
+          final query = _searchController.text.trim();
+          model.performSearch(query, widget.model.getFilteredItems());
+        });
+      },
+      builder: (context, model, child) => Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.grey[800],
-          ),
-        ),
-        title: Container(
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: TextField(
-            controller: _searchController,
-            focusNode: _searchFocusNode,
-            decoration: InputDecoration(
-              hintText: 'Search notes and reminders...',
-              hintStyle: TextStyle(color: Colors.grey[500]),
-              prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {
-                          searchResults = widget.model.getFilteredItems();
-                          hasSearched = false;
-                        });
-                      },
-                      icon: Icon(Icons.clear, color: Colors.grey[500]),
-                    )
-                  : null,
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-            style: const TextStyle(fontSize: 16),
-          ),
-        ),
-        actions: [
-          IconButton(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFF8F9FA),
+          elevation: 0,
+          leading: IconButton(
             onPressed: () => Navigator.pop(context),
             icon: Icon(
-              Icons.close,
+              Icons.arrow_back,
               color: Colors.grey[800],
             ),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search stats
-          if (hasSearched)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                '${searchResults.length} result${searchResults.length != 1 ? 's' : ''} found',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
+          title: Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            maxLines: 1,
+            textAlignVertical: TextAlignVertical.center, // <-- centers text vertically
+            decoration: InputDecoration(
+              hintText: 'Search notes and reminders...',
+              hintStyle: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w400,
+                letterSpacing: 0.2,
+              ),
+
+              // Keep icons centered too
+              prefixIcon: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Icon(Icons.search, color: Colors.grey[500], size: 20),
+              ),
+              prefixIconConstraints:
+              const BoxConstraints(minWidth: 40, minHeight: 40),
+
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                icon: Icon(Icons.clear, color: Colors.grey[500], size: 20),
+                onPressed: () {
+                  _searchController.clear();
+                  model.clearSearch(widget.model.getFilteredItems());
+                  // setState() if needed to refresh suffixIcon visibility
+                },
+              )
+                  : null,
+              suffixIconConstraints:
+              const BoxConstraints(minWidth: 40, minHeight: 40),
+
+              border: InputBorder.none,
+
+              // KEY: remove vertical padding so the container height controls layout
+              isDense: true,
+              isCollapsed: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[800],
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
+              height: 1.0, // optional: keep line height tight
+            ),
+          ),
+        ),
+        actions: [
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(
+                Icons.close,
+                color: Colors.grey[800],
               ),
             ),
-          
-          // Search results
-          Expanded(
-            child: isSearching
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
-                    ),
-                  )
-                : searchResults.isEmpty
-                    ? _buildEmptyState()
-                    : _buildSearchResults(columnCount),
-          ),
-        ],
+          ],
+        ),
+        body: Column(
+          children: [
+            // Search stats
+            if (model.hasSearched)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  '${model.searchResults.length} result${model.searchResults.length != 1 ? 's' : ''} found',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            
+            // Search results
+            Expanded(
+              child: model.isSearching
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+                      ),
+                    )
+                  : model.searchResults.isEmpty
+                      ? _buildEmptyState(model)
+                      : _buildSearchResults(columnCount, model),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(SearchViewModel model) {
     final screenWidth = MediaQuery.of(context).size.width;
     double iconSize = screenWidth < 600 ? 80 : 120;
     double titleSize = screenWidth < 600 ? 16 : 18;
@@ -236,14 +210,14 @@ class _SearchViewState extends State<SearchView> {
                 borderRadius: BorderRadius.circular(iconSize / 2),
               ),
               child: Icon(
-                hasSearched ? Icons.search_off : Icons.search,
+                model.hasSearched ? Icons.search_off : Icons.search,
                 size: iconSize * 0.5,
                 color: const Color(0xFF667eea),
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              hasSearched ? 'No results found' : 'Search your notes',
+              model.hasSearched ? 'No results found' : 'Search your notes',
               style: TextStyle(
                 fontSize: titleSize,
                 color: Colors.grey[700],
@@ -253,7 +227,7 @@ class _SearchViewState extends State<SearchView> {
             ),
             const SizedBox(height: 8),
             Text(
-              hasSearched 
+              model.hasSearched 
                   ? 'Try different keywords or check your spelling'
                   : 'Enter keywords to find your notes and reminders',
               style: TextStyle(
@@ -269,16 +243,16 @@ class _SearchViewState extends State<SearchView> {
     );
   }
 
-  Widget _buildSearchResults(int columnCount) {
+  Widget _buildSearchResults(int columnCount, SearchViewModel model) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: MasonryGridView.count(
         crossAxisCount: columnCount,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        itemCount: searchResults.length,
+        itemCount: model.searchResults.length,
         itemBuilder: (context, index) {
-          final item = searchResults[index];
+          final item = model.searchResults[index];
           if (item is Note) {
             return _buildNoteCard(item);
           } else if (item is Reminder) {

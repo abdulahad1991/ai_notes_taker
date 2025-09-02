@@ -1,4 +1,5 @@
 import 'package:ai_notes_taker/models/response/login_response.dart';
+import 'package:ai_notes_taker/ui/common/ui_helpers.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -121,9 +122,9 @@ class AuthViewModel extends ReactiveViewModel {
     isLoading = false;
     notifyListeners();*/
 
-    if (!formKey.currentState!.validate()) return;
-    // emailController.text = "saad@gmail.com";
-    // passwordController.text = "saad12";
+    // if (!formKey.currentState!.validate()) return;
+    emailController.text = "a01@gmail.com";
+    passwordController.text = "123456";
     if (isLogin) {
       try {
         var response = await runBusyFuture(
@@ -148,7 +149,8 @@ class AuthViewModel extends ReactiveViewModel {
           //
         }
       } on FormatException catch (e) {
-        print(e);
+        showErrorDialog(e.message,
+            context);
       }
     } else {
       try {
