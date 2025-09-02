@@ -130,7 +130,7 @@ class _MainScreenState extends State<VoiceNewView>
               backgroundColor: const Color(0xFFF8F9FA),
               elevation: 0,
               title: Text(
-                "Voice Pad",
+                "${model.authService.loginData?.user?.firstName}",
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w600,

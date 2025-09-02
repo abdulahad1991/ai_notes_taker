@@ -101,7 +101,7 @@ class _SearchViewState extends State<SearchView> {
             maxLines: 1,
             textAlignVertical: TextAlignVertical.center, // <-- centers text vertically
             decoration: InputDecoration(
-              hintText: 'Search notes and reminders...',
+              hintText: 'Search notes',
               hintStyle: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade400,
