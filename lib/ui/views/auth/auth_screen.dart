@@ -1,3 +1,4 @@
+import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import '../../../i18n/strings.g.dart';
@@ -262,7 +263,7 @@ class AuthScreen extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w500),
-        prefixIcon: Icon(icon, color: const Color(0xFF667eea)),
+        prefixIcon: Icon(icon, color: AppColors.primary),
         suffixIcon: isPassword
             ? IconButton(
           icon: Icon(
@@ -286,7 +287,7 @@ class AuthScreen extends StatelessWidget {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide:  BorderSide(color: AppColors.red),
         ),
         filled: true,
         fillColor: Colors.grey[50],
@@ -303,7 +304,7 @@ class AuthScreen extends StatelessWidget {
         onPressed: model.isBusy ? null : () => model.submitForm(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF667eea),
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
