@@ -19,7 +19,8 @@ class CreateNotesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<CreateNotesViewmodel>.reactive(
-      viewModelBuilder: () => CreateNotesViewmodel(context,  isEdit, note)..init(),
+      viewModelBuilder: () =>
+          CreateNotesViewmodel(context, isEdit, note)..init(),
       builder: (context, model, child) => _buildView(context, model),
     );
   }
@@ -30,7 +31,7 @@ class CreateNotesView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: _buildAppBar(context, model, isCompact),
+      appBar: _buildAppBar(context, model, isCompact,screenWidth),
       body: Form(
         key: model.formKey,
         child: _buildContentField(model, isCompact),
@@ -39,7 +40,9 @@ class CreateNotesView extends StatelessWidget {
   }
 
   PreferredSizeWidget _buildAppBar(
-      BuildContext context, CreateNotesViewmodel model, bool isCompact) {
+      BuildContext context, CreateNotesViewmodel model, bool isCompact, double screenWidth) {
+    final isSmallScreen = screenWidth < 500;
+    final isMediumScreen = screenWidth < 800;
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -71,15 +74,103 @@ class CreateNotesView extends StatelessWidget {
         ),
       ),
       actions: [
-        IconButton(
-          icon: Icon(
-            Icons.check,
-            color: model.canSave ? Colors.blue : Colors.grey,
-            size: 24,
-          ),
-          onPressed: model.canSave ? model.saveInput : null,
+        Row(
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.check,
+                color: model.canSave ? Colors.blue : Colors.grey,
+                size: 24,
+              ),
+              onPressed: model.canSave ? model.saveInput : null,
+            ),
+            !isEdit ? Container():IconButton(
+              icon: Icon(
+                Icons.delete,
+                color: AppColors.red,
+                size: 24,
+              ),
+              onPressed: (){
+                _showDeleteConfirmation(note, model, context);
+              }
+            ),
+            /*InkWell(
+              borderRadius: BorderRadius.circular(16),
+              // onTap: () => model.editNote(note),
+              child: Container(
+                padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
+                child: Icon(
+                  Icons.edit_outlined,
+                  size: isSmallScreen ? 14 : 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),*/
+            /*InkWell(
+              borderRadius: BorderRadius.circular(16),
+              // onTap: () => _showDeleteConfirmation(note, model),
+              child: Container(
+                padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
+                child: Icon(
+                  Icons.delete_outline,
+                  size: isSmallScreen ? 14 : 16,
+                  color: Colors.red[400],
+                ),
+              ),
+            ),*/
+          ],
         ),
       ],
+    );
+  }
+
+  void _showDeleteConfirmation(dynamic item, CreateNotesViewmodel model, BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Delete ${item is Note ? 'Note' : 'Reminder'}',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to delete this ${item is Note ? 'note' : 'reminder'}?',
+            style: TextStyle(
+              color: Colors.grey[600],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                model.deleteNote(item);
+              },
+              child:  Text(
+                'Yes',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -89,9 +180,8 @@ class CreateNotesView extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: model.isTitleFocused
-              ? AppColors.primary
-              : Colors.grey.shade200,
+          color:
+              model.isTitleFocused ? AppColors.primary : Colors.grey.shade200,
           width: model.isTitleFocused ? 2 : 1.5,
         ),
         boxShadow: [

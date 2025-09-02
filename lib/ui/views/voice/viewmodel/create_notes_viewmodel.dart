@@ -248,4 +248,45 @@ class CreateNotesViewmodel extends ReactiveViewModel {
       showErrorDialog(e.message, context);
     }
   }
+
+
+  Future<void> deleteNote(Note note) async {
+    // Remove from UI immediately for realtime feel
+    /*final noteIndex = notes.indexWhere((n) => n.id == note.id);
+    final deletedNote = note; // Keep reference for potential rollback
+    notes.removeWhere((n) => n.id == note.id);
+    notifyListeners();*/
+
+    try {
+      // Call API to delete note
+      await api.delete(context_id: note.id, context: 'note');
+      print('Deleted note from server');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Note "${note.title}" deleted successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      print('Error deleting note from server: $e');
+
+      // Revert UI changes on API failure - restore note at original position
+      /*if (noteIndex != -1) {
+        notes.insert(noteIndex, deletedNote);
+      } else {
+        notes.add(deletedNote);
+      }
+      notifyListeners();*/
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete note'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 }
