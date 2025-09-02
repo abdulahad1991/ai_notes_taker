@@ -123,7 +123,7 @@ class AuthViewModel extends ReactiveViewModel {
 
     if (!formKey.currentState!.validate()) return;
     // emailController.text = "saad@gmail.com";
-    // passwordController.text = "saad123";
+    // passwordController.text = "saad12";
     if (isLogin) {
       try {
         var response = await runBusyFuture(

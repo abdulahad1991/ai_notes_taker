@@ -7,6 +7,7 @@ import 'package:stacked/stacked.dart';
 import '../../../services/data_service.dart';
 import '../../../shared/functions.dart';
 import 'viewmodel/home_listing_viewmodel.dart';
+import 'search_view.dart';
 
 class VoiceNewView extends StatefulWidget {
   const VoiceNewView({super.key});
@@ -119,6 +120,13 @@ class _MainScreenState extends State<VoiceNewView>
               ),
               actions: [
                 IconButton(
+                  onPressed: () => _openSearchView(model),
+                  icon: Icon(
+                    Icons.search,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                IconButton(
                   onPressed: () => model.logout(),
                   icon: Icon(
                     Icons.logout,
@@ -170,14 +178,21 @@ class _MainScreenState extends State<VoiceNewView>
                 ),
               ),
             ),
-            body: Container(
-              color: const Color(0xFFF8F9FA),
-              child: model.isBusy
-                  ? _buildLoadingState()
-                  : isEmpty
-                      ? _buildEmptyState(screenWidth, model)
-                      : _buildNotesGrid(filteredItems,
-                      columnCount, responsivePadding, gridSpacing,model),
+            body: RefreshIndicator(
+              onRefresh: () async {
+                await model.fetchData();
+              },
+              color: const Color(0xFF667eea),
+              backgroundColor: Colors.white,
+              child: Container(
+                color: const Color(0xFFF8F9FA),
+                child: model.isBusy
+                    ? _buildLoadingState()
+                    : isEmpty
+                        ? _buildEmptyState(screenWidth, model)
+                        : _buildNotesGrid(filteredItems,
+                        columnCount, responsivePadding, gridSpacing,model),
+              ),
             ),
             floatingActionButton: _buildSpeedDial(model),
           );
@@ -679,6 +694,15 @@ class _MainScreenState extends State<VoiceNewView>
           ],
         );
       },
+    );
+  }
+
+  void _openSearchView(HomeListingViewmodel model) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchView(model: model),
+      ),
     );
   }
 
