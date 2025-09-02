@@ -249,36 +249,16 @@ class HomeListingViewmodel extends ReactiveViewModel {
   }
 
   Future<void> deleteNote(Note note) async {
+    // Remove from UI immediately for realtime feel
+    final noteIndex = notes.indexWhere((n) => n.id == note.id);
+    final deletedNote = note; // Keep reference for potential rollback
+    notes.removeWhere((n) => n.id == note.id);
+    notifyListeners();
+
     try {
-      // Check if note exists in local database (offline items)
-      final localNotes = await dbHelper.getAllNotes(includeDeleted: true);
-      final localNote = localNotes
-          .where(
-            (n) => n.serverId == note.id || n.id.toString() == note.id,
-          )
-          .firstOrNull;
-
-      if (localNote != null) {
-        // Note is in local database - delete from database
-        await dbHelper.deleteNote(localNote.id!);
-        print('Deleted note from local database');
-      } else {
-        // Note is from API (online) - only delete from server if connected
-        if (connectivityService.isConnected) {
-          try {
-            await api.delete(context_id: note.id, context: 'note');
-            print('Deleted note from server');
-          } catch (e) {
-            print('Error deleting note from server: $e');
-          }
-        } else {
-          print('Note from API cannot be deleted while offline');
-        }
-      }
-
-      // Remove from UI immediately regardless of source
-      notes.removeWhere((n) => n.id == note.id);
-      notifyListeners();
+      // Call API to delete note
+      await api.delete(context_id: note.id, context: 'note');
+      print('Deleted note from server');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -288,7 +268,16 @@ class HomeListingViewmodel extends ReactiveViewModel {
         ),
       );
     } catch (e) {
-      print('Error deleting note: $e');
+      print('Error deleting note from server: $e');
+      
+      // Revert UI changes on API failure - restore note at original position
+      if (noteIndex != -1) {
+        notes.insert(noteIndex, deletedNote);
+      } else {
+        notes.add(deletedNote);
+      }
+      notifyListeners();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to delete note'),
@@ -476,51 +465,33 @@ class HomeListingViewmodel extends ReactiveViewModel {
     if (noteIndex != -1) {
       final bool willBePinned = !note.isPinned;
 
+      // Update UI immediately for realtime feel
+      final updatedNote = Note(
+        id: note.id,
+        title: note.title,
+        content: note.content,
+        createdAt: note.createdAt,
+        isReminder: note.isReminder,
+        isPinned: willBePinned,
+      );
+      notes[noteIndex] = updatedNote;
+      notifyListeners();
+
+      // Play sound effect immediately
+      if (willBePinned) {
+        await soundService.playSoundEffect(SoundEffect.pin);
+      } else {
+        await soundService.playSoundEffect(SoundEffect.unpin);
+      }
+
       try {
-        // Find local note
-        final localNotes = await dbHelper.getAllNotes(includeDeleted: true);
-        final localNote = localNotes.firstWhere(
-          (n) => n.serverId == note.id || n.id.toString() == note.id,
-          orElse: () => throw Exception('Note not found'),
-        );
-
-        // Update local database
-        final updatedLocalNote = localNote.copyWith(
-          isPinned: willBePinned,
-          isSynced: false,
-          pendingAction: 'update',
-        );
-        await dbHelper.updateNote(updatedLocalNote);
-
-        // Update UI immediately
-        final updatedNote = Note(
+        // Call API to update pin status
+        await api.pinNote(
           id: note.id,
-          title: note.title,
-          content: note.content,
-          createdAt: note.createdAt,
-          isReminder: note.isReminder,
-          isPinned: willBePinned,
+          is_pin: willBePinned ? 1 : 0,
         );
-        notes[noteIndex] = updatedNote;
-        notifyListeners();
 
-        // Play sound effect
-        if (willBePinned) {
-          await soundService.playSoundEffect(SoundEffect.pin);
-        } else {
-          await soundService.playSoundEffect(SoundEffect.unpin);
-        }
-
-        // Trigger sync if connected
-        try {
-          if (connectivityService.isConnected) {
-            syncService.forceSyncNow();
-          }
-        } catch (e) {
-          print('Error triggering sync: $e');
-        }
-
-        // Show confirmation message
+        // Show confirmation message on success
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(willBePinned ? 'Note pinned' : 'Note unpinned'),
@@ -530,6 +501,19 @@ class HomeListingViewmodel extends ReactiveViewModel {
         );
       } catch (e) {
         print('Error toggling pin: $e');
+        
+        // Revert UI changes on API failure
+        final revertedNote = Note(
+          id: note.id,
+          title: note.title,
+          content: note.content,
+          createdAt: note.createdAt,
+          isReminder: note.isReminder,
+          isPinned: !willBePinned,
+        );
+        notes[noteIndex] = revertedNote;
+        notifyListeners();
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to ${willBePinned ? 'pin' : 'unpin'} note'),
@@ -658,48 +642,54 @@ class HomeListingViewmodel extends ReactiveViewModel {
   // Update existing note
   Future<void> updateNote(Note note,
       {String? title, String? content, bool? isPinned}) async {
+    final noteIndex = notes.indexWhere((n) => n.id == note.id);
+    if (noteIndex == -1) return;
+
+    // Store original note for potential rollback
+    final originalNote = note;
+    
+    // Update UI immediately for realtime feel
+    final updatedNote = Note(
+      id: note.id,
+      title: title ?? note.title,
+      content: content ?? note.content,
+      createdAt: note.createdAt,
+      isReminder: note.isReminder,
+      isPinned: isPinned ?? note.isPinned,
+    );
+    notes[noteIndex] = updatedNote;
+    notifyListeners();
+
     try {
-      // Find local note
-      final localNotes = await dbHelper.getAllNotes(includeDeleted: true);
-      final localNote = localNotes.firstWhere(
-        (n) => n.serverId == note.id || n.id.toString() == note.id,
-        orElse: () => throw Exception('Note not found'),
+      // Call API to update note
+      await api.editNoteText(
+        id: note.id,
+        title: title ?? note.title,
+        text: content ?? note.content,
       );
+      print('Updated note on server');
 
-      // Update local database
-      final updatedLocalNote = localNote.copyWith(
-        title: title ?? localNote.title,
-        content: content ?? localNote.content,
-        isPinned: isPinned ?? localNote.isPinned,
-        isSynced: false,
-        pendingAction: 'update',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Note updated successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 1),
+        ),
       );
-      await dbHelper.updateNote(updatedLocalNote);
-
-      // Update UI
-      final noteIndex = notes.indexWhere((n) => n.id == note.id);
-      if (noteIndex != -1) {
-        notes[noteIndex] = Note(
-          id: note.id,
-          title: title ?? note.title,
-          content: content ?? note.content,
-          createdAt: note.createdAt,
-          isReminder: note.isReminder,
-          isPinned: isPinned ?? note.isPinned,
-        );
-        notifyListeners();
-      }
-
-      // Trigger sync if connected
-      try {
-        if (connectivityService.isConnected) {
-          syncService.forceSyncNow();
-        }
-      } catch (e) {
-        print('Error triggering sync: $e');
-      }
     } catch (e) {
       print('Error updating note: $e');
+      
+      // Revert UI changes on API failure
+      notes[noteIndex] = originalNote;
+      notifyListeners();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update note'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 

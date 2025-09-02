@@ -89,17 +89,15 @@ class ApiService {
     required String offset,
   }) async {
     try {
-      String? fileExt = file?.path.split('.').last.toLowerCase();
+      String? fileExt = file.path.split('.').last.toLowerCase();
       String mimeType =
           fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
       MultipartFile? multipartFile;
-      if (file != null) {
-        multipartFile = await MultipartFile.fromFile(
-          "${file?.path.toString()}",
-          contentType: MediaType.parse(mimeType),
-          filename: file?.path.split('/').last,
-        );
-      }
+      multipartFile = await MultipartFile.fromFile(
+        file.path.toString(),
+        contentType: MediaType.parse(mimeType),
+        filename: file.path.split('/').last,
+      );
 
       Map<String, dynamic> dataMap = {
         "file": multipartFile,
@@ -119,8 +117,7 @@ class ApiService {
 
   Future<dynamic> getAll() async {
     try {
-      var response =
-          await _apiClient?.getReq("transcriptions?skip=0&limit=10");
+      var response = await _apiClient?.getReq("transcriptions?skip=0&limit=10");
       return TranscriptionResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
@@ -130,7 +127,7 @@ class ApiService {
   Future<dynamic> getReminders(int page) async {
     try {
       var response =
-      await _apiClient?.getReq("reminders?skip=${page}&limit=40");
+          await _apiClient?.getReq("reminders?skip=${page}&limit=40");
       return TranscriptionResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
@@ -139,8 +136,7 @@ class ApiService {
 
   Future<dynamic> getNotes(int page) async {
     try {
-      var response =
-      await _apiClient?.getReq("notes?skip=${page}&limit=40");
+      var response = await _apiClient?.getReq("notes?skip=${page}&limit=40");
       return NotesResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
@@ -152,7 +148,7 @@ class ApiService {
   }) async {
     try {
       var response = await _apiClient?.putReq("user/update", data: {
-        "updatePayload":{
+        "updatePayload": {
           "fcm_token": fcm_token,
         }
       });
@@ -169,17 +165,15 @@ class ApiService {
     required String offset,
   }) async {
     try {
-      String? fileExt = file?.path.split('.').last.toLowerCase();
+      String? fileExt = file.path.split('.').last.toLowerCase();
       String mimeType =
-      fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
+          fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
       MultipartFile? multipartFile;
-      if (file != null) {
-        multipartFile = await MultipartFile.fromFile(
-          "${file?.path.toString()}",
-          contentType: MediaType.parse(mimeType),
-          filename: file?.path.split('/').last,
-        );
-      }
+      multipartFile = await MultipartFile.fromFile(
+        file.path.toString(),
+        contentType: MediaType.parse(mimeType),
+        filename: file.path.split('/').last,
+      );
 
       Map<String, dynamic> dataMap = {
         "file": multipartFile,
@@ -188,7 +182,8 @@ class ApiService {
 
       FormData formData = FormData.fromMap(dataMap);
 
-      var response = await _apiClient?.postReq("reminder/voice", data: formData);
+      var response =
+          await _apiClient?.postReq("reminder/voice", data: formData);
       return TranscribeResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
@@ -203,17 +198,15 @@ class ApiService {
     String? title,
   }) async {
     try {
-      String? fileExt = file?.path.split('.').last.toLowerCase();
+      String? fileExt = file.path.split('.').last.toLowerCase();
       String mimeType =
-      fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
+          fileExt == 'wav' ? 'audio/wav' : 'application/octet-stream';
       MultipartFile? multipartFile;
-      if (file != null) {
-        multipartFile = await MultipartFile.fromFile(
-          "${file?.path.toString()}",
-          contentType: MediaType.parse(mimeType),
-          filename: file?.path.split('/').last,
-        );
-      }
+      multipartFile = await MultipartFile.fromFile(
+        file.path.toString(),
+        contentType: MediaType.parse(mimeType),
+        filename: file.path.split('/').last,
+      );
 
       Map<String, dynamic> dataMap = {
         "file": multipartFile,
@@ -221,7 +214,7 @@ class ApiService {
         "user_current_datetime": user_current_datetime,
         // "offset": offset,
       };
-      
+
       if (title != null && title.isNotEmpty) {
         dataMap["title"] = title;
       }
@@ -234,7 +227,6 @@ class ApiService {
       rethrow;
     }
   }
-
 
   Future<dynamic> delete({
     required String context_id,
@@ -251,8 +243,6 @@ class ApiService {
     }
   }
 
-
-
   Future<dynamic> createNoteText({
     required String title,
     required String text,
@@ -267,7 +257,6 @@ class ApiService {
       rethrow;
     }
   }
-
 
   Future<dynamic> createReminderText({
     required String title,
@@ -314,7 +303,7 @@ class ApiService {
       var response = await _apiClient?.putReq("update/${id}", data: {
         "context": "note",
         "updatePayload": {
-          "is_pin": is_pin,
+          "is_pin": is_pin == 1 ? true : false,
         },
       });
       return BaseResponse.fromJson(response.data);
@@ -344,21 +333,33 @@ class ApiService {
     }
   }
 
-
-
   Future<dynamic> updateInfoForm({
     required String key,
     required String value,
   }) async {
     try {
       var response = await _apiClient?.putReq("user/update", data: {
-        "updatePayload":{
+        "updatePayload": {
           key: value,
-          "form_submitted": true,
           "post_signup_form_submitted": true,
         }
       });
       return LoginResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> searchNotes({
+    required String query,
+    int page = 0,
+    int limit = 40,
+  }) async {
+    try {
+      var response = await _apiClient?.getReq(
+        "search?query=${Uri.encodeComponent(query)}&skip=${page}&limit=${limit}"
+      );
+      return NotesResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

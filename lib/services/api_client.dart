@@ -133,7 +133,8 @@ class ApiClient {
       throw const FormatException("Unable to process the data");
     } on DioException catch (e) {
       print("DioException--> ${e.toString()}");
-      throw const FormatException("Unable to process the data");
+      throw FormatException(
+          e.response?.data['detail'] ?? "Unable to connect to server");
     } catch (e) {
       print("CATCH EXCEPTION--> ${e.toString()}");
       rethrow;
