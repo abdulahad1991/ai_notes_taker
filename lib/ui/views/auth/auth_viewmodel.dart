@@ -169,7 +169,8 @@ class AuthViewModel extends ReactiveViewModel {
           notifyListeners();
         }
       } on FormatException catch (e) {
-        print(e);
+        showErrorDialog(e.message,
+            context);
       }
     }
   }
