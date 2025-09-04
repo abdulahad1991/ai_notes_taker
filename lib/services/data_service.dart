@@ -90,7 +90,7 @@ class DataService {
                 content: item.text ?? 'N/A',
                 createdAt: item.createdAt ?? '',
                 isReminder: false,
-                isPinned: (item.is_pin ?? 0) == 1,
+                isPinned: item.is_pin == true,
               ));
             }
             
