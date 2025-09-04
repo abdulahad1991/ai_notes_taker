@@ -436,15 +436,16 @@ class _MainScreenState extends State<VoiceNewView>
                             ),
                           ),
                         ),
+
                         InkWell(
                           borderRadius: BorderRadius.circular(16),
-                          // onTap: () => model.togglePinNote(note),
+                          onTap: () => _showDeleteConfirmation(note, model),
                           child: Container(
                             padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
                             child: Icon(
-                              Icons.share,
+                              Icons.delete_outline,
                               size: isSmallScreen ? 15 : 17,
-                              color: AppColors.grey,
+                              color: Colors.red[400],
                             ),
                           ),
                         ),

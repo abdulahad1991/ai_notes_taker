@@ -84,16 +84,30 @@ class CreateNotesView extends StatelessWidget {
               ),
               onPressed: model.canSave ? model.saveInput : null,
             ),
-            !isEdit ? Container():IconButton(
+
+            InkWell(
+              borderRadius: BorderRadius.circular(16),
+              // onTap: () => model.togglePinNote(note),
+              child: Container(
+                padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
+                child: Icon(
+                  Icons.share,
+                  size: isSmallScreen ? 17 : 19,
+                  color: AppColors.grey,
+                ),
+              ),
+            ),
+            SizedBox(width: 10,),
+            /*!isEdit ? Container():IconButton(
               icon: Icon(
                 Icons.delete,
                 color: AppColors.red,
-                size: 24,
+                size: isSmallScreen ? 15 : 17,
               ),
               onPressed: (){
                 _showDeleteConfirmation(note, model, context);
               }
-            ),
+            ),*/
             /*InkWell(
               borderRadius: BorderRadius.circular(16),
               // onTap: () => model.editNote(note),
