@@ -5,6 +5,7 @@ import '../../../app/app.locator.dart';
 import '../../../app/app.router.dart';
 import '../../../models/response/signup_form_response.dart';
 import '../../../services/api_service.dart';
+import '../../common/ui_helpers.dart';
 
 class UserFormViewModel extends ReactiveViewModel {
   final api = locator<ApiService>();
@@ -26,6 +27,9 @@ class UserFormViewModel extends ReactiveViewModel {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  BuildContext context;
+  UserFormViewModel(this.context);
+
   void init() async {
     await fetchFormData();
   }
@@ -35,98 +39,21 @@ class UserFormViewModel extends ReactiveViewModel {
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
-      
-      // Replace with actual API call
-      // For now, using the provided JSON data
-      final mockResponse = {
-        "success": true,
-        "data": [
-          {
-            "_id": "68af746191061c2f78bb94d7",
-            "type": "post_signup",
-            "region": {
-              "EN": {
-                "title": "Let Us Get To Know Each Other",
-                "question": [
-                  {
-                    "id": "profession",
-                    "text": "Which industry do you work in?",
-                    "answer": {
-                      "type": "drop_down",
-                      "options": [
-                        "IT",
-                        "Engineering",
-                        "Sales",
-                        "Marketing",
-                        "Finance",
-                        "Medical",
-                        "Art",
-                        "Law",
-                        "Hospitality"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "professional_level",
-                    "text": "What career level are you at?",
-                    "answer": {
-                      "type": "drop_down",
-                      "options": [
-                        "Student",
-                        "Beginner",
-                        "Manager",
-                        "Chief",
-                        "Owner"
-                      ]
-                    }
-                  }
-                ]
-              },
-              "DE": {
-                "title": "Lass uns uns kennenlernen",
-                "question": [
-                  {
-                    "id": "profession",
-                    "text": "In welcher Branche arbeiten Sie?",
-                    "answer": {
-                      "type": "drop_down",
-                      "options": [
-                        "IT",
-                        "Ingenieurwesen",
-                        "Vertrieb",
-                        "Marketing",
-                        "Finanzen",
-                        "Medizin",
-                        "Kunst",
-                        "Recht",
-                        "Gastfreundschaft"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "professional_level",
-                    "text": "Auf welchem Karrierelevel befinden Sie sich?",
-                    "answer": {
-                      "type": "drop_down",
-                      "options": [
-                        "Student",
-                        "Anfänger",
-                        "Manager",
-                        "Chef",
-                        "Eigentümer"
-                      ]
-                    }
-                  }
-                ]
-              }
-            },
-            "is_active": true,
-            "is_deleted": false
-          }
-        ]
-      };
-      
-      _formResponse = SignupFormResponse.fromJson(mockResponse);
+      try {
+        var response = await runBusyFuture(
+          api.getSignUpForm(),
+
+          throwException: true,
+        );
+        if (response != null) {
+          final data = response as SignupFormResponse;
+          _formResponse = data;
+        }
+      } on FormatException catch (e) {
+        showErrorDialog(e.message,
+            context);
+      }
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
