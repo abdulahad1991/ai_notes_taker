@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:ai_notes_taker/models/response/base_response.dart';
 import 'package:ai_notes_taker/models/response/login_response.dart';
+import 'package:ai_notes_taker/models/response/signup_form_response.dart';
+import 'package:ai_notes_taker/models/response/subscription_form_response.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import '../models/response/create_note_response.dart';
@@ -357,9 +359,26 @@ class ApiService {
   }) async {
     try {
       var response = await _apiClient?.getReq(
-        "notes/search?query=${Uri.encodeComponent(query)}&skip=${page}&limit=${limit}"
-      );
+          "notes/search?query=${Uri.encodeComponent(query)}&skip=${page}&limit=${limit}");
       return NotesResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> getPaymentForm() async {
+    try {
+      var response = await _apiClient?.getReq("form/get?form_type=payment");
+      return SubscriptionFormResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> getSignUpForm() async {
+    try {
+      var response = await _apiClient?.getReq("form/get?form_type=post_signup");
+      return SignupFormResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

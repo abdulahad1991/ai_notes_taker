@@ -15,7 +15,7 @@ class UserFormView extends StatelessWidget {
     final isWide = MediaQuery.of(context).size.width > 600;
     
     return ViewModelBuilder<UserFormViewModel>.reactive(
-      viewModelBuilder: () => UserFormViewModel()..init(),
+      viewModelBuilder: () => UserFormViewModel(context)..init(),
       builder: (context, model, child) => Scaffold(
         backgroundColor: AppColors.bg_color,
         appBar: AppBar(

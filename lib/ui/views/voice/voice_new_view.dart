@@ -3,7 +3,9 @@ import 'package:ai_notes_taker/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked_services/stacked_services.dart';
 
+import '../../../app/app.router.dart';
 import '../../../services/data_service.dart';
 import '../../../shared/functions.dart';
 import 'viewmodel/home_listing_viewmodel.dart';
@@ -129,12 +131,17 @@ class _MainScreenState extends State<VoiceNewView>
               automaticallyImplyLeading: false,
               backgroundColor: const Color(0xFFF8F9FA),
               elevation: 0,
-              title: Text(
-                "${model.authService.loginData?.user?.firstName}",
-                style: TextStyle(
-                  color: Colors.grey[800],
-                  fontWeight: FontWeight.w600,
-                  fontSize: screenWidth < 600 ? 20 : 24,
+              title: GestureDetector(
+                onTap: (){
+                  NavigationService().navigateTo(Routes.subscriptionView);
+                },
+                child: Text(
+                  "${model.authService.loginData?.user?.firstName}",
+                  style: TextStyle(
+                    color: Colors.grey[800],
+                    fontWeight: FontWeight.w600,
+                    fontSize: screenWidth < 600 ? 20 : 24,
+                  ),
                 ),
               ),
               actions: [
