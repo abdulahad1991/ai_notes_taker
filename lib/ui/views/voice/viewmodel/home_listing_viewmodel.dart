@@ -21,6 +21,7 @@ import '../../../../services/database_helper.dart';
 import '../../../../services/sync_service.dart';
 import '../../../../services/connectivity_service.dart';
 import '../../../../services/data_service.dart';
+import '../../../../services/offline_service.dart';
 import '../../../../shared/functions.dart';
 import 'package:stacked_services/stacked_services.dart';
 
@@ -46,6 +47,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
   final syncService = locator<SyncService>();
   final connectivityService = locator<ConnectivityService>();
   final dataService = locator<DataService>();
+  final offlineService = locator<OfflineService>();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -256,9 +258,26 @@ class HomeListingViewmodel extends ReactiveViewModel {
     notifyListeners();
 
     try {
-      // Call API to delete note
-      await api.delete(context_id: note.id, context: 'note');
-      print('Deleted note from server');
+      if (connectivityService.isConnected) {
+        // Online: Call API to delete note
+        await api.delete(context_id: note.id, context: 'note');
+        print('Deleted note from server');
+      } else {
+        // Offline: Try to delete from local database
+        // Convert note.id to int if it's a local note
+        try {
+          final localId = int.tryParse(note.id);
+          if (localId != null) {
+            await offlineService.deleteNote(localId);
+            print('Deleted note from offline storage');
+          } else {
+            // It's a server note ID, can't delete while offline
+            throw Exception('Cannot delete server note while offline');
+          }
+        } catch (e) {
+          throw Exception('Failed to delete offline note: $e');
+        }
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -268,9 +287,9 @@ class HomeListingViewmodel extends ReactiveViewModel {
         ),
       );
     } catch (e) {
-      print('Error deleting note from server: $e');
+      print('Error deleting note: $e');
       
-      // Revert UI changes on API failure - restore note at original position
+      // Revert UI changes on failure - restore note at original position
       if (noteIndex != -1) {
         notes.insert(noteIndex, deletedNote);
       } else {
@@ -280,7 +299,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to delete note'),
+          content: Text('Failed to delete note: ${e.toString()}'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
@@ -289,40 +308,36 @@ class HomeListingViewmodel extends ReactiveViewModel {
   }
 
   Future<void> deleteReminder(Reminder reminder) async {
-    try {
-      // Check if reminder exists in local database (offline items)
-      final localReminders =
-          await dbHelper.getAllReminders(includeDeleted: true);
-      final localReminder = localReminders
-          .where(
-            (r) => r.serverId == reminder.id || r.id.toString() == reminder.id,
-          )
-          .firstOrNull;
+    // Remove from UI immediately for realtime feel
+    final reminderIndex = reminders.indexWhere((r) => r.id == reminder.id);
+    final deletedReminder = reminder; // Keep reference for potential rollback
+    reminders.removeWhere((r) => r.id == reminder.id);
+    notifyListeners();
 
-      if (localReminder != null) {
-        // Reminder is in local database - delete from database
-        await dbHelper.deleteReminder(localReminder.id!);
-        print('Deleted reminder from local database');
+    try {
+      if (connectivityService.isConnected) {
+        // Online: Call API to delete reminder
+        await api.delete(context_id: reminder.id, context: 'reminder');
+        print('Deleted reminder from server');
       } else {
-        // Reminder is from API (online) - only delete from server if connected
-        if (connectivityService.isConnected) {
-          try {
-            await api.delete(context_id: reminder.id, context: 'reminder');
-            print('Deleted reminder from server');
-          } catch (e) {
-            print('Error deleting reminder from server: $e');
+        // Offline: Try to delete from local database
+        // Convert reminder.id to int if it's a local reminder
+        try {
+          final localId = int.tryParse(reminder.id);
+          if (localId != null) {
+            await offlineService.deleteReminder(localId);
+            print('Deleted reminder from offline storage');
+          } else {
+            // It's a server reminder ID, can't delete while offline
+            throw Exception('Cannot delete server reminder while offline');
           }
-        } else {
-          print('Reminder from API cannot be deleted while offline');
+        } catch (e) {
+          throw Exception('Failed to delete offline reminder: $e');
         }
       }
 
       // Cancel alarm regardless of source
       cancelAlarmForReminder(reminder.id);
-
-      // Remove from UI immediately regardless of source
-      reminders.removeWhere((r) => r.id == reminder.id);
-      notifyListeners();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -333,9 +348,18 @@ class HomeListingViewmodel extends ReactiveViewModel {
       );
     } catch (e) {
       print('Error deleting reminder: $e');
+      
+      // Revert UI changes on failure - restore reminder at original position
+      if (reminderIndex != -1) {
+        reminders.insert(reminderIndex, deletedReminder);
+      } else {
+        reminders.add(deletedReminder);
+      }
+      notifyListeners();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to delete reminder'),
+          content: Text('Failed to delete reminder: ${e.toString()}'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
@@ -485,11 +509,23 @@ class HomeListingViewmodel extends ReactiveViewModel {
       }
 
       try {
-        // Call API to update pin status
-        await api.pinNote(
-          id: note.id,
-          is_pin: willBePinned ? 1 : 0,
-        );
+        if (connectivityService.isConnected) {
+          // Online: Call API to update pin status
+          await api.pinNote(
+            id: note.id,
+            is_pin: willBePinned ? 1 : 0,
+          );
+        } else {
+          // Offline: Update local database
+          final localId = int.tryParse(note.id);
+          if (localId != null) {
+            await offlineService.pinNote(localId, willBePinned);
+            print('Updated pin status in offline storage');
+          } else {
+            // It's a server note ID, can't update while offline
+            throw Exception('Cannot pin/unpin server note while offline');
+          }
+        }
 
         // Show confirmation message on success
         ScaffoldMessenger.of(context).showSnackBar(
@@ -502,7 +538,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
       } catch (e) {
         print('Error toggling pin: $e');
         
-        // Revert UI changes on API failure
+        // Revert UI changes on failure
         final revertedNote = Note(
           id: note.id,
           title: note.title,
@@ -516,7 +552,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to ${willBePinned ? 'pin' : 'unpin'} note'),
+            content: Text('Failed to ${willBePinned ? 'pin' : 'unpin'} note: ${e.toString()}'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),

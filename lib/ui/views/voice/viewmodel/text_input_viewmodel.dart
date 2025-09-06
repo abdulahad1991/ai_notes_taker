@@ -6,6 +6,8 @@ import '../../../../app/app.locator.dart';
 import '../../../../models/response/create_note_text_response.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/data_service.dart';
+import '../../../../services/offline_service.dart';
+import '../../../../services/connectivity_service.dart';
 import '../../../../shared/functions.dart';
 import 'home_listing_viewmodel.dart';
 
@@ -20,6 +22,8 @@ class TextInputViewmodel extends ReactiveViewModel {
       this.context, this.isReminder, this.isEdit, this.reminder, this.note);
 
   final api = locator<ApiService>();
+  final offlineService = locator<OfflineService>();
+  final connectivityService = locator<ConnectivityService>();
 
   // Controllers
   final titleController = TextEditingController();
@@ -276,18 +280,35 @@ class TextInputViewmodel extends ReactiveViewModel {
 
   Future<void> createReminder(String scheduleDateTime) async {
     try {
-      var response = await runBusyFuture(
-          api.createReminderText(
-              title: titleController.text.trim(),
-              description: descriptionController.text.trim(),
-              reminder_time: scheduleDateTime.toString()),
-          throwException: true);
-      if (response != null) {
-        final data = response as CreateNoteTextResponse;
+      if (connectivityService.isConnected) {
+        var response = await runBusyFuture(
+            api.createReminderText(
+                title: titleController.text.trim(),
+                description: descriptionController.text.trim(),
+                reminder_time: scheduleDateTime.toString()),
+            throwException: true);
+        if (response != null) {
+          final data = response as CreateNoteTextResponse;
+          Navigator.pop(context);
+        }
+      } else {
+        // Create offline reminder
+        await runBusyFuture(
+          offlineService.createTextReminder(
+            title: titleController.text.trim(),
+            description: descriptionController.text.trim(),
+            reminderTime: timeText,
+            date: dateText,
+            runtime: scheduleDateTime.toString(),
+          ),
+          throwException: true,
+        );
         Navigator.pop(context);
       }
     } on FormatException catch (e) {
       showErrorDialog(e.message, context);
+    } catch (e) {
+      showErrorDialog('Failed to create reminder: ${e.toString()}', context);
     }
   }
 
@@ -310,16 +331,30 @@ class TextInputViewmodel extends ReactiveViewModel {
 
   Future<void> createNote() async {
     try {
-      var response = await runBusyFuture(
-          api.createNoteText(
-              title: titleController.text.trim(),
-              text: descriptionController.text.trim()),
-          throwException: true);
-      if (response != null) {
+      if (connectivityService.isConnected) {
+        var response = await runBusyFuture(
+            api.createNoteText(
+                title: titleController.text.trim(),
+                text: descriptionController.text.trim()),
+            throwException: true);
+        if (response != null) {
+          Navigator.pop(context);
+        }
+      } else {
+        // Create offline note
+        await runBusyFuture(
+          offlineService.createTextNote(
+            title: titleController.text.trim(),
+            content: descriptionController.text.trim(),
+          ),
+          throwException: true,
+        );
         Navigator.pop(context);
       }
     } on FormatException catch (e) {
       showErrorDialog(e.message, context);
+    } catch (e) {
+      showErrorDialog('Failed to create note: ${e.toString()}', context);
     }
   }
 
