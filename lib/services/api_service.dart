@@ -22,15 +22,6 @@ class ApiService {
     _apiClient = ApiClient(dio, interceptors: [AuthInterceptor()]);
   }
 
-  /*Future<dynamic> fetchQRToken() async {
-    try {
-      var response = await _apiClient?.getReq("raast_qr_token");
-      return QRTokenResponse.fromJson(response.data);
-    } catch (e) {
-      rethrow;
-    }
-  }*/
-
   Future<dynamic> login({
     required String email,
     required String password,
@@ -112,15 +103,6 @@ class ApiService {
 
       var response = await _apiClient?.postReq("transcribe", data: formData);
       return TranscribeResponse.fromJson(response.data);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<dynamic> getAll() async {
-    try {
-      var response = await _apiClient?.getReq("transcriptions?skip=0&limit=10");
-      return TranscriptionResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
