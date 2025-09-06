@@ -97,6 +97,10 @@ class SyncService {
     }
   }
 
+  Future<void> syncAllData() async {
+    await syncData();
+  }
+
   // Server to local sync is no longer needed in offline-only strategy
   // Server data is fetched directly when online via DataService
 
@@ -108,8 +112,8 @@ class SyncService {
       final success = await _syncNoteToServer(note);
       if (success) {
         // Delete the note from local database immediately after successful sync
-        await _dbHelper.deleteNote(note.id!);
-        debugPrint('Note ${note.id} synced and deleted from local database');
+        await _dbHelper.permanentlyDeleteNote(note.id!);
+        debugPrint('Note ${note.id} synced and permanently deleted from local database');
       }
     }
 
@@ -119,8 +123,8 @@ class SyncService {
       final success = await _syncReminderToServer(reminder);
       if (success) {
         // Delete the reminder from local database immediately after successful sync
-        await _dbHelper.deleteReminder(reminder.id!);
-        debugPrint('Reminder ${reminder.id} synced and deleted from local database');
+        await _dbHelper.permanentlyDeleteReminder(reminder.id!);
+        debugPrint('Reminder ${reminder.id} synced and permanently deleted from local database');
       }
     }
   }
@@ -129,23 +133,27 @@ class SyncService {
     try {
       switch (note.pendingAction) {
         case 'create':
-          // For now, assume successful sync without actual API call
-          // TODO: Implement createNote API method
-          debugPrint('Note ${note.id} synced to server (create)');
+          final response = await _apiService!.createNoteText(
+            title: note.title,
+            text: note.content,
+          );
+          debugPrint('Note ${note.id} created on server with ID: ${response.data?.id}');
           return true;
           
         case 'update':
           if (note.serverId != null) {
-            // For now, assume successful sync without actual API call
-            // TODO: Implement updateNote API method
-            debugPrint('Note ${note.id} synced to server (update)');
+            await _apiService!.editNoteText(
+              id: note.serverId!,
+              title: note.title,
+              text: note.content,
+            );
+            debugPrint('Note ${note.id} updated on server');
             return true;
           }
           break;
           
         case 'delete':
           if (note.serverId != null) {
-            // Delete note on server
             await _apiService!.delete(context_id: note.serverId!, context: 'note');
             debugPrint('Note ${note.id} deleted on server');
             return true;
@@ -153,7 +161,6 @@ class SyncService {
           break;
           
         default:
-          // No specific action needed
           if (note.serverId != null) {
             debugPrint('Note ${note.id} already synced');
             return true;
@@ -170,23 +177,29 @@ class SyncService {
     try {
       switch (reminder.pendingAction) {
         case 'create':
-          // For now, assume successful sync without actual API call
-          // TODO: Implement createReminder API method
-          debugPrint('Reminder ${reminder.id} synced to server (create)');
+          final response = await _apiService!.createReminderText(
+            title: reminder.title,
+            reminder_time: reminder.runtime,
+            description: reminder.description,
+          );
+          debugPrint('Reminder ${reminder.id} created on server with ID: ${response.data?.id}');
           return true;
           
         case 'update':
           if (reminder.serverId != null) {
-            // For now, assume successful sync without actual API call
-            // TODO: Implement updateReminder API method
-            debugPrint('Reminder ${reminder.id} synced to server (update)');
+            await _apiService!.editReminderText(
+              id: reminder.serverId!,
+              title: reminder.title,
+              text: reminder.description,
+              dateTime: reminder.runtime,
+            );
+            debugPrint('Reminder ${reminder.id} updated on server');
             return true;
           }
           break;
           
         case 'delete':
           if (reminder.serverId != null) {
-            // Delete reminder on server
             await _apiService!.delete(context_id: reminder.serverId!, context: 'reminder');
             debugPrint('Reminder ${reminder.id} deleted on server');
             return true;
@@ -194,7 +207,6 @@ class SyncService {
           break;
           
         default:
-          // No specific action needed
           if (reminder.serverId != null) {
             debugPrint('Reminder ${reminder.id} already synced');
             return true;

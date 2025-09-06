@@ -17,6 +17,7 @@ import '../services/database_helper.dart';
 import '../services/sync_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/data_service.dart';
+import '../services/offline_service.dart';
 import '../ui/views/auth/auth_screen.dart';
 import '../ui/views/voice/voice_new_view.dart';
 // @stacked-import
@@ -45,6 +46,7 @@ import '../ui/views/voice/voice_new_view.dart';
     LazySingleton(classType: SyncService),
     LazySingleton(classType: ConnectivityService),
     LazySingleton(classType: DataService),
+    LazySingleton(classType: OfflineService),
     // @stacked-service
   ],
   bottomsheets: [

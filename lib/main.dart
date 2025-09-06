@@ -10,6 +10,7 @@ import 'package:ai_notes_taker/services/sync_service.dart';
 import 'package:ai_notes_taker/services/connectivity_service.dart';
 import 'package:ai_notes_taker/services/api_service.dart';
 import 'package:ai_notes_taker/services/data_service.dart';
+import 'package:ai_notes_taker/services/offline_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Priority;
 import 'package:stacked_services/stacked_services.dart';
 import 'package:alarm/alarm.dart';
@@ -172,6 +173,7 @@ Future<void> _initializeDatabaseServices() async {
     final connectivityService = locator<ConnectivityService>();
     final apiService = locator<ApiService>();
     final dataService = locator<DataService>();
+    final offlineService = locator<OfflineService>();
     
     // Add a small delay to ensure platform channels are ready
     await Future.delayed(Duration(milliseconds: 100));
@@ -182,6 +184,14 @@ Future<void> _initializeDatabaseServices() async {
     } catch (e) {
       debugPrint('ConnectivityService initialization failed: $e');
       // Continue without connectivity monitoring
+    }
+    
+    // Initialize offline service
+    try {
+      offlineService.initialize();
+    } catch (e) {
+      debugPrint('OfflineService initialization failed: $e');
+      // Continue without offline service
     }
     
     // Initialize sync service with API service

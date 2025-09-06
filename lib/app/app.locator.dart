@@ -18,6 +18,7 @@ import '../services/app_shared_pref_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/data_service.dart';
 import '../services/database_helper.dart';
+import '../services/offline_service.dart';
 import '../services/sync_service.dart';
 
 final locator = StackedLocator.instance;
@@ -42,4 +43,5 @@ Future<void> setupLocator({
   locator.registerLazySingleton(() => SyncService());
   locator.registerLazySingleton(() => ConnectivityService());
   locator.registerLazySingleton(() => DataService());
+  locator.registerLazySingleton(() => OfflineService());
 }
