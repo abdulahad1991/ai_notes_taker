@@ -68,42 +68,34 @@ class DataService {
     _connectivityService = connectivityService;
   }
 
-  /// Fetch notes with offline-only strategy
+  /// Fetch notes with offline-first strategy - save server data to local DB
   Future<List<Note>> fetchNotes() async {
     try {
       // Check if we have internet connection
       final hasConnection = _connectivityService?.isConnected ?? false;
       
       if (hasConnection && _apiService != null) {
-        debugPrint('Fetching notes from API (online)');
+        debugPrint('Fetching notes from API and saving to local DB');
         
         try {
-          // Fetch from API directly without storing locally
+          // Fetch from API and save to local database
           final response = await _apiService!.getNotes(0);
           
           if (response != null && response is NotesResponse && response.data != null) {
-            List<Note> notes = [];
+            // Save server data to local database
             for (var item in response.data!) {
-              notes.add(Note(
-                id: item.sId?.toString() ?? '',
-                title: item.title ?? 'N/A',
-                content: item.text ?? 'N/A',
-                createdAt: item.createdAt ?? '',
-                isReminder: false,
-                isPinned: item.is_pin == true,
-              ));
+              await saveServerNoteToLocal(item);
             }
             
-            debugPrint('Successfully fetched ${notes.length} notes from API');
-            return notes;
+            debugPrint('Successfully saved ${response.data!.length} notes from server to local DB');
           }
         } catch (e) {
           debugPrint('API fetch failed, showing offline notes: $e');
         }
       }
       
-      // Show offline notes only (locally created, unsynced)
-      debugPrint('Showing offline notes only');
+      // Always return data from local database for consistent behavior
+      debugPrint('Loading notes from local database');
       return await _fetchNotesFromLocal();
       
     } catch (e) {
@@ -112,45 +104,34 @@ class DataService {
     }
   }
 
-  /// Fetch reminders with offline-only strategy
+  /// Fetch reminders with offline-first strategy - save server data to local DB
   Future<List<Reminder>> fetchReminders() async {
     try {
       // Check if we have internet connection
       final hasConnection = _connectivityService?.isConnected ?? false;
       
       if (hasConnection && _apiService != null) {
-        debugPrint('Fetching reminders from API (online)');
+        debugPrint('Fetching reminders from API and saving to local DB');
         
         try {
-          // Fetch from API directly without storing locally
+          // Fetch from API and save to local database
           final response = await _apiService!.getReminders(0);
           
           if (response != null && response is TranscriptionResponse && response.data != null) {
-            List<Reminder> reminders = [];
-            
+            // Save server data to local database
             for (var item in response.data!) {
-              reminders.add(Reminder(
-                id: item.sId?.toString() ?? '',
-                title: item.title ?? 'N/A',
-                description: item.text ?? 'N/A',
-                time: formatTime(item.userCurrentDatetime),
-                date: item.userCurrentDatetime ?? 'N/A',
-                runtime: item.runTime ?? '',
-                isCompleted: item.isDelivered ?? false,
-                priority: _stringToPriority('medium'),
-              ));
+              await saveServerReminderToLocal(item);
             }
             
-            debugPrint('Successfully fetched ${reminders.length} reminders from API');
-            return reminders;
+            debugPrint('Successfully saved ${response.data!.length} reminders from server to local DB');
           }
         } catch (e) {
           debugPrint('API fetch failed, showing offline reminders: $e');
         }
       }
       
-      // Show offline reminders only (locally created, unsynced)
-      debugPrint('Showing offline reminders only');
+      // Always return data from local database for consistent behavior
+      debugPrint('Loading reminders from local database');
       return await _fetchRemindersFromLocal();
       
     } catch (e) {
@@ -284,6 +265,192 @@ class DataService {
     }
   }
 
+  /// Edit existing note (mark as pending update for sync)
+  Future<Note?> editNote({
+    required String id,
+    required String title,
+    required String content,
+    bool? isPinned,
+  }) async {
+    try {
+      // Try to parse as local ID first
+      final localId = id;
+      LocalNote? existingNote;
+      
+      if (localId != null) {
+        existingNote = await _dbHelper.getNoteById(localId);
+      } else {
+        // It's a server ID
+        existingNote = await _dbHelper.getNoteByServerId(id);
+      }
+      
+      if (existingNote != null) {
+        final updatedNote = existingNote.copyWith(
+          title: title,
+          content: content,
+          isPinned: isPinned ?? existingNote.isPinned,
+          isSynced: false,
+          pendingAction: 'update',
+        );
+        
+        await _dbHelper.updateNote(updatedNote);
+        
+        return Note(
+          id: existingNote.serverId ?? existingNote.id.toString(),
+          title: title,
+          content: content,
+          createdAt: existingNote.createdAt,
+          isReminder: existingNote.isReminder,
+          isPinned: isPinned ?? existingNote.isPinned,
+        );
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error editing note: $e');
+      return null;
+    }
+  }
+
+  /// Edit existing reminder (mark as pending update for sync)
+  Future<Reminder?> editReminder({
+    required String id,
+    required String title,
+    required String description,
+    required String time,
+    required String date,
+    required String runtime,
+    Priority priority = Priority.medium,
+    bool? isCompleted,
+  }) async {
+    try {
+      // Try to parse as local ID first
+      final localId = int.tryParse(id);
+      LocalReminder? existingReminder;
+      
+      if (localId != null) {
+        existingReminder = await _dbHelper.getReminderById(localId);
+      } else {
+        // It's a server ID
+        existingReminder = await _dbHelper.getReminderByServerId(id);
+      }
+      
+      if (existingReminder != null) {
+        final updatedReminder = existingReminder.copyWith(
+          title: title,
+          description: description,
+          time: time,
+          date: date,
+          runtime: runtime,
+          priority: _priorityToString(priority),
+          isCompleted: isCompleted ?? existingReminder.isCompleted,
+          isSynced: false,
+          pendingAction: 'update',
+        );
+        
+        await _dbHelper.updateReminder(updatedReminder);
+        
+        return Reminder(
+          id: existingReminder.serverId ?? existingReminder.id.toString(),
+          title: title,
+          description: description,
+          time: time,
+          date: date,
+          runtime: runtime,
+          isCompleted: isCompleted ?? existingReminder.isCompleted,
+          priority: priority,
+        );
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error editing reminder: $e');
+      return null;
+    }
+  }
+
+  /// Delete note (mark as pending delete for sync)
+  Future<bool> deleteNote(String id) async {
+    try {
+      // Try to parse as local ID first
+      final localId = int.tryParse(id);
+      
+      if (localId != null) {
+        await _dbHelper.deleteNote(localId);
+        debugPrint('Note marked for deletion: $localId');
+        return true;
+      } else {
+        // It's a server ID - find local record and mark for deletion
+        final existingNote = await _dbHelper.getNoteByServerId(id);
+        if (existingNote?.id != null) {
+          await _dbHelper.deleteNote(existingNote!.id!);
+          debugPrint('Server note marked for deletion: $id');
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error deleting note: $e');
+      return false;
+    }
+  }
+
+  /// Delete reminder (mark as pending delete for sync)
+  Future<bool> deleteReminder(String id) async {
+    try {
+      // Try to parse as local ID first
+      final localId = int.tryParse(id);
+      
+      if (localId != null) {
+        await _dbHelper.deleteReminder(localId);
+        debugPrint('Reminder marked for deletion: $localId');
+        return true;
+      } else {
+        // It's a server ID - find local record and mark for deletion
+        final existingReminder = await _dbHelper.getReminderByServerId(id);
+        if (existingReminder?.id != null) {
+          await _dbHelper.deleteReminder(existingReminder!.id!);
+          debugPrint('Server reminder marked for deletion: $id');
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error deleting reminder: $e');
+      return false;
+    }
+  }
+
+  /// Pin/Unpin note (mark as pending update for sync)
+  Future<bool> pinNote(String id, bool isPinned) async {
+    try {
+      // Try to parse as local ID first
+      final localId = id;
+      LocalNote? existingNote;
+      
+      if (localId!=null) {
+        existingNote = await _dbHelper.getNoteById(localId);
+      } else {
+        // It's a server ID
+        existingNote = await _dbHelper.getNoteByServerId(id);
+      }
+      
+      if (existingNote != null) {
+        final updatedNote = existingNote.copyWith(
+          isPinned: isPinned,
+          isSynced: false,
+          pendingAction: 'update',
+        );
+        
+        await _dbHelper.updateNote(updatedNote);
+        debugPrint('Note pin status updated: $id -> $isPinned');
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error pinning note: $e');
+      return false;
+    }
+  }
+
   String _priorityToString(Priority priority) {
     switch (priority) {
       case Priority.high:
@@ -292,6 +459,97 @@ class DataService {
         return 'low';
       default:
         return 'medium';
+    }
+  }
+
+  /// Save server note to local database to avoid duplicates
+  Future<void> saveServerNoteToLocal(dynamic serverNote) async {
+    try {
+      final serverId = serverNote.sId?.toString();
+      if (serverId == null) return;
+      
+      // Check if note already exists locally
+      final existingNote = await _dbHelper.getNoteByServerId(serverId);
+      if (existingNote != null) {
+        // Update existing note only if it's not modified locally (isSynced = true)
+        if (existingNote.isSynced && existingNote.pendingAction == null) {
+          final updatedNote = existingNote.copyWith(
+            title: serverNote.title ?? existingNote.title,
+            content: serverNote.text ?? existingNote.content,
+            isPinned: serverNote.is_pin == true,
+            isSynced: true,
+            pendingAction: null,
+          );
+          await _dbHelper.updateNote(updatedNote);
+          debugPrint('Updated existing synced note: $serverId');
+        } else {
+          debugPrint('Skipping update for locally modified note: $serverId');
+        }
+      } else {
+        // Create new local note from server data
+        final localNote = LocalNote(
+          serverId: serverId,
+          title: serverNote.title ?? 'N/A',
+          content: serverNote.text ?? 'N/A',
+          createdAt: serverNote.createdAt ?? DateTime.now().toIso8601String(),
+          isReminder: false,
+          isPinned: serverNote.is_pin == true,
+          isSynced: true,
+          pendingAction: null,
+        );
+        await _dbHelper.insertNote(localNote);
+        debugPrint('Saved new note from server: $serverId');
+      }
+    } catch (e) {
+      debugPrint('Error saving server note to local: $e');
+    }
+  }
+
+  /// Save server reminder to local database to avoid duplicates  
+  Future<void> saveServerReminderToLocal(dynamic serverReminder) async {
+    try {
+      final serverId = serverReminder.sId?.toString();
+      if (serverId == null) return;
+      
+      // Check if reminder already exists locally
+      final existingReminder = await _dbHelper.getReminderByServerId(serverId);
+      if (existingReminder != null) {
+        // Update existing reminder only if it's not modified locally (isSynced = true)
+        if (existingReminder.isSynced && existingReminder.pendingAction == null) {
+          final updatedReminder = existingReminder.copyWith(
+            title: serverReminder.title ?? existingReminder.title,
+            description: serverReminder.text ?? existingReminder.description,
+            time: formatTime(serverReminder.userCurrentDatetime) ?? existingReminder.time,
+            date: serverReminder.userCurrentDatetime ?? existingReminder.date,
+            runtime: serverReminder.runTime ?? existingReminder.runtime,
+            isCompleted: serverReminder.isDelivered ?? existingReminder.isCompleted,
+            isSynced: true,
+            pendingAction: null,
+          );
+          await _dbHelper.updateReminder(updatedReminder);
+          debugPrint('Updated existing synced reminder: $serverId');
+        } else {
+          debugPrint('Skipping update for locally modified reminder: $serverId');
+        }
+      } else {
+        // Create new local reminder from server data
+        final localReminder = LocalReminder(
+          serverId: serverId,
+          title: serverReminder.title ?? 'N/A',
+          description: serverReminder.text ?? 'N/A',
+          time: formatTime(serverReminder.userCurrentDatetime) ?? '',
+          date: serverReminder.userCurrentDatetime ?? 'N/A',
+          runtime: serverReminder.runTime ?? '',
+          isCompleted: serverReminder.isDelivered ?? false,
+          priority: 'medium',
+          isSynced: true,
+          pendingAction: null,
+        );
+        await _dbHelper.insertReminder(localReminder);
+        debugPrint('Saved new reminder from server: $serverId');
+      }
+    } catch (e) {
+      debugPrint('Error saving server reminder to local: $e');
     }
   }
 }

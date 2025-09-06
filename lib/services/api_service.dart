@@ -282,6 +282,7 @@ class ApiService {
     required String id,
     required String title,
     required String text,
+    required int is_pin,
   }) async {
     try {
       var response = await _apiClient?.putReq("update/${id}", data: {
@@ -289,6 +290,7 @@ class ApiService {
         "updatePayload": {
           "title": title,
           "text": text,
+          "is_pin": is_pin == 1 ? true : false,
         },
       });
       return BaseResponse.fromJson(response.data);
