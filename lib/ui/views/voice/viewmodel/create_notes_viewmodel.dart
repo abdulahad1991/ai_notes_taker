@@ -234,7 +234,8 @@ class CreateNotesViewmodel extends ReactiveViewModel {
           api.editNoteText(
               id: note!.id.toString(),
               title: titleController.text.trim(),
-              text: descriptionController.text.trim()),
+              text: descriptionController.text.trim(),
+          is_pin: 0),
           throwException: true);
       if (response != null) {
         Navigator.pushReplacement(

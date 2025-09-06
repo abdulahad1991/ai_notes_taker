@@ -80,11 +80,11 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => LocalNote.fromMap(maps[i]));
   }
 
-  Future<LocalNote?> getNoteById(int id) async {
+  Future<LocalNote?> getNoteById(String id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'notes',
-      where: 'id = ?',
+      where: 'server_id = ?',
       whereArgs: [id],
     );
     if (maps.isNotEmpty) {
@@ -162,7 +162,7 @@ class DatabaseHelper {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'reminders',
-      where: 'id = ?',
+      where: 'server_id = ?',
       whereArgs: [id],
     );
     if (maps.isNotEmpty) {

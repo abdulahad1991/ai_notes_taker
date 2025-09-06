@@ -364,7 +364,8 @@ class TextInputViewmodel extends ReactiveViewModel {
           api.editNoteText(
               id: note!.id.toString(),
               title: titleController.text.trim(),
-              text: descriptionController.text.trim()),
+              text: descriptionController.text.trim(),
+          is_pin: note?.isPinned == true ? 1:0),
           throwException: true);
       if (response != null) {
         Navigator.pop(context);

@@ -109,27 +109,49 @@ class SyncService {
     // Sync unsynced notes
     final unsyncedNotes = await _dbHelper.getUnsyncedNotes();
     for (final note in unsyncedNotes) {
-      final success = await _syncNoteToServer(note);
-      if (success) {
-        // Delete the note from local database immediately after successful sync
-        await _dbHelper.permanentlyDeleteNote(note.id!);
-        debugPrint('Note ${note.id} synced and permanently deleted from local database');
+      final syncResult = await _syncNoteToServer(note);
+      if (syncResult.success) {
+        if (syncResult.serverId != null && note.pendingAction == 'create') {
+          // Mark as synced and store server ID for newly created items
+          await _dbHelper.markNoteSynced(note.id!, syncResult.serverId);
+          debugPrint('Note ${note.id} created and marked as synced with server ID: ${syncResult.serverId}');
+        } else {
+          // For updates/deletes, mark as synced or delete based on action
+          if (note.pendingAction == 'delete') {
+            await _dbHelper.permanentlyDeleteNote(note.id!);
+            debugPrint('Note ${note.id} deleted on server and removed from local DB');
+          } else {
+            await _dbHelper.markNoteSynced(note.id!, note.serverId);
+            debugPrint('Note ${note.id} updated and marked as synced');
+          }
+        }
       }
     }
 
     // Sync unsynced reminders
     final unsyncedReminders = await _dbHelper.getUnsyncedReminders();
     for (final reminder in unsyncedReminders) {
-      final success = await _syncReminderToServer(reminder);
-      if (success) {
-        // Delete the reminder from local database immediately after successful sync
-        await _dbHelper.permanentlyDeleteReminder(reminder.id!);
-        debugPrint('Reminder ${reminder.id} synced and permanently deleted from local database');
+      final syncResult = await _syncReminderToServer(reminder);
+      if (syncResult.success) {
+        if (syncResult.serverId != null && reminder.pendingAction == 'create') {
+          // Mark as synced and store server ID for newly created items
+          await _dbHelper.markReminderSynced(reminder.id!, syncResult.serverId);
+          debugPrint('Reminder ${reminder.id} created and marked as synced with server ID: ${syncResult.serverId}');
+        } else {
+          // For updates/deletes, mark as synced or delete based on action
+          if (reminder.pendingAction == 'delete') {
+            await _dbHelper.permanentlyDeleteReminder(reminder.id!);
+            debugPrint('Reminder ${reminder.id} deleted on server and removed from local DB');
+          } else {
+            await _dbHelper.markReminderSynced(reminder.id!, reminder.serverId);
+            debugPrint('Reminder ${reminder.id} updated and marked as synced');
+          }
+        }
       }
     }
   }
 
-  Future<bool> _syncNoteToServer(LocalNote note) async {
+  Future<SyncResult> _syncNoteToServer(LocalNote note) async {
     try {
       switch (note.pendingAction) {
         case 'create':
@@ -137,8 +159,9 @@ class SyncService {
             title: note.title,
             text: note.content,
           );
-          debugPrint('Note ${note.id} created on server with ID: ${response.data?.id}');
-          return true;
+          final serverId = response.data?.id?.toString();
+          debugPrint('Note ${note.id} created on server with ID: $serverId');
+          return SyncResult(success: true, serverId: serverId);
           
         case 'update':
           if (note.serverId != null) {
@@ -146,9 +169,10 @@ class SyncService {
               id: note.serverId!,
               title: note.title,
               text: note.content,
+              is_pin: note.isPinned == true ? 1 : 0,
             );
             debugPrint('Note ${note.id} updated on server');
-            return true;
+            return SyncResult(success: true);
           }
           break;
           
@@ -156,24 +180,24 @@ class SyncService {
           if (note.serverId != null) {
             await _apiService!.delete(context_id: note.serverId!, context: 'note');
             debugPrint('Note ${note.id} deleted on server');
-            return true;
+            return SyncResult(success: true);
           }
           break;
           
         default:
           if (note.serverId != null) {
             debugPrint('Note ${note.id} already synced');
-            return true;
+            return SyncResult(success: true);
           }
       }
-      return false;
+      return SyncResult(success: false);
     } catch (e) {
       debugPrint('Error syncing note ${note.id}: $e');
-      return false;
+      return SyncResult(success: false);
     }
   }
 
-  Future<bool> _syncReminderToServer(LocalReminder reminder) async {
+  Future<SyncResult> _syncReminderToServer(LocalReminder reminder) async {
     try {
       switch (reminder.pendingAction) {
         case 'create':
@@ -182,8 +206,9 @@ class SyncService {
             reminder_time: reminder.runtime,
             description: reminder.description,
           );
-          debugPrint('Reminder ${reminder.id} created on server with ID: ${response.data?.id}');
-          return true;
+          final serverId = response.data?.id?.toString();
+          debugPrint('Reminder ${reminder.id} created on server with ID: $serverId');
+          return SyncResult(success: true, serverId: serverId);
           
         case 'update':
           if (reminder.serverId != null) {
@@ -194,7 +219,7 @@ class SyncService {
               dateTime: reminder.runtime,
             );
             debugPrint('Reminder ${reminder.id} updated on server');
-            return true;
+            return SyncResult(success: true);
           }
           break;
           
@@ -202,20 +227,20 @@ class SyncService {
           if (reminder.serverId != null) {
             await _apiService!.delete(context_id: reminder.serverId!, context: 'reminder');
             debugPrint('Reminder ${reminder.id} deleted on server');
-            return true;
+            return SyncResult(success: true);
           }
           break;
           
         default:
           if (reminder.serverId != null) {
             debugPrint('Reminder ${reminder.id} already synced');
-            return true;
+            return SyncResult(success: true);
           }
       }
-      return false;
+      return SyncResult(success: false);
     } catch (e) {
       debugPrint('Error syncing reminder ${reminder.id}: $e');
-      return false;
+      return SyncResult(success: false);
     }
   }
 
@@ -237,4 +262,11 @@ enum SyncStatus {
   syncing,
   completed,
   failed,
+}
+
+class SyncResult {
+  final bool success;
+  final String? serverId;
+  
+  SyncResult({required this.success, this.serverId});
 }

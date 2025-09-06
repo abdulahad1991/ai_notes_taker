@@ -71,12 +71,12 @@ class OfflineService {
     return await _dbHelper.getAllNotes();
   }
 
-  Future<LocalNote?> getNoteById(int id) async {
+  Future<LocalNote?> getNoteById(String id) async {
     return await _dbHelper.getNoteById(id);
   }
 
   Future<void> updateNote({
-    required int id,
+    required String id,
     required String title,
     required String content,
   }) async {
@@ -94,7 +94,7 @@ class OfflineService {
     debugPrint('Updated offline note: $title');
   }
 
-  Future<void> pinNote(int id, bool isPinned) async {
+  Future<void> pinNote(String id, bool isPinned) async {
     final existingNote = await _dbHelper.getNoteById(id);
     if (existingNote == null) return;
 
