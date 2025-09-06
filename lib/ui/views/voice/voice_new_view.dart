@@ -782,8 +782,8 @@ class _MainScreenState extends State<VoiceNewView>
       clipBehavior: Clip.none,
       alignment: Alignment.bottomRight,
       children: [
-        // Voice Note FAB
-        if (model.isFabOpen)
+        // Voice Note FAB - only show when connected to internet
+        if (model.isFabOpen && model.hasInternetConnection())
           Positioned(
             right: 0,
             bottom: isCompact ? 120 : 140,
@@ -816,8 +816,8 @@ class _MainScreenState extends State<VoiceNewView>
             ),
           ),
 
-        // Voice Note Label
-        if (model.isFabOpen)
+        // Voice Note Label - only show when connected to internet
+        if (model.isFabOpen && model.hasInternetConnection())
           Positioned(
             right: isCompact ? 45 : 50,
             bottom: isCompact ? 130 : 150,
