@@ -1,4 +1,5 @@
 import 'package:ai_notes_taker/models/response/login_response.dart';
+import 'package:ai_notes_taker/models/response/user_config_response.dart';
 import 'package:stacked/stacked.dart';
 
 import '../../app/app.locator.dart';
@@ -7,11 +8,13 @@ import 'app_shared_pref_service.dart';
 class AppAuthService with ListenableServiceMixin {
   final String _authDataKey = "AUTH_PREF";
   final String _loginDataKey = "LOGIN_PREF";
+  final String _userConfigDataKey = "USER_CONFIG_PREF";
   final String _userTokenKey = "TOKEN_PREF";
   final String _emailKey = "email_KEY";
   final String _passwordKey = "password_KEY";
 
   final ReactiveValue<LoginResponse?> _loginData = ReactiveValue(null);
+  final ReactiveValue<UserConfigResponse?> _userConfigData = ReactiveValue(null);
 
   LoginResponse? get loginData => _loginData.value;
 
@@ -62,6 +65,7 @@ class AppAuthService with ListenableServiceMixin {
     if (existingLoginData != null) {
       _loginData.value = LoginResponse.fromJson(existingLoginData);
     }
+
     var existingUserToken =
         await locator<AppSharedPrefService>().getString(_userTokenKey);
     if (existingUserToken != null) {
@@ -91,6 +95,13 @@ class AppAuthService with ListenableServiceMixin {
     await locator<AppSharedPrefService>().setMapData(_loginDataKey, jsonData);
   }
 
+
+  Future<void> setUserConfigData(UserConfigResponse response) async {
+    _userConfigData.value = response;
+    final jsonData = response.toJson();
+    print("Saving login data: $jsonData"); // Debug print
+    await locator<AppSharedPrefService>().setMapData(_userConfigDataKey, jsonData);
+  }
   resetAuthData() async {
     // Store email and password temporarily
     String? tempEmail = _email.value;
@@ -99,6 +110,7 @@ class AppAuthService with ListenableServiceMixin {
     _loginData.value = null;
     await locator<AppSharedPrefService>().removeData(_authDataKey);
     await locator<AppSharedPrefService>().removeData(_loginDataKey);
+    await locator<AppSharedPrefService>().removeData(_userConfigDataKey);
 
     // Restore email and password
     _email.value = tempEmail;

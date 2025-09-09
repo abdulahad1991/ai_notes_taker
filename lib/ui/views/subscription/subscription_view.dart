@@ -26,8 +26,8 @@ class SubscriptionView extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
           ),
           actions: [
-            _buildLanguageSelector(model),
-            SizedBox(width: 16),
+            // _buildLanguageSelector(model),
+            // SizedBox(width: 16),
           ],
         ),
         body: SafeArea(

@@ -11,6 +11,7 @@ import '../models/response/create_note_text_response.dart';
 import '../models/response/notes_response.dart';
 import '../models/response/transcribe_response.dart';
 import '../models/response/transcription_response.dart';
+import '../models/response/user_config_response.dart';
 import 'api_client.dart';
 import 'auth_interceptor.dart';
 
@@ -363,6 +364,15 @@ class ApiService {
     try {
       var response = await _apiClient?.getReq("form/get?form_type=post_signup");
       return SignupFormResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> getUserConfig() async {
+    try {
+      var response = await _apiClient?.getReq("user/config");
+      return UserConfigResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
