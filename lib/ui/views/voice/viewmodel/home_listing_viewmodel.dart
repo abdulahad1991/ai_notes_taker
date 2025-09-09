@@ -111,6 +111,9 @@ class HomeListingViewmodel extends ReactiveViewModel {
     FirebaseMessaging.instance.getToken().then((value) {
       callUpdateUserProfile(value!);
     });
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      callUpdateUserProfile(newToken);
+    });
     try {
       _setupAlarmListeners();
     } catch (e) {
@@ -520,6 +523,9 @@ class HomeListingViewmodel extends ReactiveViewModel {
         if (success) {
           print('Note pin status updated and will sync when online');
           
+          // Refresh the notes list to ensure proper ordering with pinned notes first
+          await fetchData();
+          
           // Trigger sync if connected
           if (connectivityService.isConnected) {
             syncService.forceSyncNow();
@@ -761,7 +767,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
   Future<void> logout() async {
     await authService.resetAuthData();
-    NavigationService().navigateTo(Routes.authScreen);
+    NavigationService().pushNamedAndRemoveUntil(Routes.authScreen);
   }
 
   @override

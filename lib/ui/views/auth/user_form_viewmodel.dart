@@ -129,9 +129,7 @@ class UserFormViewModel extends ReactiveViewModel {
       
       _isLoading = false;
       notifyListeners();
-      
-      // Navigate to voice view after successful submission
-      navigationService.navigateTo(Routes.voiceNewView);
+      NavigationService().pushNamedAndRemoveUntil(Routes.voiceNewView);
       debugPrint('Form submitted successfully: $_formAnswers');
     } catch (e) {
       _isLoading = false;
