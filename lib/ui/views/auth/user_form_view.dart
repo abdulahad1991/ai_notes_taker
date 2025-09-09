@@ -86,7 +86,7 @@ class UserFormView extends StatelessWidget {
   Widget _buildSkipButton() {
     return TextButton(
       onPressed: () {
-        locator<NavigationService>().navigateTo(Routes.voiceNewView);
+        NavigationService().pushNamedAndRemoveUntil(Routes.voiceNewView);
       },
       child: Text(
         'Skip',

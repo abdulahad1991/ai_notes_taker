@@ -85,6 +85,10 @@ class AuthViewModel extends ReactiveViewModel {
       token = value!;
       print("FCM - ${token}");
     });
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      token = newToken!;
+      print("FCM - ${token}");
+    });
   }
 
   void toggleAuthMode() {
@@ -122,9 +126,9 @@ class AuthViewModel extends ReactiveViewModel {
     isLoading = false;
     notifyListeners();*/
 
-    if (!formKey.currentState!.validate()) return;
-    // emailController.text = "a01@gmail.com";
-    // passwordController.text = "123456";
+    // if (!formKey.currentState!.validate()) return;
+    emailController.text = "a01@gmail.com";
+    passwordController.text = "123456";
     if (isLogin) {
       try {
         var response = await runBusyFuture(
