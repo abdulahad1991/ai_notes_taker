@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:ai_notes_taker/models/response/user_config_response.dart';
 import 'package:ai_notes_taker/ui/views/voice/create_notes_view.dart';
 import 'package:ai_notes_taker/ui/views/voice/text_input_view.dart';
 import 'package:ai_notes_taker/ui/views/voice/voice_view.dart' hide Priority;
@@ -24,6 +25,8 @@ import '../../../../services/offline_service.dart';
 import '../../../../shared/functions.dart';
 import 'package:stacked_services/stacked_services.dart';
 
+import '../../../common/ui_helpers.dart';
+
 class HomeListingViewmodel extends ReactiveViewModel {
   BuildContext context;
 
@@ -33,7 +36,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
   int selectedTabIndex = 0;
   int notesPage = 0;
   int reminderPage = 0;
-  
+
   StreamSubscription<SyncStatus>? _syncStatusSubscription;
   StreamSubscription<bool>? _connectivitySubscription;
 
@@ -84,21 +87,20 @@ class HomeListingViewmodel extends ReactiveViewModel {
     if (connectivityService.isConnected) {
       try {
         print('VoiceNewView: Starting sync and delete process...');
-        
+
         // First, sync any pending local changes to server
         await syncService.forceSyncNow();
-        
+
         // Wait a moment for sync to complete
         await Future.delayed(Duration(milliseconds: 500));
-        
+
         // Then delete only synced items from local database (keeps unsynced local changes)
         await dbHelper.clearSyncedItems();
         print('VoiceNewView: Synced items deleted from local database');
-        
+
         // Fetch fresh data from server and save to local DB
         print('VoiceNewView: Fetching fresh data from server...');
         await _refreshDataFromServer();
-        
       } catch (e) {
         print('Error during sync and delete process: $e');
       }
@@ -118,6 +120,38 @@ class HomeListingViewmodel extends ReactiveViewModel {
       _setupAlarmListeners();
     } catch (e) {
       print(e);
+    }
+
+    fetchUserConfig();
+  }
+
+  Future<void> fetchUserConfig() async {
+    try {
+      notifyListeners();
+
+      try {
+        var response = await runBusyFuture(
+          api.getUserConfig(),
+          throwException: true,
+        );
+        if (response != null) {
+          final data = response as UserConfigResponse;
+          authService.setUserConfigData(data);
+          if(data.data!.first.tier!.free!.notes! < 1){
+
+          }
+          if(data.data!.first.tier!.free!.reminders! < 1){
+
+          }
+        }
+      } on FormatException catch (e) {
+        showErrorDialog(e.message, context);
+      }
+
+      // _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      notifyListeners();
     }
   }
 
@@ -253,7 +287,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
         // Directly fetch from API and save to local DB (bypassing cache)
         final notesResponse = await api.getNotes(0);
         final remindersResponse = await api.getReminders(0);
-        
+
         // Process and save notes
         if (notesResponse != null && notesResponse.data != null) {
           for (var item in notesResponse.data!) {
@@ -261,13 +295,14 @@ class HomeListingViewmodel extends ReactiveViewModel {
           }
           print('Refreshed ${notesResponse.data!.length} notes from server');
         }
-        
-        // Process and save reminders  
+
+        // Process and save reminders
         if (remindersResponse != null && remindersResponse.data != null) {
           for (var item in remindersResponse.data!) {
             await dataService.saveServerReminderToLocal(item);
           }
-          print('Refreshed ${remindersResponse.data!.length} reminders from server');
+          print(
+              'Refreshed ${remindersResponse.data!.length} reminders from server');
         }
       }
     } catch (e) {
@@ -284,10 +319,10 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
     try {
       final success = await dataService.deleteNote(note.id);
-      
+
       if (success) {
         print('Note marked for deletion and will sync when online');
-        
+
         // Trigger sync if connected
         if (connectivityService.isConnected) {
           syncService.forceSyncNow();
@@ -305,7 +340,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
       }
     } catch (e) {
       print('Error deleting note: $e');
-      
+
       // Revert UI changes on failure - restore note at original position
       if (noteIndex != -1) {
         notes.insert(noteIndex, deletedNote);
@@ -333,13 +368,13 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
     try {
       final success = await dataService.deleteReminder(reminder.id);
-      
+
       if (success) {
         print('Reminder marked for deletion and will sync when online');
-        
+
         // Cancel alarm regardless of source
         cancelAlarmForReminder(reminder.id);
-        
+
         // Trigger sync if connected
         if (connectivityService.isConnected) {
           syncService.forceSyncNow();
@@ -357,7 +392,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
       }
     } catch (e) {
       print('Error deleting reminder: $e');
-      
+
       // Revert UI changes on failure - restore reminder at original position
       if (reminderIndex != -1) {
         reminders.insert(reminderIndex, deletedReminder);
@@ -519,13 +554,13 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
       try {
         final success = await dataService.pinNote(note.id, willBePinned);
-        
+
         if (success) {
           print('Note pin status updated and will sync when online');
-          
+
           // Refresh the notes list to ensure proper ordering with pinned notes first
           await fetchData();
-          
+
           // Trigger sync if connected
           if (connectivityService.isConnected) {
             syncService.forceSyncNow();
@@ -543,7 +578,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
         }
       } catch (e) {
         print('Error toggling pin: $e');
-        
+
         // Revert UI changes on failure
         final revertedNote = Note(
           id: note.id,
@@ -558,7 +593,8 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to ${willBePinned ? 'pin' : 'unpin'} note: ${e.toString()}'),
+            content: Text(
+                'Failed to ${willBePinned ? 'pin' : 'unpin'} note: ${e.toString()}'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),
@@ -689,7 +725,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
 
     // Store original note for potential rollback
     final originalNote = note;
-    
+
     // Update UI immediately for realtime feel
     final updatedNote = Note(
       id: note.id,
@@ -709,10 +745,10 @@ class HomeListingViewmodel extends ReactiveViewModel {
         content: content ?? note.content,
         isPinned: isPinned,
       );
-      
+
       if (result != null) {
         print('Note updated and will sync when online');
-        
+
         // Trigger sync if connected
         if (connectivityService.isConnected) {
           syncService.forceSyncNow();
@@ -730,7 +766,7 @@ class HomeListingViewmodel extends ReactiveViewModel {
       }
     } catch (e) {
       print('Error updating note: $e');
-      
+
       // Revert UI changes on failure
       notes[noteIndex] = originalNote;
       notifyListeners();
